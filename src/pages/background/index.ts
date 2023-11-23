@@ -1,0 +1,16 @@
+import DictIDB from '@root/src/utils/DictIDB';
+import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
+import 'webextension-polyfill';
+
+reloadOnUpdate('pages/background');
+
+/**
+ * Extension reloading is necessary because the browser automatically caches the css.
+ * If you do not use the css of the content script, please delete it.
+ */
+reloadOnUpdate('pages/content/style.css');
+
+console.log('background loaded');
+
+const dictIDB = new DictIDB();
+dictIDB.getJMDict().catch(console.error);
