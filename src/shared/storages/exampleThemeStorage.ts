@@ -1,4 +1,8 @@
-import { BaseStorage, createStorage, StorageType } from '@src/shared/storages/base';
+import {
+  BaseStorage,
+  createStorage,
+  StorageType,
+} from '@src/shared/storages/base';
 
 type Theme = 'light' | 'dark';
 
@@ -14,7 +18,7 @@ const exampleThemeStorage: ThemeStorage = {
   ...storage,
   // TODO: extends your own methods
   toggle: () => {
-    storage.set(currentTheme => {
+    storage.set((currentTheme) => {
       return currentTheme === 'light' ? 'dark' : 'light';
     });
   },

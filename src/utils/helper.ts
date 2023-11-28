@@ -1,4 +1,7 @@
-export function debounce<T extends unknown[]>(fn: (...args: T) => void, delay: number) {
+export function debounce<T extends unknown[]>(
+  fn: (...args: T) => void,
+  delay: number,
+) {
   let timeoutId: NodeJS.Timeout;
 
   return (...args: T) => {
@@ -12,7 +15,7 @@ export function debounce<T extends unknown[]>(fn: (...args: T) => void, delay: n
 export type ThrottledFunction<T extends unknown[]> = (...args: T) => void;
 export function throttle<T extends unknown[]>(
   func: (...args: T) => void,
-  limit = 1000
+  limit = 1000,
 ): ThrottledFunction<T> {
   let lastExecutionTime = 0;
   let timeout: NodeJS.Timeout | null = null;
@@ -31,7 +34,7 @@ export function throttle<T extends unknown[]>(
           lastExecutionTime = now;
           timeout = null;
         },
-        limit - (now - lastExecutionTime)
+        limit - (now - lastExecutionTime),
       );
     } else {
       func(...args);

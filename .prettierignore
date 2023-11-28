@@ -8,4 +8,4 @@ node_modules
 .prettierignore
 LICENSE
 *.md
-pnpm-lock.yaml
+yarn.lock

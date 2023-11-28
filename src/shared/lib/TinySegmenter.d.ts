@@ -7,6 +7,6 @@ interface TinySegmenterConstructor {
   (): void;
 }
 
-const TinySegmenter: TinySegmenterConstructor = function() {};
+const TinySegmenter: TinySegmenterConstructor = function () {};
 
 export default TinySegmenter;

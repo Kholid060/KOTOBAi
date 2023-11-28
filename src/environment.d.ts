@@ -7,7 +7,10 @@ declare global {
   }
 
   interface Document {
-    caretPositionFromPoint?(x: number, y: number): Range;
+    caretPositionFromPoint?(
+      x: number,
+      y: number,
+    ): { offsetNode: Node; offset: number };
   }
 }
 

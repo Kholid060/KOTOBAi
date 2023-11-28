@@ -15,7 +15,7 @@ const rl = readline.createInterface({ input, output });
 
 const IS_DEV = true;
 const DATE_REGEX = /(\d{4}-\d{2}-\d{2})/;
-const DATA_DIR = path.join(__dirname, '../../data');
+const DATA_DIR = path.join(__dirname, '../../data/dict');
 
 async function getXMLDoc(url, name) {
   const XML_FILEPATH = path.join(DATA_DIR, `${name}.cache.xml`);
@@ -30,7 +30,8 @@ async function getXMLDoc(url, name) {
     console.log(`${prefix}: Downloading data`);
 
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`[${url}] ${response.status}: ${response.statusText}`)
+    if (!response.ok)
+      throw new Error(`[${url}] ${response.status}: ${response.statusText}`);
 
     const buffer = await response.arrayBuffer();
     xmlBuffer = pako.ungzip(buffer, { to: 'string' });
@@ -73,7 +74,7 @@ async function generateJMDictData(version) {
     const rootNode = doc.get('//JMdict');
     const commentNode = rootNode.prevSibling();
     if (commentNode && commentNode.type() === 'comment') {
-      const [date] = commentNode.toString().match(DATE_REGEX) ?? [];      
+      const [date] = commentNode.toString().match(DATE_REGEX) ?? [];
       dataCreatedAt = date;
     }
 
@@ -106,10 +107,18 @@ async function generateJMDictData(version) {
 
           switch (name) {
             case 'pos':
-              pushOptional(senseEntry, 'pos', getEntityText('pos', childNode.toString()));
+              pushOptional(
+                senseEntry,
+                'pos',
+                getEntityText('pos', childNode.toString()),
+              );
               break;
             case 'misc':
-              pushOptional(senseEntry, 'misc', getEntityText('misc', childNode.toString()));
+              pushOptional(
+                senseEntry,
+                'misc',
+                getEntityText('misc', childNode.toString()),
+              );
               break;
             case 'xref':
               pushOptional(senseEntry, 'xref', childNode.text());
@@ -131,7 +140,9 @@ async function generateJMDictData(version) {
 
           switch (name) {
             case 'ex_srce':
-              example.sourceId = `${childNode.getAttribute('exsrc_type')?.value()}:${childNode.text()}`;
+              example.sourceId = `${childNode
+                .getAttribute('exsrc_type')
+                ?.value()}:${childNode.text()}`;
               break;
             case 'ex_text':
               example.text = childNode.text();
@@ -141,7 +152,7 @@ async function generateJMDictData(version) {
                 text: childNode.text(),
                 lang: childNode.getAttribute('lang')?.value(),
               });
-            break;
+              break;
           }
         });
       },
@@ -157,7 +168,7 @@ async function generateJMDictData(version) {
           entry.kanji.push(childNode.text());
         });
       },
-    }
+    };
 
     let fileIndex = 0;
     let currEntries = [];
@@ -166,7 +177,12 @@ async function generateJMDictData(version) {
       fileIndex += 1;
 
       console.clear();
-      console.log('JMDICT: FILE INDEX', fileIndex, ' || ', ((fileIndex + 1) * MAX_ENTRIES_RECORD_SIZE).toLocaleString());
+      console.log(
+        'JMDICT: FILE INDEX',
+        fileIndex,
+        ' || ',
+        ((fileIndex + 1) * MAX_ENTRIES_RECORD_SIZE).toLocaleString(),
+      );
 
       const filename = `jmdict-${fileIndex}.json`;
       await fs.writeJSON(path.join(SLICE_DIR, filename), {
@@ -175,9 +191,9 @@ async function generateJMDictData(version) {
         counts: currEntries.length,
       });
 
-      filenames.push(filename)
+      filenames.push(filename);
       currEntries = [];
-    }
+    };
 
     const rootNode = doc.get('//JMdict');
     const childNodes = rootNode.childNodes();
@@ -203,7 +219,8 @@ async function generateJMDictData(version) {
 
       currEntries.push(entry);
 
-      if (currEntries.length >= MAX_ENTRIES_RECORD_SIZE) await saveCurrEntries(index + 1 >= childNodes.length);
+      if (currEntries.length >= MAX_ENTRIES_RECORD_SIZE)
+        await saveCurrEntries(index + 1 >= childNodes.length);
     }
 
     if (currEntries.length) await saveCurrEntries(true);
@@ -222,10 +239,10 @@ async function generateJMDictData(version) {
 
     for (const filename of halfFiles) {
       const data = await fs.readJSON(path.join(SLICE_DIR, filename));
-      
+
       for (const record of data.records) {
         const reading = record.reading[0] || record.kanji[0];
-        
+
         fileIdxStream.write(`${reading},${record.id}`);
         fileDataStream.write(JSON.stringify(record));
       }
@@ -235,7 +252,10 @@ async function generateJMDictData(version) {
     fileDataStream.end();
   }
 
-  const xmlDoc = await getXMLDoc('http://ftp.edrdg.org/pub/Nihongo/JMdict_e_examp.gz', 'jmdict');
+  const xmlDoc = await getXMLDoc(
+    'http://ftp.edrdg.org/pub/Nihongo/JMdict_e_examp.gz',
+    'jmdict',
+  );
   const filenames = await mapJMDictEntries(xmlDoc);
   await generateHalfDict(filenames);
   await generateMetadata(xmlDoc);
@@ -249,7 +269,8 @@ async function generateKANJIDicData(version) {
   await fs.emptyDir(FILE_DIR);
 
   async function mapKanjiEntries(doc) {
-    const getNodeNum = (node) => Number.isNaN(+node.text()) ? undefined : +node.text();
+    const getNodeNum = (node) =>
+      Number.isNaN(+node.text()) ? undefined : +node.text();
 
     const nodeHandler = {
       literal: (node, kanjiEntry) => {
@@ -259,9 +280,9 @@ async function generateKANJIDicData(version) {
         node.childNodes().forEach((child) => {
           const type = child.name();
           if (!Object.hasOwn(kanjiEntry.misc, type)) return;
-          
+
           kanjiEntry.misc[type] = getNodeNum(child);
-        })
+        });
       },
       radical: (node, kanjiEntry) => {
         node.childNodes().forEach((child) => {
@@ -276,7 +297,7 @@ async function generateKANJIDicData(version) {
           const value = getNodeNum(dictNode);
           const type = dictNode.getAttribute('dr_type')?.value();
           if (!type) return;
-  
+
           kanjiEntry.dicts[type] = value;
         });
       },
@@ -296,7 +317,7 @@ async function generateKANJIDicData(version) {
               } else if (tagName === 'reading') {
                 const type = grandChild.getAttribute('r_type')?.value();
                 if (!kanjiEntry.reading[type]) return;
-                
+
                 kanjiEntry.reading[type].push(grandChild.text());
               }
             });
@@ -304,8 +325,8 @@ async function generateKANJIDicData(version) {
             kanjiEntry.reading.nanori.push(child.text());
           }
         });
-      }
-    }
+      },
+    };
 
     const characterNodes = doc.find('//character');
     const entries = characterNodes.map((node) => {
@@ -325,12 +346,12 @@ async function generateKANJIDicData(version) {
           nanori: [],
         },
         meanings: [],
-      }
+      };
 
       node.childNodes().forEach((childNode) => {
         const handler = nodeHandler[childNode.name()];
-        if  (!handler) return;
-  
+        if (!handler) return;
+
         handler(childNode, kanjiEntry);
       });
 
@@ -347,8 +368,8 @@ async function generateKANJIDicData(version) {
       fileVersion: '',
       dataCreatedAt: '',
       databaseVersion: '',
-    }
-    
+    };
+
     const headerNode = doc.get('header');
     headerNode.childNodes().forEach((node) => {
       const value = node.text();
@@ -367,11 +388,13 @@ async function generateKANJIDicData(version) {
       }
     });
 
-
     await fs.writeJSON(METADATA_PATH, metadata);
   }
 
-  const xmlDoc = await getXMLDoc('http://www.edrdg.org/kanjidic/kanjidic2.xml.gz', 'kanjidic');
+  const xmlDoc = await getXMLDoc(
+    'http://www.edrdg.org/kanjidic/kanjidic2.xml.gz',
+    'kanjidic',
+  );
   await mapKanjiEntries(xmlDoc);
   await generateMetadata(xmlDoc);
 }
@@ -405,7 +428,7 @@ async function generateENAMDICTData(version) {
       trans(node, entry) {
         node.childNodes().forEach((childNode) => {
           const tagName = childNode.name();
-  
+
           if (tagName === 'name_type') {
             const name = getEntityText('name_type', childNode.toString());
             if (name) entry.tr.type.push(name);
@@ -413,8 +436,8 @@ async function generateENAMDICTData(version) {
             entry.tr.detail.push(childNode.text());
           }
         });
-      }
-    }
+      },
+    };
 
     const rootNode = doc.get('//JMnedict');
     const childNodes = rootNode.childNodes();
@@ -426,7 +449,12 @@ async function generateENAMDICTData(version) {
       fileIndex += 1;
 
       console.clear();
-      console.log('ENAMDICT: FILE INDEX', fileIndex, ' || ', ((fileIndex + 1) * MAX_ENTRIES).toLocaleString());
+      console.log(
+        'ENAMDICT: FILE INDEX',
+        fileIndex,
+        ' || ',
+        ((fileIndex + 1) * MAX_ENTRIES).toLocaleString(),
+      );
 
       await fs.writeJSON(path.join(SLICE_DIR, `enamdict-${fileIndex}.json`), {
         isLastFile,
@@ -435,7 +463,7 @@ async function generateENAMDICTData(version) {
       });
 
       currEntries = [];
-    }
+    };
 
     for (let index = 0; index < childNodes.length; index += 1) {
       const node = childNodes[index];
@@ -445,20 +473,21 @@ async function generateENAMDICTData(version) {
         id: -1,
         kana: [],
         text: [],
-        tr: { detail: [], type: [] }
-      }
-  
+        tr: { detail: [], type: [] },
+      };
+
       node.childNodes().forEach((childNode) => {
         const tagName = childNode.name();
         const handler = nodeHandler[tagName];
         if (!handler) return;
-  
+
         handler(childNode, entry);
       });
-  
+
       currEntries.push(entry);
 
-      if (currEntries.length >= MAX_ENTRIES) await saveCurrEntries(index + 1 >= childNodes.length);
+      if (currEntries.length >= MAX_ENTRIES)
+        await saveCurrEntries(index + 1 >= childNodes.length);
     }
 
     if (currEntries.length) await saveCurrEntries(true);
@@ -469,7 +498,7 @@ async function generateENAMDICTData(version) {
     const rootNode = doc.get('//JMnedict');
     const commentNode = rootNode.prevSibling();
     if (commentNode && commentNode.type() === 'comment') {
-      const [date] = commentNode.toString().match(DATE_REGEX) ?? [];      
+      const [date] = commentNode.toString().match(DATE_REGEX) ?? [];
       dataCreatedAt = date;
     }
 
@@ -481,13 +510,16 @@ async function generateENAMDICTData(version) {
     });
   }
 
-  const xmlDoc = await getXMLDoc('http://ftp.edrdg.org/pub/Nihongo/JMnedict.xml.gz', 'ENAMDICT');
+  const xmlDoc = await getXMLDoc(
+    'http://ftp.edrdg.org/pub/Nihongo/JMnedict.xml.gz',
+    'ENAMDICT',
+  );
   await mapCharacters(xmlDoc);
   await generateMetadata(xmlDoc);
 }
 
-async function getVersion(name)  {
-  if (IS_DEV) return  '0.0.0';
+async function getVersion(name) {
+  if (IS_DEV) return '0.0.0';
 
   const version = (await rl.question(`${name} version:`)).trim();
   if (!semverValid(version)) throw new Error('Invalid version');
@@ -501,13 +533,12 @@ async function getVersion(name)  {
 
     const jmDictVersion = await getVersion('JMDict');
     await generateJMDictData(jmDictVersion);
-    
+
     const kanjiDictVersion = await getVersion('KanjiDic');
     await generateKANJIDicData(kanjiDictVersion);
 
     const enamDictVersion = await getVersion('ENAMDICT');
     await generateENAMDICTData(enamDictVersion);
-
   } catch (error) {
     console.error(error);
   }
