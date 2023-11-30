@@ -10,6 +10,8 @@
 # etc
 .DS_Store
 .env.local
+.env.*.local
+.env
 .idea
 
 # compiled
@@ -17,4 +19,4 @@ utils/reload/*.js
 utils/reload/injections/*.js
 public/manifest.json
 
-/data/dict
+/dict-data

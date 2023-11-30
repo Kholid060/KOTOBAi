@@ -42,3 +42,18 @@ export function throttle<T extends unknown[]>(
     }
   };
 }
+
+export function parseJSON<T = unknown, K = null>(
+  input: string,
+  def: K = null,
+): T | K {
+  try {
+    return JSON.parse(input) as T;
+  } catch (_error) {
+    return def;
+  }
+}
+
+export function isObject<T>(input: T) {
+  return typeof input === 'object' && !Array.isArray(input);
+}

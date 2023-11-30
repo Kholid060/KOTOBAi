@@ -1,5 +1,6 @@
 import { debounce } from '@root/src/utils/helper';
 import { getCursorText } from './get-cursor-text';
+import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 
 const MAX_CONTENT_LENGTH = 16;
 
@@ -24,7 +25,11 @@ class ContentHandler {
     });
     if (!result) return;
 
-    console.log('SEARCH TEXT', result);
+    RuntimeMessage.sendMessage('background:search-word', {
+      input: result.text,
+    }).then((searchResult) => {
+      console.log(searchResult);
+    });
   }
 }
 

@@ -6,11 +6,15 @@ import exampleThemeStorage from '@src/shared/storages/exampleThemeStorage';
 import withSuspense from '@src/shared/hoc/withSuspense';
 import withErrorBoundary from '@src/shared/hoc/withErrorBoundary';
 import { useEffectOnce } from 'usehooks-ts';
+import dictDB from '@root/src/shared/db/dict.db';
+import DictLoader from '@root/src/utils/DictLoader';
 
 const Newtab = () => {
   const theme = useStorage(exampleThemeStorage);
 
-  useEffectOnce(() => {});
+  useEffectOnce(() => {
+    console.log({ dictDB }, DictLoader);
+  });
 
   return (
     <div

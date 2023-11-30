@@ -12,7 +12,9 @@ const rootDir = resolve(__dirname, '..', '..');
 const distDir = resolve(rootDir, 'dist');
 const manifestFile = resolve(rootDir, 'manifest.js');
 
-const getManifestWithCacheBurst = (): Promise<{ default: chrome.runtime.ManifestV3 }> => {
+const getManifestWithCacheBurst = (): Promise<{
+  default: chrome.runtime.ManifestV3;
+}> => {
   const withCacheBurst = (path: string) => `${path}?${Date.now().toString()}`;
   /**
    * In Windows, import() doesn't work without file:// protocol.
@@ -24,7 +26,9 @@ const getManifestWithCacheBurst = (): Promise<{ default: chrome.runtime.Manifest
   return import(withCacheBurst(manifestFile));
 };
 
-export default function makeManifest(config: { contentScriptCssKey?: string }): PluginOption {
+export default function makeManifest(config: {
+  contentScriptCssKey?: string;
+}): PluginOption {
   function makeManifest(manifest: chrome.runtime.ManifestV3, to: string) {
     if (!fs.existsSync(to)) {
       fs.mkdirSync(to);
@@ -33,14 +37,19 @@ export default function makeManifest(config: { contentScriptCssKey?: string }): 
 
     // Naming change for cache invalidation
     if (config.contentScriptCssKey) {
-      manifest.content_scripts.forEach(script => {
+      manifest.content_scripts.forEach((script) => {
         if (!script.css) return;
 
-        script.css = script.css.map(css => css.replace('<KEY>', config.contentScriptCssKey));
+        script.css = script.css.map((css) =>
+          css.replace('<KEY>', config.contentScriptCssKey),
+        );
       });
     }
 
-    fs.writeFileSync(manifestPath, ManifestParser.convertManifestToString(manifest));
+    fs.writeFileSync(
+      manifestPath,
+      ManifestParser.convertManifestToString(manifest),
+    );
 
     colorLog(`Manifest file copy complete: ${manifestPath}`, 'success');
   }

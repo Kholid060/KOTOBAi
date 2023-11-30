@@ -1,5 +1,9 @@
 import reloadOnUpdate from 'virtual:reload-on-update-in-background-script';
-import 'webextension-polyfill';
+import Browser from 'webextension-polyfill';
+import BackgroundEventListener from './BackgroundEventListener';
+import Dictionary from '@root/src/utils/Dictionary';
+import RuntimeMessage from '@root/src/utils/RuntimeMessage';
+import dictWordSearcher from './messageHandler/dictWordSearcher';
 
 reloadOnUpdate('pages/background');
 
@@ -9,4 +13,8 @@ reloadOnUpdate('pages/background');
  */
 reloadOnUpdate('pages/content/style.css');
 
-console.log('background loaded');
+Browser.runtime.onInstalled.addListener(BackgroundEventListener.onInstalled);
+
+RuntimeMessage.onMessage('background:search-word', dictWordSearcher());
+
+console.log('background loaded', Dictionary);

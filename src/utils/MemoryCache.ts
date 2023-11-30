@@ -1,24 +1,24 @@
-interface CacheContent<T> {
+interface CacheContent<K, T> {
+  id: K;
   value: T;
-  id: string;
 }
 
 const MAX_CACHE_LENGTH = 100;
 
-class MemoryCache<T> {
-  private caches: CacheContent<T>[];
+class MemoryCache<K, T> {
+  private caches: CacheContent<K, T>[];
 
   constructor() {
     this.caches = [];
   }
 
-  add(id: string, value: T) {
+  add(id: K, value: T) {
     this.caches.push({ id, value });
 
     if (this.caches.length > MAX_CACHE_LENGTH) this.caches.shift();
   }
 
-  get(id: string) {
+  get(id: K) {
     return this.caches.find((cache) => cache.id === id);
   }
 
