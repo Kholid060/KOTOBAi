@@ -1,4 +1,4 @@
-import { toHiragana } from 'wanakana';
+import { isKanji, toHiragana } from 'wanakana';
 import {
   DictWordEntry,
   DictWordLocalEntry,
@@ -11,6 +11,8 @@ import LocalDictionary from '@root/src/utils/LocalDictionary';
 
 export interface SearchDictWordResult {
   input: string;
+  maxLength: number;
+  kanji: { char: string; pos: number }[];
   entries: (DictWordEntry | DictWordLocalEntry)[];
 }
 
@@ -40,7 +42,9 @@ async function handleSearchWord({
 }) {
   const searchResult: SearchDictWordResult = {
     input,
+    kanji: [],
     entries: [],
+    maxLength: 0,
   };
 
   let copyInput = `${input}`;
@@ -51,6 +55,22 @@ async function handleSearchWord({
 
     const entries = await searchWord(copyInput);
     searchResult.entries.push(...entries);
+
+    if (entries.length > 0) {
+      console.log(copyInput.length);
+      searchResult.maxLength = Math.max(
+        searchResult.maxLength,
+        copyInput.length,
+      );
+    }
+
+    const lastChar = copyInput.at(-1);
+    if (lastChar && isKanji(lastChar)) {
+      searchResult.kanji.unshift({
+        char: lastChar,
+        pos: copyInput.length - input.length + input.length - 1,
+      });
+    }
 
     const sliceLen = endsInYoon(copyInput) ? 2 : 1;
     copyInput = copyInput.slice(0, -sliceLen);
@@ -94,6 +114,8 @@ export default function dictWordSearcher() {
       });
 
       resultCache.add(wordToSearch, result);
+
+      console.log('RESULT || ', input, ' || ', result);
 
       return result;
     } catch (error) {

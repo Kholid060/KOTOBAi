@@ -1,9 +1,8 @@
 import {
   NodeTypeChecker,
   getNodeBoundingClientRect,
-  isRectOverlap,
 } from './content-handler-utils';
-import { extractTextNodeContent } from './extract-text-content';
+import { TextRange, extractTextNodeContent } from './extract-text-content';
 import { CursorOffset, getCursorOffset } from './get-cursor-offset';
 
 export interface CursorPoint {
@@ -14,13 +13,17 @@ export interface CursorPoint {
 export interface CursorOffsetText extends CursorOffset {
   text: string;
   offsetEnd: number;
+  textRange: TextRange[];
 }
 
-type CursorTextReturn = CursorOffsetText | null;
+export type GetCursorTextResult = {
+  cursorOffset: CursorOffsetText;
+  rect: DOMRect;
+} | null;
 
-let previousResult: { rect: DOMRect; result: CursorOffsetText } | null = null;
+let previousResult: GetCursorTextResult | null = null;
 
-function getTextNodeRect({ offset, offsetNode }: CursorTextReturn): DOMRect {
+function getTextNodeRect({ offset, offsetNode }: CursorOffsetText): DOMRect {
   const range = new Range();
   range.setStart(offsetNode, offset);
   range.setEnd(offsetNode, Math.min(offsetNode.textContent.length, offset + 1));
@@ -28,20 +31,20 @@ function getTextNodeRect({ offset, offsetNode }: CursorTextReturn): DOMRect {
   return range.getBoundingClientRect();
 }
 
-function cacheResult(result: CursorTextReturn): CursorTextReturn {
+function returnResult(result: CursorOffsetText): GetCursorTextResult {
   if (!result) {
     previousResult = null;
     return null;
   }
 
   previousResult = {
-    result,
+    cursorOffset: result,
     rect: NodeTypeChecker.isText(result.offsetNode)
       ? getTextNodeRect(result)
       : getNodeBoundingClientRect(result.offsetNode),
   };
 
-  return result;
+  return previousResult;
 }
 
 export function getCursorText({
@@ -52,35 +55,34 @@ export function getCursorText({
   element: Element;
   point: CursorPoint;
   maxLength?: number;
-}): CursorTextReturn {
-  if (previousResult && isRectOverlap({ point, rect: previousResult.rect })) {
-    console.log('CACHE');
-    // return previousResult.result;
-  }
-
-  if (['IMG', 'PICTURE', 'VIDEO'].includes(element.tagName)) {
+}): GetCursorTextResult {
+  if (NodeTypeChecker.isImage(element)) {
     const text = element.getAttribute('alt') || element.getAttribute('title');
-    return cacheResult({
+    return returnResult({
       text,
       offset: 0,
+      textRange: [],
       offsetNode: element,
       offsetEnd: text.length - 1,
     });
   } else if (element.tagName === 'SELECT') {
     const text = (<HTMLSelectElement>element).value;
-    return cacheResult({
+    return returnResult({
       text,
       offset: 0,
+      textRange: [],
       offsetNode: element,
       offsetEnd: text.length - 1,
     });
   }
 
   const cursorOffset = getCursorOffset({ point, element });
-  if (!cursorOffset) return cacheResult(null);
+  if (!cursorOffset) return returnResult(null);
 
+  let isFake = false;
   let scanNode = cursorOffset.offsetNode;
   if (NodeTypeChecker.isInput(scanNode)) {
+    isFake = true;
     scanNode = document.createTextNode((<HTMLInputElement>scanNode).value);
   }
 
@@ -90,14 +92,17 @@ export function getCursorText({
       cursorOffset: <CursorOffset<Text>>textCursorOffset,
       maxLength,
     });
-    if (!textResult) return cacheResult(null);
+    if (!textResult) return returnResult(null);
 
-    return cacheResult({
+    const [textRange] = textResult.textRange;
+    return returnResult({
       ...cursorOffset,
+      offsetEnd: textRange.end,
       text: textResult.text || '',
-      offsetEnd: textResult.textRange[0].end,
+      textRange: textResult.textRange,
+      offsetNode: isFake ? cursorOffset.offsetNode : textRange.node,
     });
   }
 
-  return cacheResult(null);
+  return returnResult(null);
 }

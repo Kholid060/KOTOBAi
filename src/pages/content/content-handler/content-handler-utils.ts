@@ -11,6 +11,9 @@ export const NodeTypeChecker = {
   isShadowDOM: (node: Node) => {
     return node.nodeType === Node.ELEMENT_NODE && (<Element>node).shadowRoot;
   },
+  isImage: (node: Node) =>
+    node.nodeType === Node.ELEMENT_NODE &&
+    ['IMG', 'PICTURE', 'VIDEO'].includes((<Element>node).tagName),
 };
 
 export function mirrorElement(target: Element, text?: string) {

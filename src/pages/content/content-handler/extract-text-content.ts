@@ -18,12 +18,18 @@ function isInlineElement(el: Element) {
   return false;
 }
 
+export interface TextRange {
+  node: Node;
+  end: number;
+  start: number;
+}
+
 export function extractTextNodeContent({
   cursorOffset,
   maxLength = 10,
 }: {
-  cursorOffset: CursorOffset<Text>;
   maxLength?: number;
+  cursorOffset: CursorOffset<Text>;
 }) {
   let inlineAncestor = cursorOffset.offsetNode.parentElement;
   while (
@@ -75,8 +81,7 @@ export function extractTextNodeContent({
 
   if (!node) return null;
 
-  type NodeRange = { node: Node; start: number; end: number };
-  const result: { text: string; textRange: NodeRange[] } = {
+  const result: { text: string; textRange: TextRange[] } = {
     text: '',
     textRange: [],
   };

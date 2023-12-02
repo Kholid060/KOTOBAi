@@ -2,6 +2,7 @@ import {
   NodeTypeChecker,
   mirrorElement,
   isRectOverlap,
+  getNodeBoundingClientRect,
 } from './content-handler-utils';
 import { CursorPoint } from './get-cursor-text';
 
@@ -153,6 +154,9 @@ function caretRangeFromPointExtended({
 
   let position = document.caretRangeFromPoint(point.x, point.y);
   if (!position) return null;
+
+  const rect = getNodeBoundingClientRect(position.startContainer);
+  if (!isRectOverlap({ point, rect })) return null;
 
   position = shadowDOMChecker({ point, position });
   if (!position) return null;

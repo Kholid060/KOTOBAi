@@ -13,7 +13,6 @@ class Dictionary {
   }
 
   private async _init() {
-    return;
     const updateState = (state: DictLoadState) => {
       this.loadState = state;
       return dictStateStorage.update({ state });

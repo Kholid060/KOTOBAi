@@ -1,5 +1,6 @@
 import { useEffectOnce } from 'usehooks-ts';
 import ContentHandler from '../content-handler/ContentHandler';
+import WordDetail from './WordDetail';
 
 export default function App() {
   useEffectOnce(() => {
@@ -17,5 +18,9 @@ export default function App() {
   //   console.log(text);
   // }, 500));
 
-  return <div className="bg-blue-900">content view</div>;
+  return (
+    <>
+      <WordDetail />
+    </>
+  );
 }
