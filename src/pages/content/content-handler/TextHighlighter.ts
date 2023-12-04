@@ -1,49 +1,12 @@
+import { CursorOffset } from './caretPositionFromPoint';
 import { NodeTypeChecker } from './content-handler-utils';
-import { CursorOffsetText } from './get-cursor-text';
-
-declare global {
-  interface Highlight extends Set<StaticRange> {
-    readonly priority: number;
-  }
-
-  // eslint-disable-next-line no-var
-  var Highlight:
-    | {
-        prototype: Highlight;
-        new (...initialRanges: Array<StaticRange>): Highlight;
-      }
-    | undefined;
-
-  type HighlightRegistry = Map<string, Highlight>;
-
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace CSS {
-    const highlights: HighlightRegistry | undefined;
-  }
-}
-
-const STYLE_ID = 'ext-name';
-
-function injectCSS() {
-  const styleExists = document.getElementById(STYLE_ID);
-  if (styleExists) return;
-
-  const style = document.createElement('style');
-  style.id = STYLE_ID;
-  style.textContent = `
-  ::highlight(${STYLE_ID}) {
-    color: #e4e4e7;
-    background-color: #0284c7;
-  }
-  `;
-
-  document.head.appendChild(style);
-}
+import { TextRange } from './extract-text-content';
 
 interface HighlighterParam {
   matchLength: number;
   documentCtx: Document;
-  cursorOffset: CursorOffsetText;
+  textRange: TextRange[];
+  cursorOffset: CursorOffset;
 }
 
 type PrevSelection =
@@ -62,50 +25,62 @@ type PrevSelection =
       endNode: Node;
       startNode: Node;
     };
-
 class TextHighlighter {
   private selectedText: string;
   private prevSelection: PrevSelection;
-  private highlightAPIAvailable: boolean;
   private prevFocusEl: Element | HTMLElement | null;
+  private highlightedNode: Node | Element | HTMLElement | null;
 
   constructor() {
     this.selectedText = '';
     this.prevFocusEl = null;
     this.prevSelection = null;
-    this.highlightAPIAvailable = Boolean(window.Highlight && CSS.highlights);
+    this.highlightedNode = null;
   }
 
   highlighText({
-    cursorOffset,
+    textRange,
     matchLength,
+    cursorOffset,
   }: {
     matchLength: number;
-    cursorOffset: CursorOffsetText;
+    textRange: TextRange[];
+    cursorOffset: CursorOffset;
   }) {
     const documentCtx = cursorOffset.offsetNode.ownerDocument;
-    if (!documentCtx) return;
+    if (!documentCtx || NodeTypeChecker.isImage(cursorOffset.offsetNode))
+      return;
 
     this.storeCurrSelection();
-    CSS?.highlights?.delete(STYLE_ID);
 
-    const highlighterPayload = { cursorOffset, matchLength, documentCtx };
+    const highlighterPayload = {
+      textRange,
+      matchLength,
+      documentCtx,
+      cursorOffset,
+    };
 
     if (NodeTypeChecker.isInput(cursorOffset.offsetNode)) {
       this.inputHighlighter(highlighterPayload);
     } else {
       this.nodeHighlighter(highlighterPayload);
     }
+
+    this.highlightedNode = cursorOffset.offsetNode;
   }
 
-  private inputHighlighter({ cursorOffset, matchLength }: HighlighterParam) {
+  private inputHighlighter({
+    textRange,
+    matchLength,
+    cursorOffset,
+  }: HighlighterParam) {
     if (!this.prevFocusEl) this.prevFocusEl = document.activeElement;
 
+    const [firstRange] = textRange;
     const el = cursorOffset.offsetNode as HTMLInputElement;
-    const [textRange] = cursorOffset.textRange;
 
-    const startOffset = textRange.start;
-    const endOffset = textRange.start + matchLength;
+    const startOffset = firstRange.start;
+    const endOffset = firstRange.start + matchLength;
 
     el.focus();
     el.setSelectionRange(startOffset, endOffset);
@@ -114,11 +89,10 @@ class TextHighlighter {
   }
 
   private nodeHighlighter({
+    textRange,
     matchLength,
     documentCtx,
-    cursorOffset,
   }: HighlighterParam) {
-    const { textRange } = cursorOffset;
     const [firstRange] = textRange;
     if (!firstRange) return;
 
@@ -144,27 +118,15 @@ class TextHighlighter {
 
     if (!this.prevFocusEl) this.prevFocusEl = documentCtx.activeElement;
 
-    if (this.highlightAPIAvailable) {
-      const range = new StaticRange({
-        endOffset,
-        startOffset,
-        endContainer: endNode,
-        startContainer: startNode,
-      });
-      CSS.highlights.set(STYLE_ID, new Highlight(range));
+    const range = documentCtx.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
 
-      injectCSS();
-    } else {
-      const range = documentCtx.createRange();
-      range.setStart(startNode, startOffset);
-      range.setEnd(endNode, endOffset);
+    const selection = documentCtx.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
 
-      const selection = documentCtx.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-
-      this.selectedText = selection.toString();
-    }
+    this.selectedText = selection.toString();
   }
 
   private storeCurrSelection() {
@@ -188,7 +150,7 @@ class TextHighlighter {
 
     const selection = window.getSelection();
     if (
-      this.highlightAPIAvailable ||
+      this.selectedText ||
       !selection ||
       selection.type !== 'Range' ||
       selection.toString() === this.selectedText
@@ -202,16 +164,24 @@ class TextHighlighter {
       start: selection.anchorOffset,
       startNode: selection.anchorNode,
     };
+
+    console.log(this.prevSelection, ' aasasas');
   }
 
   private restorePrevSelection() {
+    if (this.highlightedNode) {
+      if ('blur' in this.highlightedNode) this.highlightedNode.blur();
+      else if ('blur' in this.highlightedNode.parentElement) {
+        this.highlightedNode.parentElement.blur();
+      }
+    }
     if (this.prevFocusEl && 'focus' in this.prevFocusEl) {
       this.prevFocusEl.focus();
     }
 
     if (!this.prevSelection) {
-      if (!this.highlightAPIAvailable) {
-        const selection = document.getSelection();
+      const selection = window.getSelection();
+      if (selection.toString() === this.selectedText) {
         selection.removeAllRanges();
       }
 
@@ -238,17 +208,17 @@ class TextHighlighter {
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(range);
+      console.log('restore', this.prevSelection);
     }
   }
 
   clearHighlight() {
     this.restorePrevSelection();
 
-    CSS?.highlights?.delete(STYLE_ID);
-
     this.selectedText = '';
     this.prevFocusEl = null;
     this.prevSelection = null;
+    this.highlightedNode = null;
   }
 }
 

@@ -1,4 +1,4 @@
-import { CursorPoint } from './get-cursor-text';
+import { CursorPoint } from './TextSearcher';
 
 export const NodeTypeChecker = {
   isText: (node: Node) => node.nodeType === Node.TEXT_NODE,
@@ -53,13 +53,21 @@ export function mirrorElement(target: Element, text?: string) {
   return mirrorEl;
 }
 
-export function getNodeBoundingClientRect(el: Node | Element): DOMRect {
+export function getNodeBoundingClientRect(
+  el: Node | Element,
+  offset?: { start: number; end: number },
+): DOMRect {
   if ('getBoundingClientRect' in el) {
     return el.getBoundingClientRect();
   }
 
   const range = document.createRange();
-  range.selectNode(el);
+  if (offset) {
+    range.setStart(el, offset.start);
+    range.setStart(el, offset.end);
+  } else {
+    range.selectNode(el);
+  }
 
   return range.getBoundingClientRect();
 }
@@ -72,4 +80,8 @@ export function isRectOverlap({
   point: CursorPoint;
 }) {
   return left <= x && left + width >= x && top <= y && top + height >= y;
+}
+
+export function isInMainFrame() {
+  return window.self === window.top;
 }

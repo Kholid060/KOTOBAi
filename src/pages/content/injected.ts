@@ -1,9 +1,16 @@
-import exampleThemeStorage from '@src/shared/storages/exampleThemeStorage';
+import RuntimeMessage from '@root/src/utils/RuntimeMessage';
+import ContentHandler, {
+  contentEventEmitter,
+} from './content-handler/ContentHandler';
 
-async function toggleTheme() {
-  console.log('initial theme', await exampleThemeStorage.get());
-  exampleThemeStorage.toggle();
-  console.log('toggled theme', await exampleThemeStorage.get());
-}
+RuntimeMessage.onMessage('content:iframe-word-result', (searchResult) => {
+  contentEventEmitter.emit('search-word-result', {
+    entry: searchResult,
+    point: searchResult.frameSource.point,
+    frameSource: searchResult.frameSource,
+  });
+});
 
-void toggleTheme();
+(() => {
+  new ContentHandler();
+})();

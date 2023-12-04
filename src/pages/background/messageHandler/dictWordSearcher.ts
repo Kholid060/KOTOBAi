@@ -4,10 +4,13 @@ import {
   DictWordLocalEntry,
 } from '@root/src/interface/dict.interface';
 import { getBackgroundDictionary } from '../BackgroundDict';
-import { MessageSearchWordOpts } from '@root/src/utils/RuntimeMessage';
+import RuntimeMessage, {
+  MessageSearchWordOpts,
+} from '@root/src/utils/RuntimeMessage';
 import MemoryCache from '@root/src/utils/MemoryCache';
 import Dictionary from '@root/src/utils/Dictionary';
 import LocalDictionary from '@root/src/utils/LocalDictionary';
+import Browser from 'webextension-polyfill';
 
 export interface SearchDictWordResult {
   input: string;
@@ -57,7 +60,6 @@ async function handleSearchWord({
     searchResult.entries.push(...entries);
 
     if (entries.length > 0) {
-      console.log(copyInput.length);
       searchResult.maxLength = Math.max(
         searchResult.maxLength,
         copyInput.length,
@@ -79,12 +81,17 @@ async function handleSearchWord({
   return searchResult;
 }
 
-export default function dictWordSearcher() {
+export default function dictWordSearcher(isIframe = false) {
   let searchController: AbortController | null = null;
 
   const resultCache = new MemoryCache<string, SearchDictWordResult>();
 
-  return async ({ input, maxResult }: MessageSearchWordOpts) => {
+  return async (
+    { input, maxResult, frameSource }: MessageSearchWordOpts,
+    sender: Browser.Runtime.MessageSender,
+  ) => {
+    console.log('Sender', sender);
+
     if (searchController) {
       searchController.abort();
       searchController = null;
@@ -115,6 +122,22 @@ export default function dictWordSearcher() {
 
       resultCache.add(wordToSearch, result);
 
+      if (isIframe) {
+        await RuntimeMessage.sendMessageToTab(
+          {
+            frameId: 0,
+            tabId: sender.tab.id!,
+            name: 'content:iframe-word-result',
+          },
+          {
+            input,
+            kanji: [],
+            entries: [],
+            frameSource,
+            maxLength: result.maxLength,
+          },
+        );
+      }
       console.log('RESULT || ', input, ' || ', result);
 
       return result;

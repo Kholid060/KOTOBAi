@@ -7,7 +7,14 @@
  * If you want to use other modules in content scripts, you need to import them via these files.
  *
  */
-import('@pages/content/ui');
+if (window.self === window.top) {
+  import('@pages/content/ui');
+}
+
 import('@pages/content/injected');
 
-console.log('content loaded');
+console.log(
+  'content loaded',
+  window.self === window.top ? 'TOP FRAME' : 'IFRAME',
+  window.location.hostname,
+);

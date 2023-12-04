@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { CursorPoint } from './TextSearcher';
 import {
   NodeTypeChecker,
   mirrorElement,
   isRectOverlap,
   getNodeBoundingClientRect,
 } from './content-handler-utils';
-import { CursorPoint } from './get-cursor-text';
 
 export interface CursorOffset<T extends Node = Node> {
   offsetNode: T;
@@ -12,26 +13,26 @@ export interface CursorOffset<T extends Node = Node> {
 }
 
 const SUPPORTED_INPUT_TYPES = [
-  'button',
+  'url',
+  'text',
   'email',
   'search',
   'submit',
-  'text',
-  'url',
+  'button',
   'textarea',
 ];
 
 function getCursorOffsetFromTextField({
-  inputEl,
   point,
+  inputEl,
 }: {
-  inputEl: HTMLInputElement | HTMLTextAreaElement;
   point: CursorPoint;
+  inputEl: HTMLInputElement | HTMLTextAreaElement;
 }) {
   if (!SUPPORTED_INPUT_TYPES.includes(inputEl.type)) return null;
 
   const mirrorEl = mirrorElement(inputEl, inputEl.value);
-  const result = getCursorOffset({ point, element: mirrorEl });
+  const result = caretPositionFromPoint({ point, element: mirrorEl });
   if (result) result.offsetNode = inputEl;
 
   mirrorEl.remove();
@@ -66,7 +67,7 @@ function findShadowRoot({
 }): ShadowRoot | null {
   if (element.shadowRoot) return element.shadowRoot;
 
-  const MAX_CHILD_CHECK = 25;
+  const MAX_CHILD_CHECK = 10;
   let checkedChildCount = 0;
 
   for (const child of element.children) {
@@ -152,19 +153,16 @@ function caretRangeFromPointExtended({
     });
   }
 
-  let position = document.caretRangeFromPoint(point.x, point.y);
+  const position = document.caretRangeFromPoint(point.x, point.y);
   if (!position) return null;
 
   const rect = getNodeBoundingClientRect(position.startContainer);
   if (!isRectOverlap({ point, rect })) return null;
 
-  position = shadowDOMChecker({ point, position });
-  if (!position) return null;
-
   if (NodeTypeChecker.isInput(position.startContainer)) {
     return getCursorOffsetFromTextField({
-      inputEl: <HTMLInputElement>position.startContainer,
       point,
+      inputEl: <HTMLInputElement>position.startContainer,
     });
   }
 
@@ -174,19 +172,19 @@ function caretRangeFromPointExtended({
   };
 }
 
-export function getCursorOffset({
+export function caretPositionFromPoint({
   point,
   element,
 }: {
-  point: CursorPoint;
   element: Element;
+  point: CursorPoint;
 }): CursorOffset | null {
   if (document.caretPositionFromPoint) {
     const position = document.caretPositionFromPoint(point.x, point.y);
-    return position?.offsetNode
-      ? { offset: position.offset, offsetNode: position.offsetNode }
-      : null;
+    if (!position?.offsetNode) return null;
+
+    return { offset: position.offset, offsetNode: position.offsetNode };
   }
 
-  return caretRangeFromPointExtended({ point, element });
+  return caretRangeFromPointExtended({ element, point });
 }

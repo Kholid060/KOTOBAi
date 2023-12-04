@@ -9,11 +9,7 @@ const manifest = {
   name: packageJson.name,
   version: packageJson.version,
   description: packageJson.description,
-  permissions: ['storage', 'sidePanel'],
-  side_panel: {
-    default_path: 'src/pages/sidepanel/index.html',
-  },
-  options_page: 'src/pages/options/index.html',
+  permissions: ['storage'],
   background: {
     service_worker: 'src/pages/background/index.js',
     type: 'module',
@@ -29,11 +25,17 @@ const manifest = {
     {
       matches: ['http://*/*', 'https://*/*', '<all_urls>'],
       js: ['src/pages/content/index.js'],
+      all_frames: true,
     },
   ],
   web_accessible_resources: [
     {
-      resources: ['assets/js/*.js', 'assets/css/*.css', 'icon-128.png', 'icon-34.png'],
+      resources: [
+        'assets/js/*.js',
+        'assets/css/*.css',
+        'icon-128.png',
+        'icon-34.png',
+      ],
       matches: ['*://*/*'],
     },
   ],

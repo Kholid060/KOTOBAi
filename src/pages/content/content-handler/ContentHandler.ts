@@ -1,32 +1,38 @@
 import { debounce } from '@root/src/utils/helper';
-import {
-  CursorPoint,
-  GetCursorTextResult,
-  getCursorText,
-} from './get-cursor-text';
-import RuntimeMessage from '@root/src/utils/RuntimeMessage';
+import RuntimeMessage, {
+  WordFrameSource,
+} from '@root/src/utils/RuntimeMessage';
 import EventEmitter from 'eventemitter3';
 import { SearchDictWordResult } from '../../background/messageHandler/dictWordSearcher';
 import TextHighlighter from './TextHighlighter';
+import TextSearcher, { CursorPoint } from './TextSearcher';
+import { isInMainFrame } from './content-handler-utils';
+import { ClientRect } from '@root/src/interface/shared.interface';
 
 const MAX_CONTENT_LENGTH = 16;
 
-interface SearchWordResult extends GetCursorTextResult {
+interface SearchWordResult {
+  rect?: ClientRect;
   point: CursorPoint;
   entry: SearchDictWordResult;
 }
 
 interface Events {
-  'search-word-result': (result: SearchWordResult | null) => void;
+  'search-word-result': (
+    result: (SearchWordResult & { frameSource?: WordFrameSource }) | null,
+  ) => void;
 }
 
-class ContentHandler extends EventEmitter<Events> {
+export const contentEventEmitter = new EventEmitter<Events>();
+
+class ContentHandler {
   private isPointerDown = false;
+  private isMainFrame = isInMainFrame();
+
+  private textSearcher = new TextSearcher();
   private textHighlighter = new TextHighlighter();
 
   constructor() {
-    super();
-
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = debounce(this.onPointerMove.bind(this), 100);
@@ -58,45 +64,67 @@ class ContentHandler extends EventEmitter<Events> {
     if (this.isPointerDown) return;
 
     const cursorPoint = { x: event.clientX, y: event.clientY };
-    const result = getCursorText({
+    const result = this.textSearcher.getTextByPoint({
       point: cursorPoint,
       maxLength: MAX_CONTENT_LENGTH,
       element: <Element>event.target,
     });
     if (!result) {
-      this.emit('search-word-result', null);
+      contentEventEmitter.emit('search-word-result', null);
       this.textHighlighter.clearHighlight();
       return;
     }
 
-    RuntimeMessage.sendMessage('background:search-word', {
-      input: result.cursorOffset.text,
+    let frameSource: WordFrameSource | undefined;
+    if (!this.isMainFrame) {
+      frameSource = {
+        point: cursorPoint,
+        frameURL: window.location.href,
+        rect: window.frameElement?.getBoundingClientRect(),
+      };
+
+      if (result.rect) {
+        frameSource.point.x = result.rect.right;
+        frameSource.point.y = result.rect.bottom;
+      }
+    }
+
+    const messageKey = this.isMainFrame
+      ? 'background:search-word'
+      : 'background:search-word-iframe';
+
+    RuntimeMessage.sendMessage(messageKey, {
+      frameSource,
+      input: result.text,
     })
       .then((searchResult) => {
         if (searchResult) {
           this.textHighlighter.highlighText({
+            textRange: result.textRange,
             cursorOffset: result.cursorOffset,
             matchLength: searchResult.maxLength,
           });
+        } else {
+          this.textHighlighter.clearHighlight();
         }
 
-        console.log('RESU:T', searchResult);
+        if (!this.isMainFrame) return;
 
-        this.emit('search-word-result', {
-          ...result,
+        contentEventEmitter.emit('search-word-result', {
+          rect: result.rect,
           point: cursorPoint,
           entry: searchResult,
         });
       })
       .catch((error) => {
         console.error(error);
-        this.emit('search-word-result', null);
+        contentEventEmitter.emit('search-word-result', null);
       });
   }
 
   destroy() {
     this.detachListeners();
-    this.removeAllListeners();
+    contentEventEmitter.removeAllListeners();
   }
 }
 

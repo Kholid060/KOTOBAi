@@ -1,16 +1,31 @@
 import Browser from 'webextension-polyfill';
 import { isObject } from './helper';
 import { SearchDictWordResult } from '../pages/background/messageHandler/dictWordSearcher';
+import { CursorPoint } from '../pages/content/content-handler/TextSearcher';
+import { SetRequired } from 'type-fest';
+import { ClientRect } from '../interface/shared.interface';
 
+export interface WordFrameSource {
+  frameURL: string;
+  rect?: ClientRect;
+  point: CursorPoint;
+}
 export interface MessageSearchWordOpts {
   input: string;
   maxResult?: number;
+  frameSource?: WordFrameSource;
 }
 
 interface Events {
   'background:search-word': (
     detail: MessageSearchWordOpts,
   ) => SearchDictWordResult;
+  'background:search-word-iframe': (
+    detail: SetRequired<MessageSearchWordOpts, 'frameSource'>,
+  ) => SearchDictWordResult;
+  'content:iframe-word-result': (
+    result: SearchDictWordResult & { frameSource: WordFrameSource },
+  ) => void;
 }
 
 type EventListener = Map<string, (...args: unknown[]) => unknown>;
@@ -30,20 +45,20 @@ class RuntimeMessage {
   }
 
   private init() {
-    Browser.runtime.onMessage.addListener((message) => {
+    Browser.runtime.onMessage.addListener((message, sender) => {
       if (!isObject(message) || !Object.hasOwn(message, 'name')) return;
 
       const callback = this.eventListeners.get(message.name);
       if (!callback) return;
 
-      return callback(...(message.args ?? [])) as Promise<unknown>;
+      return callback(...(message.args ?? []), sender) as Promise<unknown>;
     });
   }
 
   onMessage<T extends keyof Events>(
     name: T,
     callback: (
-      ...args: Parameters<Events[T]>
+      ...args: [...Parameters<Events[T]>, Browser.Runtime.MessageSender]
     ) => ReturnType<Events[T]> extends void
       ? void
       : Promise<ReturnType<Events[T]>>,

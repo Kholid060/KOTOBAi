@@ -5,6 +5,14 @@ import Dictionary from '@root/src/utils/Dictionary';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import dictWordSearcher from './messageHandler/dictWordSearcher';
 
+Browser.runtime.onInstalled.addListener(BackgroundEventListener.onInstalled);
+
+RuntimeMessage.onMessage('background:search-word', dictWordSearcher());
+RuntimeMessage.onMessage(
+  'background:search-word-iframe',
+  dictWordSearcher(true),
+);
+
 reloadOnUpdate('pages/background');
 
 /**
@@ -12,9 +20,5 @@ reloadOnUpdate('pages/background');
  * If you do not use the css of the content script, please delete it.
  */
 reloadOnUpdate('pages/content/style.css');
-
-Browser.runtime.onInstalled.addListener(BackgroundEventListener.onInstalled);
-
-RuntimeMessage.onMessage('background:search-word', dictWordSearcher());
 
 console.log('background loaded', Dictionary);

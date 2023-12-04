@@ -1,12 +1,6 @@
-import { useEffectOnce } from 'usehooks-ts';
-import ContentHandler from '../content-handler/ContentHandler';
 import WordDetail from './WordDetail';
 
 export default function App() {
-  useEffectOnce(() => {
-    new ContentHandler();
-  });
-
   // useEventListener('mousemove', debounce(({ target, clientX, clientY }) => {
   //   const range = caretPositionFromPoint(clientX, clientY);
   //   if (!range) return;

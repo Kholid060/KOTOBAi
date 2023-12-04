@@ -42,6 +42,7 @@ class Dictionary {
       .equals(input)
       .or('kanji')
       .equals(input)
+      .limit(7)
       .toArray();
 
     return result;
