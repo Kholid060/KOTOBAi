@@ -97,6 +97,14 @@ async function generateJMDictData(version) {
 
     const filenames = [];
 
+    const handlePriority = ({ node, index, entry, prefix }) => {
+      const propName = prefix + 'Prio';
+      if (!entry[propName]) entry[propName] = {};
+      if (!entry[propName][index]) entry[propName][index] = [];
+
+      entry[propName][index].push(node.text());
+    };
+
     const nodeHandler = {
       ent_seq(node, entry) {
         entry.id = +node.text();
@@ -163,18 +171,44 @@ async function generateJMDictData(version) {
           }
         });
       },
-      r_ele(node, entry) {
+      r_ele(node, entry, tempStorage) {
         node.childNodes().forEach((childNode) => {
-          if (childNode.name() !== 'reb') return;
-          entry.reading.push(childNode.text());
+          const nodeName = childNode.name();
+          const idxPropName = 'rPrioIdx';
+
+          if (nodeName === 'reb') {
+            entry.reading.push(childNode.text());
+          } else if (nodeName === 're_pri') {
+            handlePriority({
+              entry,
+              prefix: 'r',
+              node: childNode,
+              index: tempStorage[idxPropName] || 0,
+            });
+          }
         });
       },
-      k_ele(node, entry) {
-        node.childNodes().forEach((childNode) => {
-          if (childNode.name() !== 'keb') return;
-          if (!entry.kanji) entry.kanji = [];
+      k_ele(node, entry, tempStorage) {
+        const idxPropName = 'kPrioIdx';
 
-          entry.kanji.push(childNode.text());
+        node.childNodes().forEach((childNode) => {
+          const nodeName = childNode.name();
+
+          if (nodeName === 'keb') {
+            if (!entry.kanji) entry.kanji = [];
+            if (!Object.hasOwn(tempStorage, idxPropName)) {
+              tempStorage[idxPropName] = 0;
+            }
+
+            entry.kanji.push(childNode.text());
+          } else if (nodeName === 'ke_pri') {
+            handlePriority({
+              entry,
+              prefix: 'k',
+              node: childNode,
+              index: tempStorage[idxPropName] || 0,
+            });
+          }
         });
       },
     };
@@ -215,13 +249,14 @@ async function generateJMDictData(version) {
         sense: [],
         reading: [],
       };
+      const tempStorage = {};
 
       node.childNodes().forEach((childNode) => {
         const name = childNode.name();
         const handler = nodeHandler[name];
         if (!handler) return;
 
-        handler.apply(nodeHandler, [childNode, entry]);
+        handler.apply(nodeHandler, [childNode, entry, tempStorage]);
       });
 
       currEntries.push(entry);

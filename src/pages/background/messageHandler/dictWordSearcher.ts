@@ -11,15 +11,21 @@ import MemoryCache from '@root/src/utils/MemoryCache';
 import Dictionary from '@root/src/utils/Dictionary';
 import LocalDictionary from '@root/src/utils/LocalDictionary';
 import Browser from 'webextension-polyfill';
+import { Reason, deinflect, entryMatchesType } from '@src/shared/lib/deinflect';
+
+export type DictionaryEntryResult = {
+  word: string;
+  reasons?: Reason[];
+} & DictWordEntry &
+  DictWordLocalEntry;
 
 export interface SearchDictWordResult {
   input: string;
   maxLength: number;
   kanji: { char: string; pos: number }[];
-  entries: (DictWordEntry | DictWordLocalEntry)[];
+  entries: DictionaryEntryResult[];
 }
 
-const DEFAULT_MAX_RESULT = 5;
 const YOON = {
   smallY: ['ゃ', 'ゅ', 'ょ'],
   chars: ['き', 'し', 'ち', 'に', 'ひ', 'み', 'り', 'ぎ', 'じ', 'び', 'ぴ'],
@@ -34,14 +40,17 @@ async function handleSearchWord({
   input,
   controller,
   searchWord,
-  maxResult = DEFAULT_MAX_RESULT,
+  maxResult = 7,
+  wordQueryLimit = 3,
 }: {
   input: string;
   maxResult?: number;
+  wordQueryLimit?: number;
   controller: AbortController;
-  searchWord: (
-    input: string,
-  ) => Promise<(DictWordEntry | DictWordLocalEntry)[]>;
+  searchWord: (input: {
+    input: string;
+    maxResult: number;
+  }) => Promise<(DictWordEntry | DictWordLocalEntry)[]>;
 }) {
   const searchResult: SearchDictWordResult = {
     input,
@@ -50,16 +59,54 @@ async function handleSearchWord({
     maxLength: 0,
   };
 
+  const checkSignal = () => {
+    if (controller.signal.aborted) throw new Error('Aborted');
+  };
+
+  const inputtedWordEntry = new Set<number>();
+  const candidateSearched = new Set<string>();
+
   let copyInput = `${input}`;
 
   while (copyInput.length) {
-    if (controller.signal.aborted) throw new Error('Aborted');
-    if (searchResult.entries.length > maxResult) return searchResult;
+    checkSignal();
 
-    const entries = await searchWord(copyInput);
-    searchResult.entries.push(...entries);
+    const candidates = deinflect(copyInput);
+    for (let index = 0; index < candidates.length; index += 1) {
+      checkSignal();
 
-    if (entries.length > 0) {
+      if (searchResult.entries.length >= maxResult) return searchResult;
+
+      const candidate = candidates[index];
+      if (candidateSearched.has(candidate.word)) continue;
+
+      let entries = await searchWord({
+        input: candidate.word,
+        maxResult: wordQueryLimit,
+      });
+      entries = entries.filter((entry) => {
+        if (index === 0 || !entry.sense) return true;
+
+        return entryMatchesType(entry.sense ?? [], candidate.type);
+      });
+      if (entries.length <= 0) continue;
+
+      for (const entry of entries) {
+        checkSignal();
+
+        if (inputtedWordEntry.has(entry.id)) continue;
+
+        searchResult.entries.push({
+          ...entry,
+          word: candidate.word,
+          reasons: candidate.reasons.flat(),
+        });
+
+        inputtedWordEntry.add(entry.id);
+      }
+
+      candidateSearched.add(candidate.word);
+
       searchResult.maxLength = Math.max(
         searchResult.maxLength,
         copyInput.length,
@@ -90,8 +137,6 @@ export default function dictWordSearcher(isIframe = false) {
     { input, maxResult, frameSource }: MessageSearchWordOpts,
     sender: Browser.Runtime.MessageSender,
   ) => {
-    console.log('Sender', sender);
-
     if (searchController) {
       searchController.abort();
       searchController = null;

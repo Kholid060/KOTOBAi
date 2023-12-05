@@ -5,9 +5,13 @@ import RuntimeMessage, {
 import EventEmitter from 'eventemitter3';
 import { SearchDictWordResult } from '../../background/messageHandler/dictWordSearcher';
 import TextHighlighter from './TextHighlighter';
-import TextSearcher, { CursorPoint } from './TextSearcher';
+import TextSearcher, {
+  CursorPoint,
+  GetTextByPointResult,
+} from './TextSearcher';
 import { isInMainFrame } from './content-handler-utils';
 import { ClientRect } from '@root/src/interface/shared.interface';
+import { CursorOffset } from './caretPositionFromPoint';
 
 const MAX_CONTENT_LENGTH = 16;
 
@@ -15,6 +19,7 @@ interface SearchWordResult {
   rect?: ClientRect;
   point: CursorPoint;
   entry: SearchDictWordResult;
+  cursorOffset?: CursorOffset;
 }
 
 interface Events {
@@ -54,6 +59,7 @@ class ContentHandler {
 
   private onPointerDown() {
     this.isPointerDown = true;
+    this.textHighlighter.clearHighlight();
   }
 
   private onPointerUp() {
@@ -75,51 +81,62 @@ class ContentHandler {
       return;
     }
 
-    let frameSource: WordFrameSource | undefined;
-    if (!this.isMainFrame) {
-      frameSource = {
-        point: cursorPoint,
-        frameURL: window.location.href,
-        rect: window.frameElement?.getBoundingClientRect(),
-      };
+    this.searchText({ ...result, cursorPoint });
+  }
 
-      if (result.rect) {
-        frameSource.point.x = result.rect.right;
-        frameSource.point.y = result.rect.bottom;
-      }
-    }
-
-    const messageKey = this.isMainFrame
-      ? 'background:search-word'
-      : 'background:search-word-iframe';
-
-    RuntimeMessage.sendMessage(messageKey, {
-      frameSource,
-      input: result.text,
-    })
-      .then((searchResult) => {
-        if (searchResult) {
-          this.textHighlighter.highlighText({
-            textRange: result.textRange,
-            cursorOffset: result.cursorOffset,
-            matchLength: searchResult.maxLength,
-          });
-        } else {
-          this.textHighlighter.clearHighlight();
-        }
-
-        if (!this.isMainFrame) return;
-
-        contentEventEmitter.emit('search-word-result', {
-          rect: result.rect,
+  private async searchText({
+    text,
+    rect,
+    textRange,
+    cursorOffset,
+    cursorPoint,
+  }: GetTextByPointResult & { cursorPoint: CursorPoint }) {
+    try {
+      let frameSource: WordFrameSource | undefined;
+      if (!this.isMainFrame) {
+        frameSource = {
           point: cursorPoint,
-          entry: searchResult,
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-        contentEventEmitter.emit('search-word-result', null);
+          frameURL: window.location.href,
+          rect: window.frameElement?.getBoundingClientRect(),
+        };
+
+        if (rect) {
+          frameSource.point.x = rect.right;
+          frameSource.point.y = rect.bottom;
+        }
+      }
+
+      const messageKey = this.isMainFrame
+        ? 'background:search-word'
+        : 'background:search-word-iframe';
+
+      const searchResult = await RuntimeMessage.sendMessage(messageKey, {
+        frameSource,
+        input: text,
       });
+
+      if (searchResult) {
+        this.textHighlighter.highlighText({
+          textRange: textRange,
+          cursorOffset: cursorOffset,
+          matchLength: searchResult.maxLength,
+        });
+      } else {
+        this.textHighlighter.clearHighlight();
+      }
+
+      if (!this.isMainFrame) return;
+
+      contentEventEmitter.emit('search-word-result', {
+        rect,
+        point: cursorPoint,
+        entry: searchResult,
+        cursorOffset: cursorOffset,
+      });
+    } catch (error) {
+      console.error(error);
+      contentEventEmitter.emit('search-word-result', null);
+    }
   }
 
   destroy() {

@@ -30,13 +30,15 @@ class LocalDictionary {
     }
   }
 
-  searchWord(input: string) {
+  searchWord({ input, maxResult }: { input: string; maxResult: number }) {
     const wordOffsets = this.wordsIndex[input];
     if (!wordOffsets) return [];
 
     const result: DictWordLocalEntry[] = [];
 
     for (const offset of wordOffsets) {
+      if (result.length > maxResult) break;
+
       const entryStr = this.words.substring(
         offset,
         this.words.indexOf('\n', offset),

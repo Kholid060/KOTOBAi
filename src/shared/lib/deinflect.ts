@@ -17,6 +17,10 @@
  * https://github.com/birchill/10ten-ja-reader
  */
 
+import {
+  DictWordEntrySense,
+  WordPosTag,
+} from '@root/src/interface/dict.interface';
 import { toHiragana } from 'wanakana';
 
 export const enum Reason {
@@ -1182,4 +1186,47 @@ export function deinflect(word: string): CandidateWord[] {
   result = result.filter((r) => r.type & Type.All);
 
   return result;
+}
+
+export function entryMatchesType(
+  sense: DictWordEntrySense[],
+  type: number,
+): boolean {
+  const hasMatchingSense = (test: (pos: WordPosTag) => boolean) =>
+    sense.some((sense) => sense.pos?.some(test));
+
+  if (
+    type & Type.IchidanVerb &&
+    hasMatchingSense((pos) => pos.startsWith('v1'))
+  ) {
+    return true;
+  }
+
+  if (
+    type & Type.GodanVerb &&
+    hasMatchingSense((pos) => pos.startsWith('v5') || pos.startsWith('v4'))
+  ) {
+    return true;
+  }
+
+  if (type & Type.IAdj && hasMatchingSense((pos) => pos.startsWith('adj-i'))) {
+    return true;
+  }
+
+  if (type & Type.KuruVerb && hasMatchingSense((pos) => pos === 'vk')) {
+    return true;
+  }
+
+  if (
+    type & Type.SuruVerb &&
+    hasMatchingSense((pos) => pos.startsWith('vs-'))
+  ) {
+    return true;
+  }
+
+  if (type & Type.NounVS && hasMatchingSense((pos) => pos === 'vs')) {
+    return true;
+  }
+
+  return false;
 }

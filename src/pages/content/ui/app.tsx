@@ -1,4 +1,4 @@
-import WordDetail from './WordDetail';
+import WordContainer from './WordContainer';
 
 export default function App() {
   // useEventListener('mousemove', debounce(({ target, clientX, clientY }) => {
@@ -13,8 +13,8 @@ export default function App() {
   // }, 500));
 
   return (
-    <>
-      <WordDetail />
-    </>
+    <div className="font-sans">
+      <WordContainer />
+    </div>
   );
 }

@@ -36,13 +36,13 @@ class Dictionary {
     }
   }
 
-  async searchWord(input: string) {
+  async searchWord({ input, maxResult }: { input: string; maxResult: number }) {
     const result = await dictDB.words
       .where('reading')
       .equals(input)
       .or('kanji')
       .equals(input)
-      .limit(7)
+      .limit(maxResult)
       .toArray();
 
     return result;
