@@ -13,7 +13,7 @@ export default function App() {
   // }, 500));
 
   return (
-    <div className="font-sans">
+    <div className="font-sans dark text-foreground">
       <WordContainer />
     </div>
   );

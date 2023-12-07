@@ -572,10 +572,12 @@ async function generateInitialData() {
     }
 
     const filePart = await fs.readJSON(filePartPath);
-    filePart.records.forEach(({ id, sense, reading, kanji }) => {
+    filePart.records.forEach(({ id, sense, reading, kanji, rPrio, kPrio }) => {
       const entry = {
         id,
         kanji,
+        rPrio,
+        kPrio,
         reading,
         sense: sense.map(({ pos, gloss }) => ({ pos, gloss })),
       };

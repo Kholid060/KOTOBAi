@@ -19,7 +19,7 @@
 
 import {
   DictWordEntrySense,
-  WordPosTag,
+  DictWordPosTag,
 } from '@root/src/interface/dict.interface';
 import { toHiragana } from 'wanakana';
 
@@ -1192,7 +1192,7 @@ export function entryMatchesType(
   sense: DictWordEntrySense[],
   type: number,
 ): boolean {
-  const hasMatchingSense = (test: (pos: WordPosTag) => boolean) =>
+  const hasMatchingSense = (test: (pos: DictWordPosTag) => boolean) =>
     sense.some((sense) => sense.pos?.some(test));
 
   if (

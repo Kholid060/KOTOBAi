@@ -6,7 +6,15 @@ import { WordFrameSource } from '@root/src/utils/RuntimeMessage';
 import { ClientRect } from '@root/src/interface/shared.interface';
 import { NodeTypeChecker } from '../content-handler/content-handler-utils';
 import { SearchDictWordResult } from '../../background/messageHandler/dictWordSearcher';
-import WordContent from './WordContent';
+import WordEntries from './WordEntries';
+import { X } from 'lucide-react';
+import { cn } from '@root/src/shared/lib/shadcn-utils';
+
+const TAB_ITEMS = [
+  { name: 'Words', id: 'words' },
+  { name: 'Kanji', id: 'kanji' },
+  { name: 'Names', id: 'names' },
+];
 
 function getFrameRect({
   frameURL,
@@ -38,6 +46,33 @@ function getFrameRect({
     width: right - left,
     height: bottom - top,
   };
+}
+
+function WordContainerHeader() {
+  const [activeTab, setActiveTab] = useState('words');
+
+  return (
+    <div className="flex items-center px-4 border-b bg-background sticky top-0">
+      {TAB_ITEMS.map((item) => (
+        <button
+          key={item.id}
+          className={cn(
+            'p-2 py-3 border-b h-full hover:text-foreground',
+            activeTab === item.id
+              ? 'border-primary'
+              : 'border-transparent text-muted-foreground',
+          )}
+          onClick={() => setActiveTab(item.id)}
+        >
+          {item.name}
+        </button>
+      ))}
+      <div className="flex-grow" />
+      <button>
+        <X className="h-5 w-5" />
+      </button>
+    </div>
+  );
 }
 
 function WordContainer() {
@@ -92,6 +127,18 @@ function WordContainer() {
       });
     });
 
+    if (window.location.host === 'localhost:3000') {
+      setTimeout(() => {
+        document.documentElement.dispatchEvent(
+          new PointerEvent('pointermove', {
+            clientY: 73,
+            bubbles: true,
+            clientX: 90.5,
+          }),
+        );
+      }, 500);
+    }
+
     return () => {
       contentEventEmitter.removeAllListeners();
     };
@@ -102,10 +149,17 @@ function WordContainer() {
       ref={popoverRef}
       isOpen={isOpen}
       placement="bottom-start"
-      className="bg-zinc-900 text-zinc-200"
       onOpenChange={setIsOpen}
+      className="w-full max-w-sm bg-background border focus-visible:ring-2 shadow-xl text-sm rounded-md scroll max-h-96 overflow-auto"
     >
-      {searchResult && <WordContent result={searchResult} />}
+      {searchResult && (
+        <>
+          <WordContainerHeader />
+          <div className="p-4">
+            <WordEntries result={searchResult} />
+          </div>
+        </>
+      )}
     </WordPopover>
   );
 }

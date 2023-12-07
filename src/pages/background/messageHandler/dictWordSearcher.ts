@@ -2,6 +2,7 @@ import { isKanji, toHiragana } from 'wanakana';
 import {
   DictWordEntry,
   DictWordLocalEntry,
+  DictWordPriority,
 } from '@root/src/interface/dict.interface';
 import { getBackgroundDictionary } from '../BackgroundDict';
 import RuntimeMessage, {
@@ -12,9 +13,11 @@ import Dictionary from '@root/src/utils/Dictionary';
 import LocalDictionary from '@root/src/utils/LocalDictionary';
 import Browser from 'webextension-polyfill';
 import { Reason, deinflect, entryMatchesType } from '@src/shared/lib/deinflect';
+import { WORD_PRIORITY_WEIGHT } from '@root/src/shared/constant/word.const';
 
 export type DictionaryEntryResult = {
   word: string;
+  oriWord: string;
   reasons?: Reason[];
 } & DictWordEntry &
   DictWordLocalEntry;
@@ -22,7 +25,7 @@ export type DictionaryEntryResult = {
 export interface SearchDictWordResult {
   input: string;
   maxLength: number;
-  kanji: { char: string; pos: number }[];
+  kanji: Record<number, string>;
   entries: DictionaryEntryResult[];
 }
 
@@ -37,10 +40,10 @@ const endsInYoon = (str: string) =>
   YOON.chars.includes(str.at(-2));
 
 async function handleSearchWord({
-  input,
   controller,
   searchWord,
   maxResult = 7,
+  input: oriInput,
   wordQueryLimit = 3,
 }: {
   input: string;
@@ -53,11 +56,12 @@ async function handleSearchWord({
   }) => Promise<(DictWordEntry | DictWordLocalEntry)[]>;
 }) {
   const searchResult: SearchDictWordResult = {
-    input,
     kanji: [],
     entries: [],
     maxLength: 0,
+    input: oriInput,
   };
+  const input = toHiragana(oriInput, { passRomaji: true });
 
   const checkSignal = () => {
     if (controller.signal.aborted) throw new Error('Aborted');
@@ -100,6 +104,7 @@ async function handleSearchWord({
           ...entry,
           word: candidate.word,
           reasons: candidate.reasons.flat(),
+          oriWord: oriInput.slice(0, copyInput.length),
         });
 
         inputtedWordEntry.add(entry.id);
@@ -115,10 +120,8 @@ async function handleSearchWord({
 
     const lastChar = copyInput.at(-1);
     if (lastChar && isKanji(lastChar)) {
-      searchResult.kanji.unshift({
-        char: lastChar,
-        pos: copyInput.length - input.length + input.length - 1,
-      });
+      const kanjiIdx = copyInput.length - input.length + input.length - 1;
+      searchResult.kanji[kanjiIdx] = lastChar;
     }
 
     const sliceLen = endsInYoon(copyInput) ? 2 : 1;
@@ -126,6 +129,53 @@ async function handleSearchWord({
   }
 
   return searchResult;
+}
+
+function sortSearchResult(result: SearchDictWordResult): SearchDictWordResult {
+  const getScore = (items: DictWordPriority[]) => {
+    let sum = 0;
+
+    items.forEach((str) => {
+      if (str.startsWith('nf')) {
+        const freq = +str.slice(2);
+        sum += Math.floor(65 * Math.exp(-0.1 * freq));
+
+        return;
+      }
+
+      sum += WORD_PRIORITY_WEIGHT[str] || 0;
+    });
+
+    return sum;
+  };
+  const getPriority = (entry: DictionaryEntryResult) => {
+    if (!entry.kPrio && !entry.rPrio) return 0;
+
+    let score = 0;
+    entry.reading.forEach((reading, index) => {
+      if (reading !== entry.word || !entry.rPrio || !entry.rPrio[index]) return;
+
+      score = Math.max(score, getScore(entry.rPrio[index]));
+    });
+    entry.kanji.forEach((kanji, index) => {
+      if (kanji !== entry.word || !entry.kPrio || !entry.kPrio[index]) return;
+
+      score = Math.max(score, getScore(entry.kPrio[index]));
+    });
+
+    return score;
+  };
+
+  const sortedEntries = [...result.entries].sort((a, b) => {
+    if (a.word !== b.word) return 0;
+
+    return getPriority(b) - getPriority(a);
+  });
+
+  return {
+    ...result,
+    entries: sortedEntries,
+  };
 }
 
 export default function dictWordSearcher(isIframe = false) {
@@ -146,8 +196,7 @@ export default function dictWordSearcher(isIframe = false) {
       console.log('SEARCH', input);
       searchController = new AbortController();
 
-      const wordToSearch = toHiragana(input, { passRomaji: true });
-      const cacheResult = resultCache.get(wordToSearch);
+      const cacheResult = resultCache.get(input);
       if (cacheResult) return cacheResult.value;
 
       let dictionary: Dictionary | LocalDictionary =
@@ -158,14 +207,15 @@ export default function dictWordSearcher(isIframe = false) {
         searchWord = dictionary.searchWord.bind(dictionary);
       }
 
-      const result = await handleSearchWord({
+      let result = await handleSearchWord({
+        input,
         maxResult,
         searchWord,
-        input: wordToSearch,
         controller: searchController,
       });
+      result = sortSearchResult(result);
 
-      resultCache.add(wordToSearch, result);
+      resultCache.add(input, result);
 
       if (isIframe) {
         await RuntimeMessage.sendMessageToTab(

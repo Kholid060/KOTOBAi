@@ -1,8 +1,17 @@
-import { WORD_POS_TAG } from '@src/shared/constant/word-tag.const';
+import {
+  WORD_POS_TAG,
+  WORD_PRIORITY_WEIGHT,
+} from '@root/src/shared/constant/word.const';
 
 export type DictLoadState = 'not_loaded' | 'loading_data' | 'loaded';
 
-export type WordPosTag = keyof typeof WORD_POS_TAG;
+export type DictWordPosTag = keyof typeof WORD_POS_TAG;
+
+export type DictWordPriority =
+  | keyof typeof WORD_PRIORITY_WEIGHT
+  | `nf${number}`;
+
+export type DictWordEntryPriority = Record<number, DictWordPriority[]>;
 
 export interface DictWordEntryExample {
   text: string;
@@ -12,7 +21,7 @@ export interface DictWordEntryExample {
 
 export interface DictWordEntrySense {
   gloss: string[];
-  pos: WordPosTag[];
+  pos: DictWordPosTag[];
   example?: DictWordEntryExample;
 }
 
@@ -21,6 +30,8 @@ export interface DictWordEntry {
   kanji?: string[];
   reading: string[];
   sense: DictWordEntrySense[];
+  rPrio?: DictWordEntryPriority;
+  kPrio?: DictWordEntryPriority;
 }
 
 export interface DictWordLocalEntry extends DictWordEntry {

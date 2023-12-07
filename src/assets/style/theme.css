@@ -1,9 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
-  :root {
+  :root, :host {
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
@@ -32,7 +34,7 @@
     --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
  
-    --radius: 0.5rem;
+    --radius: 12px;
   }
  
   .dark {
@@ -71,6 +73,48 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-size: inherit;
   }
+}
+
+.scroll {
+  &::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+  &::-webkit-scrollbar-thumb {
+    @apply bg-border;
+    border-radius: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &.scroll-xs::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  &.hide {
+    mask-image: linear-gradient(to top, transparent, black),
+      linear-gradient(to left, transparent 17px, black 17px);
+    mask-position: left bottom;
+    mask-size: 100% 100%;
+    -webkit-mask-image: linear-gradient(to top, transparent, black),
+      linear-gradient(to left, transparent 17px, black 17px);
+    -webkit-mask-position: left bottom;
+    transition: mask-position 0.3s, -webkit-mask-position 0.3s;
+
+    &:hover {
+      -webkit-mask-position: left top;
+    }
+  }
+}
+
+.tooltip {
+  @apply invisible absolute;
+}
+
+.has-tooltip:hover .tooltip {
+  @apply visible z-50;
 }

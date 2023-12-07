@@ -70,6 +70,7 @@ class ContentHandler {
     if (this.isPointerDown) return;
 
     const cursorPoint = { x: event.clientX, y: event.clientY };
+    console.log(cursorPoint);
     const result = this.textSearcher.getTextByPoint({
       point: cursorPoint,
       maxLength: MAX_CONTENT_LENGTH,

@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 import App from '@pages/content/ui/app';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
 import browser from 'webextension-polyfill';
+import fontCss from '@assets/style/fonts.css?inline';
 
 refreshOnUpdate('pages/content');
 
@@ -17,10 +18,17 @@ rootIntoShadow.id = 'shadow-root';
 const shadowRoot = root.attachShadow({ mode: 'open' });
 shadowRoot.appendChild(rootIntoShadow);
 
+// Main Style
 const style = document.createElement('link');
 style.setAttribute('rel', 'stylesheet');
 style.href = browser.runtime.getURL('/assets/css/contentStyle.chunk.css');
 shadowRoot.appendChild(style);
+
+// Font styyle
+const fontURL = browser.runtime.getURL('/assets/');
+const fontStyle = document.createElement('style');
+fontStyle.textContent = fontCss.replaceAll('/assets/', fontURL);
+document.head.appendChild(fontStyle);
 
 // attachTwindStyle(rootIntoShadow, shadowRoot);
 
