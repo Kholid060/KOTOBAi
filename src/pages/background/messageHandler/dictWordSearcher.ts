@@ -1,4 +1,4 @@
-import { isKanji, toHiragana } from 'wanakana';
+import { toHiragana } from 'wanakana';
 import {
   DictWordEntry,
   DictWordLocalEntry,
@@ -6,7 +6,7 @@ import {
 } from '@root/src/interface/dict.interface';
 import { getBackgroundDictionary } from '../BackgroundDict';
 import RuntimeMessage, {
-  MessageSearchWordOpts,
+  MessageSearchOpts,
 } from '@root/src/utils/RuntimeMessage';
 import MemoryCache from '@root/src/utils/MemoryCache';
 import Dictionary from '@root/src/utils/Dictionary';
@@ -25,7 +25,6 @@ export type DictionaryEntryResult = {
 export interface SearchDictWordResult {
   input: string;
   maxLength: number;
-  kanji: Record<number, string>;
   entries: DictionaryEntryResult[];
 }
 
@@ -56,7 +55,6 @@ async function handleSearchWord({
   }) => Promise<(DictWordEntry | DictWordLocalEntry)[]>;
 }) {
   const searchResult: SearchDictWordResult = {
-    kanji: [],
     entries: [],
     maxLength: 0,
     input: oriInput,
@@ -116,12 +114,6 @@ async function handleSearchWord({
         searchResult.maxLength,
         copyInput.length,
       );
-    }
-
-    const lastChar = copyInput.at(-1);
-    if (lastChar && isKanji(lastChar)) {
-      const kanjiIdx = copyInput.length - input.length + input.length - 1;
-      searchResult.kanji[kanjiIdx] = lastChar;
     }
 
     const sliceLen = endsInYoon(copyInput) ? 2 : 1;
@@ -184,7 +176,7 @@ export default function dictWordSearcher(isIframe = false) {
   const resultCache = new MemoryCache<string, SearchDictWordResult>();
 
   return async (
-    { input, maxResult, frameSource }: MessageSearchWordOpts,
+    { input, maxResult, frameSource }: MessageSearchOpts,
     sender: Browser.Runtime.MessageSender,
   ) => {
     if (searchController) {
@@ -225,13 +217,12 @@ export default function dictWordSearcher(isIframe = false) {
             name: 'content:iframe-word-result',
           },
           {
-            input,
-            kanji: [],
-            entries: [],
+            ...result,
             frameSource,
-            maxLength: result.maxLength,
           },
         );
+
+        result.entries = [];
       }
       console.log('RESULT || ', input, ' || ', result);
 

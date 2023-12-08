@@ -1,6 +1,13 @@
+import { createContext } from 'react';
 import WordContainer from './WordContainer';
 
-export default function App() {
+export const AppContentContext = createContext<{
+  shadowRoot: ShadowRoot | null;
+}>({
+  shadowRoot: null,
+});
+
+export default function App({ shadowRoot }: { shadowRoot: ShadowRoot }) {
   // useEventListener('mousemove', debounce(({ target, clientX, clientY }) => {
   //   const range = caretPositionFromPoint(clientX, clientY);
   //   if (!range) return;
@@ -13,8 +20,10 @@ export default function App() {
   // }, 500));
 
   return (
-    <div className="font-sans dark text-foreground">
-      <WordContainer />
-    </div>
+    <AppContentContext.Provider value={{ shadowRoot }}>
+      <div className="font-sans dark text-foreground">
+        <WordContainer />
+      </div>
+    </AppContentContext.Provider>
   );
 }

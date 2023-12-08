@@ -46,7 +46,7 @@ export interface DictKanjiEntryReading {
 }
 
 export interface DictKanjiEntry {
-  literal: string;
+  id: number;
   misc: {
     jlpt?: number;
     freq?: number;

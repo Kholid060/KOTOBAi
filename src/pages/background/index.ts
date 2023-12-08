@@ -4,10 +4,12 @@ import BackgroundEventListener from './BackgroundEventListener';
 import Dictionary from '@root/src/utils/Dictionary';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import dictWordSearcher from './messageHandler/dictWordSearcher';
+import { dictKanjiSearcher } from './messageHandler/dictKanjiSearcher';
 
 Browser.runtime.onInstalled.addListener(BackgroundEventListener.onInstalled);
 
 RuntimeMessage.onMessage('background:search-word', dictWordSearcher());
+RuntimeMessage.onMessage('background:search-kanji', dictKanjiSearcher);
 RuntimeMessage.onMessage(
   'background:search-word-iframe',
   dictWordSearcher(true),

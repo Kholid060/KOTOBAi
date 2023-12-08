@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import defaultTheme from 'tailwindcss/defaultTheme';
+import flattenColorPalette from 'tailwindcss/lib/util/flattenColorPalette';
 
 function rem2px(input, fontSize = 16) {
   if (input == null) {
@@ -112,5 +113,18 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    function ({ matchUtilities, theme }) {
+      matchUtilities(
+        {
+          highlight: (value) => ({ boxShadow: `inset 0 1px 0 0 ${value}` }),
+        },
+        {
+          values: flattenColorPalette(theme('backgroundColor')),
+          type: 'color',
+        },
+      );
+    },
+  ],
 };

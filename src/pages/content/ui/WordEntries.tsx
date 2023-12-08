@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import {
   DictionaryEntryResult,
   SearchDictWordResult,
@@ -48,12 +48,8 @@ function WordEntry({
     window.speechSynthesis.speak(speech);
   }
 
-  if (entry.reasons.length > 0) {
-    console.log(entry, entry.reasons);
-  }
-
   return (
-    <div className="mb-4">
+    <div className="pt-4">
       <div className="flex items-start">
         <p className="flex-grow font-sans-jp text-lg leading-tight pt-0.5">
           {matchKanji && (
@@ -112,19 +108,7 @@ function WordEntry({
       <ul className="mt-2 list-decimal pl-4 space-y-1">
         {entry.sense.map((sense, idx) => (
           <li key={idx}>
-            <p className="leading-tight">{sense.gloss.join('; ')} </p>
-            <div className="mt-px flex gap-1 flex-wrap items-center">
-              {sense.example && (
-                <div className="text-muted-foreground inline-block text-xs border px-1 py-0.5 rounded underline has-tooltip">
-                  <span className="tooltip leading-tight rounded-md text-left shadow-lg p-1 text-sm bg-popover mt-5 border px-2 py-1">
-                    <p className="font-sans-jp">
-                      {sense.example.sent[0]?.text}
-                    </p>
-                    <p className="mt-1">{sense.example.sent[1]?.text}</p>
-                  </span>
-                  See example
-                </div>
-              )}
+            <span className="inline space-x-0.5">
               {sense.pos.map((pos) => (
                 <span
                   key={pos}
@@ -134,7 +118,21 @@ function WordEntry({
                   {WORD_POS_TAG[pos].name || pos}
                 </span>
               ))}
-            </div>
+            </span>
+            <p className="leading-tight inline"> {sense.gloss.join('; ')} </p>
+            {sense.example && (
+              <div className="mt-px">
+                <div className="text-muted-foreground inline-block text-xs border px-1 py-0.5 rounded underline has-tooltip">
+                  <span className="tooltip leading-tight rounded-md text-left shadow-lg p-1 text-sm bg-popover mt-5 border px-2 py-1">
+                    <p className="font-sans-jp">
+                      {sense.example.sent[0]?.text}
+                    </p>
+                    <p className="mt-1">{sense.example.sent[1]?.text}</p>
+                  </span>
+                  See example
+                </div>
+              </div>
+            )}
           </li>
         ))}
       </ul>
@@ -142,7 +140,15 @@ function WordEntry({
   );
 }
 
-function WordEntries({ result }: { result: SearchDictWordResult }) {
+function WordEntries({
+  result,
+  className,
+  ...props
+}: {
+  result: SearchDictWordResult;
+} & React.DetailsHTMLAttributes<HTMLDivElement>) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [isSpeechAvailable, setIsSpeechAvailable] = useState(false);
 
   useEffectOnce(() => {
@@ -160,7 +166,12 @@ function WordEntries({ result }: { result: SearchDictWordResult }) {
   });
 
   return (
-    <>
+    <div
+      ref={containerRef}
+      id="words-section"
+      className={cn('divide-y space-y-4 px-4 pb-4', className)}
+      {...props}
+    >
       {result.entries.map((entry) => (
         <WordEntry
           key={entry.id}
@@ -168,7 +179,7 @@ function WordEntries({ result }: { result: SearchDictWordResult }) {
           speechAvailable={isSpeechAvailable}
         />
       ))}
-    </>
+    </div>
   );
 }
 

@@ -2,26 +2,28 @@ import Browser from 'webextension-polyfill';
 import { isObject } from './helper';
 import { SearchDictWordResult } from '../pages/background/messageHandler/dictWordSearcher';
 import { CursorPoint } from '../pages/content/content-handler/TextSearcher';
-import { SetRequired } from 'type-fest';
+import { SetOptional, SetRequired } from 'type-fest';
 import { ClientRect } from '../interface/shared.interface';
+import { DictSearchKanjiOptions, DictSearchOptions } from './Dictionary';
+import { DictKanjiEntry } from '../interface/dict.interface';
 
 export interface WordFrameSource {
   frameURL: string;
   rect?: ClientRect;
   point: CursorPoint;
 }
-export interface MessageSearchWordOpts {
-  input: string;
-  maxResult?: number;
+export interface MessageSearchOpts
+  extends SetOptional<DictSearchOptions, 'maxResult'> {
   frameSource?: WordFrameSource;
 }
 
 interface Events {
-  'background:search-word': (
-    detail: MessageSearchWordOpts,
-  ) => SearchDictWordResult;
+  'background:search-word': (detail: MessageSearchOpts) => SearchDictWordResult;
+  'background:search-kanji': (
+    detail: DictSearchKanjiOptions,
+  ) => DictKanjiEntry[];
   'background:search-word-iframe': (
-    detail: SetRequired<MessageSearchWordOpts, 'frameSource'>,
+    detail: SetRequired<MessageSearchOpts, 'frameSource'>,
   ) => SearchDictWordResult;
   'content:iframe-word-result': (
     result: SearchDictWordResult & { frameSource: WordFrameSource },
