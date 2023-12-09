@@ -14,14 +14,16 @@ const __dirname = path.dirname(__filename);
 
 const rl = readline.createInterface({ input, output });
 
-let IS_DEV = false;
+let IS_DEV = true;
 
 const DATE_REGEX = /(\d{4}-\d{2}-\d{2})/;
 const DATA_DIR = path.join(__dirname, '../../dict-data');
+const GITHUB_API_BASE_URL = 'https://api.github.com/repos/';
 const DATA_URL = {
   KANJIDIC: 'http://www.edrdg.org/kanjidic/kanjidic2.xml.gz',
   JMDICT: 'http://ftp.edrdg.org/pub/Nihongo/JMdict_e_examp.gz',
   ENAMDICT: 'http://ftp.edrdg.org/pub/Nihongo/JMnedict.xml.gz',
+  KANJIVG_RELEASE: `${GITHUB_API_BASE_URL}/KanjiVG/kanjivg/releases/latest`,
 };
 
 async function getXMLDoc(url, name) {
@@ -599,6 +601,23 @@ async function generateInitialData() {
   wordDataStream.end();
 }
 
+async function generateKanjiVG() {
+  const apiResponse = await fetch(DATA_URL.KANJIVG_RELEASE);
+  if (!apiResponse.ok) throw new Error(apiResponse.statusText);
+
+  const release = await apiResponse.json();
+  const latestFile = release.assets.find((asset) =>
+    asset.name.endsWith('.xml.gz'),
+  );
+  if (!latestFile) throw new Error("Can't find latest XML file release");
+
+  const xmlDoc = await getXMLDoc(latestFile.browser_download_url, 'kanjivg');
+  const rootDoc = xmlDoc.get('//kanjivg');
+  if (!rootDoc) throw new Error("Can't find KanjiVG root doc");
+
+  rootDoc.childNodes();
+}
+
 async function getVersion(name) {
   if (IS_DEV) return '0.0.0';
 
@@ -621,6 +640,7 @@ const ACTIONS_FUNCS = {
     const enamDictVersion = await getVersion('ENAMDICT');
     await generateENAMDICTData(enamDictVersion);
   },
+  kanjivg: generateKanjiVG,
   initial: generateInitialData,
 };
 

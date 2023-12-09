@@ -1,42 +1,61 @@
 import { createRoot } from 'react-dom/client';
-import App from '@pages/content/ui/app';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
+import App from '@root/src/pages/content/ui/app';
 import browser from 'webextension-polyfill';
 import fontCss from '@assets/style/fonts.css?inline';
+import { isInMainFrame } from '../content-handler/content-handler-utils';
+import themeStorage from '@root/src/shared/storages/themeStorage';
 
 refreshOnUpdate('pages/content');
 
-const root = document.createElement('div');
-root.style.all = 'unset';
-root.id = 'chrome-extension-boilerplate-react-vite-content-view-root';
+export const CONTENT_ROOT_EL_ID = 'chrome-extension-root';
 
-document.body.append(root);
+async function applyTheme(rootEl: HTMLElement) {
+  try {
+    const currTheme = await themeStorage.get();
+    if (currTheme === 'dark') rootEl.classList.add('dark');
+  } catch (error) {
+    console.error(error);
+  }
+}
 
-const rootIntoShadow = document.createElement('div');
-rootIntoShadow.id = 'shadow-root';
+(() => {
+  if (!isInMainFrame()) return;
 
-const shadowRoot = root.attachShadow({ mode: 'open' });
-shadowRoot.appendChild(rootIntoShadow);
+  const root = document.createElement('div');
+  root.style.all = 'unset';
+  root.id = CONTENT_ROOT_EL_ID;
 
-// Main Style
-const style = document.createElement('link');
-style.setAttribute('rel', 'stylesheet');
-style.href = browser.runtime.getURL('/assets/css/contentStyle.chunk.css');
-shadowRoot.appendChild(style);
+  document.body.append(root);
 
-// Font styyle
-const fontURL = browser.runtime.getURL('/assets/');
-const fontStyle = document.createElement('style');
-fontStyle.textContent = fontCss.replaceAll('/assets/', fontURL);
-document.head.appendChild(fontStyle);
+  const rootIntoShadow = document.createElement('div');
+  rootIntoShadow.id = 'shadow-root';
 
-// attachTwindStyle(rootIntoShadow, shadowRoot);
+  const shadowRoot = root.attachShadow({ mode: 'open' });
+  shadowRoot.appendChild(rootIntoShadow);
 
-/**
- * https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/pull/174
- *
- * In the firefox environment, the adoptedStyleSheets bug may prevent contentStyle from being applied properly.
- * Please refer to the PR link above and go back to the contentStyle.css implementation, or raise a PR if you have a better way to improve it.
- */
+  // Main Style
+  const style = document.createElement('link');
+  style.setAttribute('rel', 'stylesheet');
+  style.href = browser.runtime.getURL('/assets/css/contentStyle.chunk.css');
+  shadowRoot.appendChild(style);
 
-createRoot(rootIntoShadow).render(<App shadowRoot={shadowRoot} />);
+  // Font styyle
+  const fontURL = browser.runtime.getURL('/assets/');
+  const fontStyle = document.createElement('style');
+  fontStyle.textContent = fontCss.replaceAll('/assets/', fontURL);
+  document.head.appendChild(fontStyle);
+
+  applyTheme(rootIntoShadow);
+
+  // attachTwindStyle(rootIntoShadow, shadowRoot);
+
+  /**
+   * https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/pull/174
+   *
+   * In the firefox environment, the adoptedStyleSheets bug may prevent contentStyle from being applied properly.
+   * Please refer to the PR link above and go back to the contentStyle.css implementation, or raise a PR if you have a better way to improve it.
+   */
+
+  createRoot(rootIntoShadow).render(<App shadowRoot={shadowRoot} />);
+})();

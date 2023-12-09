@@ -12,6 +12,7 @@ import TextSearcher, {
 import { isInMainFrame } from './content-handler-utils';
 import { ClientRect } from '@root/src/interface/shared.interface';
 import { CursorOffset } from './caretPositionFromPoint';
+import { CONTENT_ROOT_EL_ID } from '../ui';
 
 const MAX_CONTENT_LENGTH = 16;
 
@@ -20,54 +21,89 @@ interface SearchWordResult {
   point: CursorPoint;
   entry: SearchDictWordResult;
   cursorOffset?: CursorOffset;
+  frameSource?: WordFrameSource;
 }
 
 interface Events {
-  'search-word-result': (
-    result: (SearchWordResult & { frameSource?: WordFrameSource }) | null,
-  ) => void;
+  'popup:close': () => void;
+  'clear-result': () => void;
+  'search-word-result': (result: SearchWordResult | null) => void;
 }
+
+const isInContentPopup = (el: EventTarget | Element) =>
+  el instanceof Element ? el.id === CONTENT_ROOT_EL_ID : false;
 
 export const contentEventEmitter = new EventEmitter<Events>();
 
+interface ContentHandlerOptions {
+  disabled?: boolean;
+}
+
 class ContentHandler {
+  private _disabled = false;
   private isPointerDown = false;
   private isMainFrame = isInMainFrame();
 
   private textSearcher = new TextSearcher();
   private textHighlighter = new TextHighlighter();
 
-  constructor() {
+  constructor({ disabled }: ContentHandlerOptions = { disabled: false }) {
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
+    this.onClearResult = this.onClearResult.bind(this);
     this.onPointerMove = debounce(this.onPointerMove.bind(this), 100);
 
-    this.attachListeners();
+    if (!disabled) this.attachListeners();
+  }
+
+  get disabled() {
+    return this._disabled;
+  }
+
+  set disabled(value: boolean) {
+    if (value) this.detachListeners();
+    else this.attachListeners();
+
+    this._disabled = value;
   }
 
   private attachListeners() {
     window.addEventListener('pointerup', this.onPointerUp);
     window.addEventListener('pointerdown', this.onPointerDown);
     window.addEventListener('pointermove', this.onPointerMove);
+
+    contentEventEmitter.addListener('clear-result', this.onClearResult);
   }
 
   private detachListeners() {
     window.removeEventListener('pointerup', this.onPointerUp);
     window.removeEventListener('pointerdown', this.onPointerDown);
     window.removeEventListener('pointermove', this.onPointerMove);
+
+    contentEventEmitter.removeListener('clear-result', this.onClearResult);
   }
 
-  private onPointerDown() {
-    this.isPointerDown = true;
+  private onClearResult() {
     this.textHighlighter.clearHighlight();
   }
 
+  private onPointerDown({ target }: PointerEvent) {
+    if (this._disabled) return;
+
+    this.isPointerDown = true;
+
+    if (!isInContentPopup(target)) this.textHighlighter.clearHighlight();
+  }
+
   private onPointerUp() {
+    if (this._disabled) return;
+
     this.isPointerDown = false;
   }
 
   private onPointerMove(event: PointerEvent) {
-    if (this.isPointerDown) return;
+    if (this.isPointerDown || this._disabled || isInContentPopup(event.target))
+      return;
 
     const cursorPoint = { x: event.clientX, y: event.clientY };
     const result = this.textSearcher.getTextByPoint({

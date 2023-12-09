@@ -144,12 +144,12 @@ function sortSearchResult(result: SearchDictWordResult): SearchDictWordResult {
     if (!entry.kPrio && !entry.rPrio) return 0;
 
     let score = 0;
-    entry.reading.forEach((reading, index) => {
+    entry.reading?.forEach((reading, index) => {
       if (reading !== entry.word || !entry.rPrio || !entry.rPrio[index]) return;
 
       score = Math.max(score, getScore(entry.rPrio[index]));
     });
-    entry.kanji.forEach((kanji, index) => {
+    entry.kanji?.forEach((kanji, index) => {
       if (kanji !== entry.word || !entry.kPrio || !entry.kPrio[index]) return;
 
       score = Math.max(score, getScore(entry.kPrio[index]));

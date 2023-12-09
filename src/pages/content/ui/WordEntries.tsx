@@ -1,8 +1,4 @@
 import { memo, useRef, useState } from 'react';
-import {
-  DictionaryEntryResult,
-  SearchDictWordResult,
-} from '../../background/messageHandler/dictWordSearcher';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { UiButton } from '@root/src/components/ui/button';
 import { BookmarkIcon, Volume2Icon } from 'lucide-react';
@@ -11,6 +7,11 @@ import {
   WORD_POS_TAG,
   WORD_REASON as WORD_REASONS,
 } from '@root/src/shared/constant/word.const';
+import {
+  DictionaryEntryResult,
+  SearchDictWordResult,
+} from '../../background/messageHandler/dictWordSearcher';
+import UiTooltip from '@root/src/components/ui/tooltip';
 
 const SYNTH_LANG = 'ja-JP';
 
@@ -57,8 +58,8 @@ function WordEntry({
               className={cn(
                 'mr-2',
                 matchKanji.match
-                  ? 'text-indigo-400 font-semibold'
-                  : 'text-indigo-400/90',
+                  ? 'dark:text-indigo-400 text-indigo-600 font-semibold'
+                  : 'dark:text-indigo-400/90 text-indigo-600/90',
               )}
             >
               {matchKanji.match || matchKanji.text}
@@ -67,21 +68,25 @@ function WordEntry({
           {matchReading && (
             <span
               className={cn(
-                'mr-2 text-emerald-400 tracking-[-2px]',
-                matchReading.match && 'font-semibold',
+                'mr-2 dark:text-emerald-400 tracking-[-2px]',
+                matchReading.match
+                  ? 'font-semibold text-emerald-700'
+                  : 'text-emerald-700/90',
               )}
             >
               {matchReading.match || matchReading.text}
             </span>
           )}
         </p>
-        <UiButton
-          className="ml-1 flex-shrink-0"
-          size="icon-xs"
-          variant="secondary"
-        >
-          <BookmarkIcon className="h-4 w-4" />
-        </UiButton>
+        <UiTooltip label="Bookmark word">
+          <UiButton
+            className="ml-1 flex-shrink-0"
+            size="icon-xs"
+            variant="secondary"
+          >
+            <BookmarkIcon className="h-4 w-4" />
+          </UiButton>
+        </UiTooltip>
         {speechAvailable && (
           <UiButton
             variant="secondary"
@@ -98,7 +103,7 @@ function WordEntry({
           {entry.reasons.map((reason) => (
             <span
               key={reason}
-              className="text-xs px-1 py-0.5 bg-cyan-400/20 text-cyan-400 rounded inline-block"
+              className="text-xs px-1 py-0.5 bg-cyan-400/20 dark:text-cyan-400 text-cyan-700 rounded inline-block"
             >
               {WORD_REASONS[reason]}
             </span>
@@ -113,7 +118,7 @@ function WordEntry({
                 <span
                   key={pos}
                   title={WORD_POS_TAG[pos].value}
-                  className="text-xs px-1 py-0.5 bg-fuchsia-400/20 text-fuchsia-400 rounded inline-block"
+                  className="text-xs px-1 py-0.5 bg-fuchsia-400/20 dark:text-fuchsia-400 text-fuchsia-700 rounded inline-block"
                 >
                   {WORD_POS_TAG[pos].name || pos}
                 </span>

@@ -2,14 +2,20 @@ import { useEffectOnce } from 'usehooks-ts';
 import { contentEventEmitter } from '../content-handler/ContentHandler';
 import { useEffect, useRef, useState } from 'react';
 import WordPopover, { WordPopoverRef } from './WordPopover';
-import { WordFrameSource } from '@root/src/utils/RuntimeMessage';
+import RuntimeMessage, {
+  DisableExtPayload,
+  WordFrameSource,
+} from '@root/src/utils/RuntimeMessage';
 import { ClientRect } from '@root/src/interface/shared.interface';
 import { NodeTypeChecker } from '../content-handler/content-handler-utils';
 import { SearchDictWordResult } from '../../background/messageHandler/dictWordSearcher';
 import WordEntries from './WordEntries';
-import { X } from 'lucide-react';
+import { ChevronDown, PowerIcon, SettingsIcon, X } from 'lucide-react';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import WordKanji from './WordKanji';
+import { UiButton } from '@root/src/components/ui/button';
+import UiTooltip from '@root/src/components/ui/tooltip';
+import UiHoverCard from '@root/src/components/ui/hover-card';
 
 type TabItems = 'words' | 'kanji' | 'names';
 const TAB_ITEMS: { name: string; id: TabItems }[] = [
@@ -64,6 +70,19 @@ function WordContainer() {
     words: false,
   });
 
+  function closePopup(clearResult = false) {
+    setIsOpen(false);
+    setSearchResult(null);
+
+    if (clearResult) contentEventEmitter.emit('clear-result');
+  }
+  function disableExtension(payload: DisableExtPayload) {
+    closePopup();
+    RuntimeMessage.sendMessage('background:disable-ext', payload).catch(
+      console.error,
+    );
+  }
+
   useEffect(() => {
     setActiveTab('words');
 
@@ -75,13 +94,12 @@ function WordContainer() {
   }, [searchResult]);
   useEffectOnce(() => {
     contentEventEmitter.on('search-word-result', (result) => {
+      console.log(result);
       const popover = popoverRef.current;
-      if (!result || !popover) {
-        // setIsOpen(false);
-        // setSearchResult(null);
+      if (!result || !popover || !result.entry) {
+        // closePopup();
         return;
       }
-      console.log(result);
 
       setIsOpen(true);
 
@@ -117,6 +135,7 @@ function WordContainer() {
         },
       });
     });
+    contentEventEmitter.addListener('popup:close', closePopup);
 
     if (window.location.host === 'localhost:3000') {
       setTimeout(() => {
@@ -141,11 +160,11 @@ function WordContainer() {
       isOpen={isOpen}
       placement="bottom-start"
       onOpenChange={setIsOpen}
-      className="w-full max-w-sm bg-background border focus-visible:ring-2 shadow-xl text-sm rounded-md scroll max-h-96 overflow-auto"
+      className="w-full z-[99999] max-w-sm bg-background border focus-visible:ring-2 shadow-xl text-sm rounded-md scroll max-h-96 overflow-auto"
     >
       {searchResult && (
         <>
-          <div className="flex items-center px-4 j border-b bg-background sticky top-0">
+          <div className="flex items-center px-4 z-50 border-b bg-background sticky top-0">
             {TAB_ITEMS.map((item) => (
               <button
                 key={item.id}
@@ -163,7 +182,58 @@ function WordContainer() {
               </button>
             ))}
             <div className="flex-grow" />
-            <button>
+            <UiButton variant="secondary" size="icon-xs" className="ml-1">
+              <SettingsIcon className="h-4 w-4" />
+            </UiButton>
+            <div className="border rounded-md ml-2 h-8 flex items-center">
+              <UiTooltip side="bottom" label="Disable extension">
+                <UiButton
+                  variant="ghost"
+                  size="icon-xs"
+                  className="rounded-r-none"
+                  onClick={() =>
+                    disableExtension({ type: 'all', disable: true })
+                  }
+                >
+                  <PowerIcon className="h-4 w-4" />
+                </UiButton>
+              </UiTooltip>
+              <hr className="w-px bg-border h-4/5" />
+              <UiHoverCard openDelay={100}>
+                <UiHoverCard.Trigger>
+                  <UiButton
+                    variant="ghost"
+                    size="icon-xs"
+                    className="rounded-l-none"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </UiButton>
+                </UiHoverCard.Trigger>
+                <UiHoverCard.Content align="end" className="p-2">
+                  <UiButton
+                    size="sm"
+                    variant="ghost"
+                    className="w-full justify-start text-left"
+                    onClick={() =>
+                      disableExtension({
+                        type: 'host',
+                        disable: true,
+                        host: window.location.hostname,
+                      })
+                    }
+                  >
+                    Disable only on this site
+                  </UiButton>
+                </UiHoverCard.Content>
+              </UiHoverCard>
+            </div>
+            <button
+              onPointerDown={(event) => {
+                event.preventDefault();
+                closePopup(true);
+              }}
+              className="ml-4"
+            >
               <X className="h-5 w-5" />
             </button>
           </div>

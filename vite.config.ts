@@ -52,7 +52,7 @@ export default defineConfig({
         background: resolve(pagesDir, 'background', 'index.ts'),
         contentStyle: resolve(pagesDir, 'content', 'style.css'),
         popup: resolve(pagesDir, 'popup', 'index.html'),
-        newtab: resolve(pagesDir, 'newtab', 'index.html'),
+        dashboard: resolve(pagesDir, 'dashboard', 'index.html'),
       },
       output: {
         entryFileNames: 'src/pages/[name]/index.js',

@@ -17,7 +17,12 @@ export interface MessageSearchOpts
   frameSource?: WordFrameSource;
 }
 
+export type DisableExtPayload =
+  | { type: 'all'; disable: boolean }
+  | { type: 'host'; host: string; disable: boolean };
+
 interface Events {
+  'background:set-disabled-badge': () => void;
   'background:search-word': (detail: MessageSearchOpts) => SearchDictWordResult;
   'background:search-kanji': (
     detail: DictSearchKanjiOptions,
@@ -25,9 +30,11 @@ interface Events {
   'background:search-word-iframe': (
     detail: SetRequired<MessageSearchOpts, 'frameSource'>,
   ) => SearchDictWordResult;
+  'background:disable-ext': (payload: DisableExtPayload) => void;
   'content:iframe-word-result': (
     result: SearchDictWordResult & { frameSource: WordFrameSource },
   ) => void;
+  'content:disable-ext-state': (disabled: boolean) => void;
 }
 
 type EventListener = Map<string, (...args: unknown[]) => unknown>;

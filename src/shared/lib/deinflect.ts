@@ -60,6 +60,20 @@ export const enum Reason {
   NegativeTe,
 }
 
+const enum Type {
+  // Final word type
+  IchidanVerb = 1 << 0, // i.e. ru-verbs
+  GodanVerb = 1 << 1, // i.e. u-verbs
+  IAdj = 1 << 2,
+  KuruVerb = 1 << 3,
+  SuruVerb = 1 << 4,
+  NounVS = 1 << 5,
+  All = IchidanVerb | GodanVerb | IAdj | KuruVerb | SuruVerb | NounVS,
+  // Intermediate types
+  Initial = 1 << 6, // original word before any deinflection (from-type only)
+  VNai = 1 << 7,
+}
+
 export const deinflectL10NKeys: { [key: number]: string } = {
   [Reason.PolitePastNegative]: 'deinflect_polite_past_negative',
   [Reason.PoliteNegative]: 'deinflect_polite_negative',
@@ -960,20 +974,6 @@ const deinflectRuleData: Array<[string, string, number, number, Reason]> = [
   ['れ', 'れる', Type.Initial, Type.IchidanVerb, Reason.MasuStem],
   ['ろ', 'る', Type.Initial, Type.IchidanVerb, Reason.Imperative],
 ];
-
-const enum Type {
-  // Final word type
-  IchidanVerb = 1 << 0, // i.e. ru-verbs
-  GodanVerb = 1 << 1, // i.e. u-verbs
-  IAdj = 1 << 2,
-  KuruVerb = 1 << 3,
-  SuruVerb = 1 << 4,
-  NounVS = 1 << 5,
-  All = IchidanVerb | GodanVerb | IAdj | KuruVerb | SuruVerb | NounVS,
-  // Intermediate types
-  Initial = 1 << 6, // original word before any deinflection (from-type only)
-  VNai = 1 << 7,
-}
 
 export { Type as WordType };
 

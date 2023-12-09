@@ -51,8 +51,7 @@ const WordPopover = forwardRef<WordPopoverRef, WordPopoverProps>(
       <div
         ref={data.refs.setFloating}
         style={data.floatingStyles}
-        {...getFloatingProps()}
-        {...props}
+        {...getFloatingProps(props)}
       >
         {children}
       </div>

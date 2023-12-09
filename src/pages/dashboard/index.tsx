@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
-import Newtab from '@pages/newtab/Newtab';
-import '@pages/newtab/index.css';
+import Newtab from '@root/src/pages/dashboard/Dashboard';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
+import './index.css';
 
 refreshOnUpdate('pages/newtab');
 

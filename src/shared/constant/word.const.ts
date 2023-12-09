@@ -923,7 +923,7 @@ export const WORD_POS_TAG = {
   adv: {
     id: 'adv',
     tag: 'pos',
-    name: 'Adverb',
+    name: 'adverb',
     value: 'adverb (fukushi)',
   },
   'adv-to': {

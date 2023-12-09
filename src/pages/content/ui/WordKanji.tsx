@@ -22,25 +22,31 @@ function WordKanji({
 
   useEffect(() => {
     const [firstEntry] = result.entries;
-    const currKanji = firstEntry?.kanji?.find(
-      (kanji) => kanji === firstEntry.word,
-    );
+    if (!firstEntry?.kanji) {
+      setKanjiList([]);
+      return;
+    }
+
+    const currKanji =
+      firstEntry.kanji.length === 1
+        ? firstEntry.kanji[0]
+        : firstEntry.kanji.find((kanji) => kanji === firstEntry.word);
     if (!currKanji) {
       setKanjiList([]);
       return;
     }
 
-    const kanji = currKanji.split('').reduce<number[]>((acc, char) => {
+    const kanji = currKanji.split('').reduce<Set<number>>((acc, char) => {
       if (!isKanji(char)) return acc;
 
-      acc.push(char.codePointAt(0));
+      acc.add(char.codePointAt(0));
 
       return acc;
-    }, []);
+    }, new Set());
     RuntimeMessage.sendMessage('background:search-kanji', {
       by: 'id',
-      input: kanji,
       maxResult: 10,
+      input: [...kanji],
     })
       .then((kanjiResult) => {
         setKanjiList(kanjiResult.filter(Boolean));
@@ -52,13 +58,14 @@ function WordKanji({
   }, [result.entries]);
   useEffect(() => {
     onToggleDisable?.(kanjiList.length <= 0);
-  }, [onToggleDisable, kanjiList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kanjiList.length]);
 
   if (kanjiList.length <= 0) return null;
 
   return (
     <div
-      className={cn('pb-4 border-t px-4 space-y-4 divide-y', className)}
+      className={cn('pb-4 px-4 space-y-4 divide-y', className)}
       ref={containerRef}
       id="kanji-section"
       {...props}
@@ -66,7 +73,7 @@ function WordKanji({
       {kanjiList.map((kanji) => (
         <div key={kanji.id} className="pt-4">
           <div className="flex items-center gap-2">
-            <p className="text-6xl text-indigo-400 font-sans-jp">
+            <p className="text-6xl dark:text-indigo-400 text-indigo-600 font-sans-jp">
               {String.fromCodePoint(kanji.id)}
             </p>
             <div className="flex-grow">
@@ -108,18 +115,24 @@ function WordKanji({
           <div className="mt-2">
             <p>{kanji.meanings.join(', ')}</p>
             <table className="text-left mt-2">
-              <tr>
-                <th className="font-normal align-baseline">Kun:</th>
-                <td className="font-sans-jp pl-1 leading-tight">
-                  {kanji.reading.ja_kun?.join('、')}
-                </td>
-              </tr>
-              <tr>
-                <th className="font-normal align-baseline">On:</th>
-                <td className="font-sans-jp pl-1 leading-tight">
-                  {kanji.reading.ja_on?.join('、')}
-                </td>
-              </tr>
+              <tbody>
+                {kanji.reading.ja_kun && (
+                  <tr>
+                    <th className="font-normal align-baseline">Kun:</th>
+                    <td className="font-sans-jp pl-1 leading-tight">
+                      {kanji.reading.ja_kun.join('、')}
+                    </td>
+                  </tr>
+                )}
+                {kanji.reading.ja_on && (
+                  <tr>
+                    <th className="font-normal align-baseline">On:</th>
+                    <td className="font-sans-jp pl-1 leading-tight">
+                      {kanji.reading.ja_on.join('、') || '-'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
             </table>
           </div>
         </div>
