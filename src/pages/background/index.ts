@@ -7,9 +7,11 @@ import dictWordSearcher from './messageHandler/dictWordSearcher';
 import { dictKanjiSearcher } from './messageHandler/dictKanjiSearcher';
 import disableExtStorage from '@root/src/shared/storages/disableExtStorage';
 import disableExtBadge from '@root/src/utils/disableExtBadge';
+import { dictNameSearcher } from './messageHandler/dictNameSearcher';
 
 Browser.runtime.onInstalled.addListener(BackgroundEventListener.onInstalled);
 
+RuntimeMessage.onMessage('background:search-name', dictNameSearcher());
 RuntimeMessage.onMessage('background:search-word', dictWordSearcher());
 RuntimeMessage.onMessage('background:search-kanji', dictKanjiSearcher);
 RuntimeMessage.onMessage(

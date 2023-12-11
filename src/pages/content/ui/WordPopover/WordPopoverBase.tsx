@@ -21,7 +21,7 @@ export interface WordPopoverProps
 
 export type WordPopoverRef = UseFloatingReturn;
 
-const WordPopover = forwardRef<WordPopoverRef, WordPopoverProps>(
+const WordPopoverBase = forwardRef<WordPopoverRef, WordPopoverProps>(
   ({ children, isOpen, onOpenChange, placement = 'bottom', ...props }, ref) => {
     const data = useFloating({
       placement,
@@ -58,6 +58,6 @@ const WordPopover = forwardRef<WordPopoverRef, WordPopoverProps>(
     );
   },
 );
-WordPopover.displayName = 'WordPopover';
+WordPopoverBase.displayName = 'WordPopover';
 
-export default WordPopover;
+export default WordPopoverBase;

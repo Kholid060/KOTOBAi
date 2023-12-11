@@ -118,3 +118,7 @@
 .has-tooltip:hover .tooltip {
   @apply visible z-40;
 }
+
+.kbd {
+  @apply border inline-block rounded-sm p-1 align-middle leading-none min-w-[25px] border-b-2 text-center;
+}

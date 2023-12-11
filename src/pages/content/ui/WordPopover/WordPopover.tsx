@@ -1,14 +1,14 @@
 import { useEffectOnce } from 'usehooks-ts';
-import { contentEventEmitter } from '../content-handler/ContentHandler';
-import { useEffect, useRef, useState } from 'react';
-import WordPopover, { WordPopoverRef } from './WordPopover';
+import { contentEventEmitter } from '../../content-handler/ContentHandler';
+import { useContext, useEffect, useRef, useState } from 'react';
+import WordPopoverBase, { WordPopoverRef } from './WordPopoverBase';
 import RuntimeMessage, {
   DisableExtPayload,
   WordFrameSource,
 } from '@root/src/utils/RuntimeMessage';
 import { ClientRect } from '@root/src/interface/shared.interface';
-import { NodeTypeChecker } from '../content-handler/content-handler-utils';
-import { SearchDictWordResult } from '../../background/messageHandler/dictWordSearcher';
+import { NodeTypeChecker } from '../../content-handler/content-handler-utils';
+import { SearchDictWordResult } from '../../../background/messageHandler/dictWordSearcher';
 import WordEntries from './WordEntries';
 import { ChevronDown, PowerIcon, SettingsIcon, X } from 'lucide-react';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
@@ -16,6 +16,7 @@ import WordKanji from './WordKanji';
 import { UiButton } from '@root/src/components/ui/button';
 import UiTooltip from '@root/src/components/ui/tooltip';
 import UiHoverCard from '@root/src/components/ui/hover-card';
+import { AppContentContext } from '../app';
 
 type TabItems = 'words' | 'kanji' | 'names';
 const TAB_ITEMS: { name: string; id: TabItems }[] = [
@@ -56,7 +57,9 @@ function getFrameRect({
   };
 }
 
-function WordContainer() {
+function WordPopover() {
+  const appCtx = useContext(AppContentContext);
+
   const popoverRef = useRef<WordPopoverRef | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
@@ -92,12 +95,14 @@ function WordContainer() {
       left: 0,
     });
   }, [searchResult]);
+  useEffect(() => {
+    if (appCtx.isDisabled) closePopup();
+  }, [appCtx.isDisabled]);
   useEffectOnce(() => {
     contentEventEmitter.on('search-word-result', (result) => {
-      console.log(result);
       const popover = popoverRef.current;
       if (!result || !popover || !result.entry) {
-        // closePopup();
+        closePopup();
         return;
       }
 
@@ -135,27 +140,10 @@ function WordContainer() {
         },
       });
     });
-    contentEventEmitter.addListener('popup:close', closePopup);
-
-    if (window.location.host === 'localhost:3000') {
-      setTimeout(() => {
-        document.documentElement.dispatchEvent(
-          new PointerEvent('pointermove', {
-            clientY: 73,
-            bubbles: true,
-            clientX: 90.5,
-          }),
-        );
-      }, 500);
-    }
-
-    return () => {
-      contentEventEmitter.removeAllListeners();
-    };
   });
 
   return (
-    <WordPopover
+    <WordPopoverBase
       ref={popoverRef}
       isOpen={isOpen}
       placement="bottom-start"
@@ -250,8 +238,8 @@ function WordContainer() {
           />
         </>
       )}
-    </WordPopover>
+    </WordPopoverBase>
   );
 }
 
-export default WordContainer;
+export default WordPopover;

@@ -30,6 +30,7 @@ async function applyTheme(rootEl: HTMLElement) {
 
   const rootIntoShadow = document.createElement('div');
   rootIntoShadow.id = 'shadow-root';
+  rootIntoShadow.classList.add('font-sans', 'text-foreground');
 
   const shadowRoot = root.attachShadow({ mode: 'open' });
   shadowRoot.appendChild(rootIntoShadow);

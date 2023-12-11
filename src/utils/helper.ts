@@ -57,3 +57,7 @@ export function parseJSON<T = unknown, K = null>(
 export function isObject<T>(input: T) {
   return typeof input === 'object' && !Array.isArray(input);
 }
+
+export function sleep(ms = 1000) {
+  return new Promise((r) => setTimeout(r, ms));
+}

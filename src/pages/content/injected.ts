@@ -20,6 +20,8 @@ function contentMessageListener() {
   }
 
   RuntimeMessage.onMessage('content:disable-ext-state', (isDisabled) => {
+    contentEventEmitter.emit('disable-state-change', isDisabled);
+
     if (!isDisabled) {
       if (!contentHandler) contentHandler = new ContentHandler();
       else contentHandler.disabled = false;
@@ -28,7 +30,6 @@ function contentMessageListener() {
     }
 
     if (contentHandler) contentHandler.disabled = true;
-    contentEventEmitter.emit('popup:close');
   });
 }
 

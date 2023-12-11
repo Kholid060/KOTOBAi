@@ -9,7 +9,7 @@ import TextSearcher, {
   CursorPoint,
   GetTextByPointResult,
 } from './TextSearcher';
-import { isInMainFrame } from './content-handler-utils';
+import { NodeTypeChecker, isInMainFrame } from './content-handler-utils';
 import { ClientRect } from '@root/src/interface/shared.interface';
 import { CursorOffset } from './caretPositionFromPoint';
 import { CONTENT_ROOT_EL_ID } from '../ui';
@@ -25,8 +25,8 @@ interface SearchWordResult {
 }
 
 interface Events {
-  'popup:close': () => void;
   'clear-result': () => void;
+  'disable-state-change': (disabled?: boolean) => void;
   'search-word-result': (result: SearchWordResult | null) => void;
 }
 
@@ -149,6 +149,9 @@ class ContentHandler {
       const searchResult = await RuntimeMessage.sendMessage(messageKey, {
         frameSource,
         input: text,
+        type: NodeTypeChecker.isImage(cursorOffset.offsetNode)
+          ? 'whole'
+          : 'search-backward',
       });
 
       if (searchResult) {

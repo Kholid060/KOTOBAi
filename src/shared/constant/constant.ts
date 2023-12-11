@@ -3,3 +3,5 @@ export enum DICTIONARY_NAME {
   KANJIDIC = 'kanjidic',
   ENAMDICT = 'enamdict',
 }
+
+export const SYNTH_LANG = 'ja-JP';

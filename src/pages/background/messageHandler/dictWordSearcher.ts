@@ -3,10 +3,11 @@ import {
   DictWordEntry,
   DictWordLocalEntry,
   DictWordPriority,
+  DictSearchOptions,
 } from '@root/src/interface/dict.interface';
 import { getBackgroundDictionary } from '../BackgroundDict';
 import RuntimeMessage, {
-  MessageSearchOpts,
+  MessageSearchWordOpts,
 } from '@root/src/utils/RuntimeMessage';
 import MemoryCache from '@root/src/utils/MemoryCache';
 import Dictionary from '@root/src/utils/Dictionary';
@@ -15,7 +16,7 @@ import Browser from 'webextension-polyfill';
 import { Reason, deinflect, entryMatchesType } from '@src/shared/lib/deinflect';
 import { WORD_PRIORITY_WEIGHT } from '@root/src/shared/constant/word.const';
 
-export type DictionaryEntryResult = {
+export type DictionaryWordEntryResult = {
   word: string;
   oriWord: string;
   reasons?: Reason[];
@@ -25,8 +26,21 @@ export type DictionaryEntryResult = {
 export interface SearchDictWordResult {
   input: string;
   maxLength: number;
-  entries: DictionaryEntryResult[];
+  entries: DictionaryWordEntryResult[];
 }
+
+interface SearchWordOptions {
+  input: string;
+  maxResult?: number;
+  maxQueryLimit?: number;
+  controller: AbortController;
+  searchWord: (
+    detail: DictSearchOptions,
+  ) => Promise<(DictWordEntry | DictWordLocalEntry)[]>;
+}
+
+const MAX_RESULT_DEF = 7;
+const QUERY_LIMIT_DEF = 3;
 
 const YOON = {
   smallY: ['ゃ', 'ゅ', 'ょ'],
@@ -38,22 +52,88 @@ const endsInYoon = (str: string) =>
   YOON.smallY.includes(str.at(-1)) &&
   YOON.chars.includes(str.at(-2));
 
-async function handleSearchWord({
+async function handleSearchForward({
+  searchWord,
+  maxQueryLimit,
+  input: oriInput,
+}: SearchWordOptions) {
+  const input = toHiragana(oriInput, { passRomaji: true });
+
+  const searchResult: SearchDictWordResult = {
+    entries: [],
+    maxLength: 0,
+    input: oriInput,
+  };
+
+  const candidcateInputted = new Set<number>();
+
+  const candidates = deinflect(input);
+  for (let index = 0; index < candidates.length; index += 1) {
+    const candidate = candidates[index];
+
+    const searchInput = [candidate.word];
+    if (index === 0 && oriInput !== input) searchInput.push(oriInput);
+
+    const entries = await searchWord({
+      matchWhole: false,
+      input: searchInput,
+      maxResult: maxQueryLimit,
+    });
+
+    for (const entry of entries) {
+      if (candidcateInputted.has(entry.id)) continue;
+
+      searchResult.entries.push({
+        ...entry,
+        oriWord: input,
+        word: candidate.word,
+        reasons: candidate.reasons.flat(),
+      });
+
+      candidcateInputted.add(entry.id);
+    }
+  }
+
+  return searchResult;
+}
+
+async function handleSearchWhole({
+  searchWord,
+  maxQueryLimit,
+  input: oriInput,
+}: SearchWordOptions) {
+  const searchResult: SearchDictWordResult = {
+    entries: [],
+    maxLength: 0,
+    input: oriInput,
+  };
+  const input = toHiragana(oriInput, { passRomaji: true });
+
+  const searchInput = [input];
+  if (input !== oriInput) searchInput.push(oriInput);
+
+  const entries = await searchWord({
+    matchWhole: true,
+    input: searchInput,
+    maxResult: maxQueryLimit,
+  });
+  searchResult.entries = entries.map((entry) => ({
+    ...entry,
+    reason: [],
+    word: input,
+    oriWord: oriInput,
+  }));
+
+  return searchResult;
+}
+
+async function handleSearchBackward({
   controller,
   searchWord,
-  maxResult = 7,
+  maxQueryLimit,
   input: oriInput,
-  wordQueryLimit = 3,
-}: {
-  input: string;
-  maxResult?: number;
-  wordQueryLimit?: number;
-  controller: AbortController;
-  searchWord: (input: {
-    input: string;
-    maxResult: number;
-  }) => Promise<(DictWordEntry | DictWordLocalEntry)[]>;
-}) {
+  maxResult = MAX_RESULT_DEF,
+}: SearchWordOptions) {
   const searchResult: SearchDictWordResult = {
     entries: [],
     maxLength: 0,
@@ -73,6 +153,8 @@ async function handleSearchWord({
   while (copyInput.length) {
     checkSignal();
 
+    const oriWord = oriInput.slice(0, copyInput.length);
+
     const candidates = deinflect(copyInput);
     for (let index = 0; index < candidates.length; index += 1) {
       checkSignal();
@@ -82,10 +164,14 @@ async function handleSearchWord({
       const candidate = candidates[index];
       if (candidateSearched.has(candidate.word)) continue;
 
+      const searchInput = [candidate.word];
+      if (oriWord !== copyInput) searchInput.push(oriWord);
+
       let entries = await searchWord({
-        input: candidate.word,
-        maxResult: wordQueryLimit,
+        input: searchInput,
+        maxResult: maxQueryLimit,
       });
+
       entries = entries.filter((entry) => {
         if (index === 0 || !entry.sense) return true;
 
@@ -100,9 +186,9 @@ async function handleSearchWord({
 
         searchResult.entries.push({
           ...entry,
+          oriWord,
           word: candidate.word,
           reasons: candidate.reasons.flat(),
-          oriWord: oriInput.slice(0, copyInput.length),
         });
 
         inputtedWordEntry.add(entry.id);
@@ -140,7 +226,7 @@ function sortSearchResult(result: SearchDictWordResult): SearchDictWordResult {
 
     return sum;
   };
-  const getPriority = (entry: DictionaryEntryResult) => {
+  const getPriority = (entry: DictionaryWordEntryResult) => {
     if (!entry.kPrio && !entry.rPrio) return 0;
 
     let score = 0;
@@ -176,7 +262,13 @@ export default function dictWordSearcher(isIframe = false) {
   const resultCache = new MemoryCache<string, SearchDictWordResult>();
 
   return async (
-    { input, maxResult, frameSource }: MessageSearchOpts,
+    {
+      input,
+      maxResult,
+      frameSource,
+      type = 'search-backward',
+      maxQueryLimit = QUERY_LIMIT_DEF,
+    }: MessageSearchWordOpts,
     sender: Browser.Runtime.MessageSender,
   ) => {
     if (searchController) {
@@ -199,12 +291,27 @@ export default function dictWordSearcher(isIframe = false) {
         searchWord = dictionary.searchWord.bind(dictionary);
       }
 
-      let result = await handleSearchWord({
+      const searchPayload = {
         input,
         maxResult,
         searchWord,
+        maxQueryLimit,
         controller: searchController,
-      });
+      };
+
+      let result: SearchDictWordResult;
+      switch (type) {
+        case 'search-backward':
+          result = await handleSearchBackward(searchPayload);
+          break;
+        case 'search-forward':
+          result = await handleSearchForward(searchPayload);
+          break;
+        case 'whole':
+          result = await handleSearchWhole(searchPayload);
+          break;
+      }
+
       result = sortSearchResult(result);
 
       resultCache.add(input, result);

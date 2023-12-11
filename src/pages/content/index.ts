@@ -7,6 +7,9 @@
  * If you want to use other modules in content scripts, you need to import them via these files.
  *
  */
+
+// TO-DO: Separate UI content script file
+
 if (window.self === window.top) {
   import('@pages/content/ui');
 }

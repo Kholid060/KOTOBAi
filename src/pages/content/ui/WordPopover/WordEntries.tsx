@@ -1,83 +1,35 @@
-import { memo, useRef, useState } from 'react';
+import { memo, useRef } from 'react';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { UiButton } from '@root/src/components/ui/button';
 import { BookmarkIcon, Volume2Icon } from 'lucide-react';
-import { useEffectOnce } from 'usehooks-ts';
 import {
   WORD_POS_TAG,
-  WORD_REASON as WORD_REASONS,
+  WORD_REASONS,
 } from '@root/src/shared/constant/word.const';
 import {
-  DictionaryEntryResult,
+  DictionaryWordEntryResult,
   SearchDictWordResult,
-} from '../../background/messageHandler/dictWordSearcher';
+} from '../../../background/messageHandler/dictWordSearcher';
 import UiTooltip from '@root/src/components/ui/tooltip';
-
-const SYNTH_LANG = 'ja-JP';
-
-function findMatchWord(
-  entry: DictionaryEntryResult,
-  prop: 'kanji' | 'reading',
-) {
-  const match = entry[prop].find(
-    (str) => str === entry.oriWord || str === entry.word,
-  );
-
-  return {
-    match,
-    text: match ? '' : entry[prop].join('、'),
-  };
-}
+import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
+import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 
 function WordEntry({
   entry,
+  onSpeak,
   speechAvailable,
 }: {
-  entry: DictionaryEntryResult;
   speechAvailable?: boolean;
+  onSpeak?: (str: string) => void;
+  entry: DictionaryWordEntryResult;
 }) {
-  const matchKanji = entry.kanji && findMatchWord(entry, 'kanji');
-  const matchReading = entry.reading && findMatchWord(entry, 'reading');
-
-  function speakWord() {
-    window.speechSynthesis.cancel();
-
-    const speech = new SpeechSynthesisUtterance();
-    speech.lang = SYNTH_LANG;
-    speech.text = entry.word;
-
-    window.speechSynthesis.speak(speech);
-  }
-
   return (
     <div className="pt-4">
       <div className="flex items-start">
-        <p className="flex-grow font-sans-jp text-lg leading-tight pt-0.5">
-          {matchKanji && (
-            <span
-              className={cn(
-                'mr-2',
-                matchKanji.match
-                  ? 'dark:text-indigo-400 text-indigo-600 font-semibold'
-                  : 'dark:text-indigo-400/90 text-indigo-600/90',
-              )}
-            >
-              {matchKanji.match || matchKanji.text}
-            </span>
-          )}
-          {matchReading && (
-            <span
-              className={cn(
-                'mr-2 dark:text-emerald-400 tracking-[-2px]',
-                matchReading.match
-                  ? 'font-semibold text-emerald-700'
-                  : 'text-emerald-700/90',
-              )}
-            >
-              {matchReading.match || matchReading.text}
-            </span>
-          )}
-        </p>
+        <ViewReadingKanji
+          entry={entry}
+          className="text-lg leading-tight pt-0.5 flex-grow"
+        />
         <UiTooltip label="Bookmark word">
           <UiButton
             className="ml-1 flex-shrink-0"
@@ -92,9 +44,9 @@ function WordEntry({
             variant="secondary"
             size="icon-xs"
             className="ml-1 flex-shrink-0"
-            onClick={speakWord}
+            onClick={() => onSpeak?.(entry.word)}
           >
-            <Volume2Icon className="h-4 w4" />
+            <Volume2Icon className="h-4 w-4" />
           </UiButton>
         )}
       </div>
@@ -154,21 +106,7 @@ function WordEntries({
 } & React.DetailsHTMLAttributes<HTMLDivElement>) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [isSpeechAvailable, setIsSpeechAvailable] = useState(false);
-
-  useEffectOnce(() => {
-    const checkSpeechAvailability = () => {
-      const isAvailable = window.speechSynthesis
-        .getVoices()
-        .some((voice) => voice.lang === SYNTH_LANG);
-      setIsSpeechAvailable(isAvailable);
-    };
-    checkSpeechAvailability();
-
-    window.speechSynthesis.onvoiceschanged = () => {
-      checkSpeechAvailability();
-    };
-  });
+  const { isSpeechAvailable, speak } = useSpeechSynthesis();
 
   return (
     <div
@@ -181,6 +119,7 @@ function WordEntries({
         <WordEntry
           key={entry.id}
           entry={entry}
+          onSpeak={speak}
           speechAvailable={isSpeechAvailable}
         />
       ))}

@@ -1,13 +1,14 @@
 import { IndexableType } from 'dexie';
-import { DictKanjiEntry, DictLoadState } from '../interface/dict.interface';
+import {
+  DictKanjiEntry,
+  DictLoadState,
+  DictNameEntry,
+  DictSearchOptions,
+  DictWordEntry,
+} from '../interface/dict.interface';
 import dictDB from '../shared/db/dict.db';
 import dictStateStorage from '../shared/storages/dictStateStorage';
 import DictLoader from './DictLoader';
-
-export interface DictSearchOptions {
-  input: string;
-  maxResult: number;
-}
 
 export interface DictSearchKanjiOptions
   extends Omit<DictSearchOptions, 'input'> {
@@ -48,14 +49,56 @@ class Dictionary {
     }
   }
 
-  async searchWord({ input, maxResult }: DictSearchOptions) {
-    const result = await dictDB.words
-      .where('reading')
-      .equals(input)
-      .or('kanji')
-      .equals(input)
-      .limit(maxResult)
-      .toArray();
+  async searchWord({ input, maxResult, matchWhole = true }: DictSearchOptions) {
+    let result: DictWordEntry[] = [];
+
+    if (!matchWhole) {
+      const inputArr = Array.isArray(input) ? input : [input];
+      result = await dictDB.words
+        .where('reading')
+        .startsWithAnyOf(inputArr)
+        .or('kanji')
+        .startsWithAnyOf(inputArr)
+        .limit(maxResult)
+        .toArray();
+    } else {
+      result = await dictDB.words
+        .where('reading')
+        .anyOf(input)
+        .or('kanji')
+        .anyOf(input)
+        .limit(maxResult)
+        .toArray();
+    }
+
+    return result;
+  }
+
+  async searchNames({
+    input,
+    maxResult,
+    matchWhole = true,
+  }: DictSearchOptions) {
+    let result: DictNameEntry[] = [];
+
+    if (!matchWhole) {
+      const inputArr = Array.isArray(input) ? input : [input];
+      result = await dictDB.names
+        .where('reading')
+        .startsWithAnyOf(inputArr)
+        .or('kanji')
+        .startsWithAnyOf(inputArr)
+        .limit(maxResult)
+        .toArray();
+    } else {
+      result = await dictDB.names
+        .where('reading')
+        .anyOf(input)
+        .or('kanji')
+        .anyOf(input)
+        .limit(maxResult)
+        .toArray();
+    }
 
     return result;
   }
@@ -77,7 +120,6 @@ class Dictionary {
         .limit(maxResult)
         .toArray();
     } else if (searchBy === 'id') {
-      console.log('ID', input);
       if (Array.isArray(input)) {
         result = await dictDB.kanji.bulkGet(input as unknown as number[]);
       } else {

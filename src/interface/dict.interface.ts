@@ -76,3 +76,9 @@ export interface DictNameEntry {
   reading: string[];
   tr: { detail: string[]; type: string[] };
 }
+
+export interface DictSearchOptions {
+  maxResult: number;
+  matchWhole?: boolean;
+  input: string | string[];
+}

@@ -9,7 +9,36 @@ export const WORD_PRIORITY_WEIGHT = {
   gail2: 5,
 } as const;
 
-export const WORD_REASON = {
+export const NAME_TYPES = {
+  ev: 'event',
+  dei: 'deity',
+  oth: 'other',
+  leg: 'legend',
+  obj: 'object',
+  group: 'group',
+  doc: 'document',
+  fict: 'fiction',
+  serv: 'service',
+  char: 'character',
+  creat: 'creature',
+  myth: 'mythology',
+  relig: 'religion',
+  ship: 'ship name',
+  place: 'place name',
+  company: 'company name',
+  product: 'product name',
+  station: 'railway station',
+  surname: 'family or surname',
+  unclass: 'unclassified name',
+  organization: 'organization name',
+  masc: 'male given name or forename',
+  fem: 'female given name or forename',
+  person: 'full name of a particular person',
+  work: 'work of art, literature, music, etc. name',
+  given: 'given name or forename, gender not specified',
+} as const;
+
+export const WORD_REASONS = {
   [Reason.Zu]: '-zu',
   [Reason.Te]: '-te',
   [Reason.Ki]: '-ki',

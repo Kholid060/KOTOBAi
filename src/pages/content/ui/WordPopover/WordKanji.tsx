@@ -1,4 +1,4 @@
-import { SearchDictWordResult } from '../../background/messageHandler/dictWordSearcher';
+import { SearchDictWordResult } from '../../../background/messageHandler/dictWordSearcher';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import { memo, useEffect, useRef, useState } from 'react';
 import { DictKanjiEntry } from '@root/src/interface/dict.interface';

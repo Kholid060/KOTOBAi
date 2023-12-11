@@ -1,8 +1,8 @@
-import { MessageSearchOpts } from '@root/src/utils/RuntimeMessage';
+import { MessageSearchWordOpts } from '@root/src/utils/RuntimeMessage';
 import { isObject } from '@root/src/utils/helper';
 
 interface Events {
-  'window:search-word': (detail: MessageSearchOpts) => void;
+  'window:search-word': (detail: MessageSearchWordOpts) => void;
 }
 
 type EventListener = Record<string, ((...args: unknown[]) => unknown)[]>;

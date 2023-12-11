@@ -210,6 +210,12 @@ async function generateJMDictData(version) {
               node: childNode,
               index: tempStorage[idxPropName] || 0,
             });
+          } else if (nodeName === 'ke_inf') {
+            const index = tempStorage[idxPropName] || 0;
+            if (!entry.kInfo) entry.kInfo = {};
+            if (!entry.kInfo[index]) entry.kInfo[index] = [];
+
+            entry.kInfo[index].push(childNode.text());
           }
         });
       },
