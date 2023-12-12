@@ -74,12 +74,12 @@ export function getNodeBoundingClientRect(
 
 export function isRectOverlap({
   point: { x, y },
-  rect: { left, top, height, width },
+  rect: { left, top, bottom, right },
 }: {
   rect: DOMRect;
   point: CursorPoint;
 }) {
-  return left <= x && left + width >= x && top <= y && top + height >= y;
+  return left <= x && right >= x && top <= y && bottom >= y;
 }
 
 export function isInMainFrame() {

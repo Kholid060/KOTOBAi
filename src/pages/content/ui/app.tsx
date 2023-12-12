@@ -13,12 +13,20 @@ export const AppContentContext = createContext<{
   isDisabled: false,
 });
 
-export default function App({ shadowRoot }: { shadowRoot: ShadowRoot }) {
-  const [isDisabled, setIsDisabled] = useState(false);
+export default function App({
+  disabled,
+  shadowRoot,
+}: {
+  disabled: boolean;
+  shadowRoot: ShadowRoot;
+}) {
+  const [isDisabled, setIsDisabled] = useState(() => disabled);
 
   useEffectOnce(() => {
     contentEventEmitter.addListener('disable-state-change', setIsDisabled);
   });
+
+  if (isDisabled) return null;
 
   return (
     <UiTooltipProvider>

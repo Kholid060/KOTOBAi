@@ -2,7 +2,6 @@ import { isJapanese } from 'wanakana';
 import {
   NodeTypeChecker,
   getNodeBoundingClientRect,
-  isRectOverlap,
 } from './content-handler-utils';
 import { NON_JP_CHARS_REGEX } from '@root/src/shared/constant/char.const';
 import { TextRange, extractTextNodeContent } from './extract-text-content';
@@ -49,13 +48,6 @@ class TextSearcher {
     maxLength: number;
     point: CursorPoint;
   }): GetTextByPointResult {
-    if (
-      this.previousResult &&
-      isRectOverlap({ point, rect: this.previousResult.rect })
-    ) {
-      return this.previousResult;
-    }
-
     if (NodeTypeChecker.isImage(element)) {
       const text = findJPText(
         element.getAttribute('alt') || element.getAttribute('title'),

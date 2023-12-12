@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHandler/dictNameSearcher';
-import CommandContent from './CommandContent';
+import CommandContent, { CommandContentRef } from './CommandContent';
 import UiSeparator from '@root/src/components/ui/separator';
 import UiToggle from '@root/src/components/ui/toggle';
 import UiTooltip from '@root/src/components/ui/tooltip';
@@ -90,6 +90,7 @@ function CommandContainer() {
 
   const convertRomaji = useRef(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const commandContentRef = useRef<CommandContentRef | null>(null);
 
   const [query, setQuery] = useState('');
   const [queryResult, setQueryResult] = useState<CommandQueryResult>({
@@ -98,10 +99,8 @@ function CommandContainer() {
     words: [],
   });
 
+  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(
-    () => window.location.hostname === 'localhost',
-  );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onQueryChange = useCallback(
@@ -113,6 +112,14 @@ function CommandContainer() {
     }, 500),
     [],
   );
+
+  function onInputKeydown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.code !== 'Escape' || !commandContentRef.current?.activeItemDetail)
+      return;
+
+    commandContentRef.current.setActiveItem({ id: '', type: 'words' });
+    event.preventDefault();
+  }
 
   useEventListener('keydown', (event) => {
     const { ctrlKey, altKey, code } = event;
@@ -145,17 +152,20 @@ function CommandContainer() {
           names: [],
         };
 
-        if (!query.trim()) {
+        const trimmedQuery = query.trim();
+        if (!trimmedQuery) {
           setQueryResult(result);
           return;
         }
 
         const queryType = getCommandQueryType(query);
+        if (queryType !== 'all' && trimmedQuery.length <= 1) return;
+
         if (queryType === 'all') {
           const [words, kanji, names] = await Promise.allSettled([
-            queriesMap.words(query),
-            queriesMap.kanji(query),
-            queriesMap.names(query),
+            queriesMap.words(trimmedQuery),
+            queriesMap.kanji(trimmedQuery),
+            queriesMap.names(trimmedQuery),
           ]);
 
           result.kanji = kanji.status === 'fulfilled' ? kanji.value : [];
@@ -163,7 +173,9 @@ function CommandContainer() {
           result.words = words.status === 'fulfilled' ? words.value : [];
         } else {
           // @ts-expect-error expected!!!
-          result[queryType] = await queriesMap[queryType](query.slice(1));
+          result[queryType] = await queriesMap[queryType](
+            trimmedQuery.slice(1),
+          );
         }
 
         setQueryResult(result);
@@ -192,6 +204,7 @@ function CommandContainer() {
       <UiCommand.Input
         defaultValue={query}
         ref={inputRef}
+        onKeyDownCapture={onInputKeydown}
         prependSlot={
           <div className="mr-2 shrink-0">
             {isLoading ? (
@@ -205,13 +218,18 @@ function CommandContainer() {
         className="font-sans-jp placeholder:font-sans"
         placeholder="Search words, kanji, or names (append > to only search kanji)"
       />
-      <CommandContent query={query} queryResult={queryResult} />
-      <div className="py-2 px-4 gap-2 text-sm text-muted-foreground flex items-center border-t">
+      <CommandContent
+        ref={commandContentRef}
+        query={query}
+        queryResult={queryResult}
+      />
+      <div className="py-2 px-4 gap-2 text-xs text-muted-foreground flex items-center border-t">
         <UiTooltip label="Auto convert romaji into kana" side="right">
           <div>
             <UiToggle
               size="xs"
               defaultPressed={convertRomaji.current}
+              className="text-sm h-7"
               onPressedChange={(val) => (convertRomaji.current = val)}
             >
               <span>A</span> <span>{'=>'}</span>
@@ -222,16 +240,16 @@ function CommandContainer() {
         <UiSeparator orientation="vertical" className="!mx-2" />
         <p>
           <kbd className="kbd mr-1">
-            <CornerDownLeftIcon className="h-4 w-4 inline-block" />
+            <CornerDownLeftIcon className="h-3 w-3 inline-block" />
           </kbd>
           <span>to select</span>
         </p>
         <p>
           <kbd className="kbd mr-1">
-            <ArrowUpIcon className="h-4 w-4 inline-block" />
+            <ArrowUpIcon className="h-3 w-3 inline-block" />
           </kbd>
           <kbd className="kbd mr-1">
-            <ArrowDownIcon className="h-4 w-4 inline-block" />
+            <ArrowDownIcon className="h-3 w-3 inline-block" />
           </kbd>
           <span>to navigate</span>
         </p>

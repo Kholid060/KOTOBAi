@@ -5,6 +5,7 @@ import browser from 'webextension-polyfill';
 import fontCss from '@assets/style/fonts.css?inline';
 import { isInMainFrame } from '../content-handler/content-handler-utils';
 import themeStorage from '@root/src/shared/storages/themeStorage';
+import disableExtStorage from '@root/src/shared/storages/disableExtStorage';
 
 refreshOnUpdate('pages/content');
 
@@ -19,44 +20,54 @@ async function applyTheme(rootEl: HTMLElement) {
   }
 }
 
-(() => {
-  if (!isInMainFrame()) return;
+(async () => {
+  try {
+    if (!isInMainFrame()) return;
 
-  const root = document.createElement('div');
-  root.style.all = 'unset';
-  root.id = CONTENT_ROOT_EL_ID;
+    const root = document.createElement('div');
+    root.style.all = 'unset';
+    root.id = CONTENT_ROOT_EL_ID;
 
-  document.body.append(root);
+    document.body.append(root);
 
-  const rootIntoShadow = document.createElement('div');
-  rootIntoShadow.id = 'shadow-root';
-  rootIntoShadow.classList.add('font-sans', 'text-foreground');
+    const rootIntoShadow = document.createElement('div');
+    rootIntoShadow.id = 'shadow-root';
+    rootIntoShadow.classList.add('font-sans', 'text-foreground');
 
-  const shadowRoot = root.attachShadow({ mode: 'open' });
-  shadowRoot.appendChild(rootIntoShadow);
+    const shadowRoot = root.attachShadow({ mode: 'open' });
+    shadowRoot.appendChild(rootIntoShadow);
 
-  // Main Style
-  const style = document.createElement('link');
-  style.setAttribute('rel', 'stylesheet');
-  style.href = browser.runtime.getURL('/assets/css/contentStyle.chunk.css');
-  shadowRoot.appendChild(style);
+    // Main Style
+    const style = document.createElement('link');
+    style.setAttribute('rel', 'stylesheet');
+    style.href = browser.runtime.getURL('/assets/css/contentStyle.chunk.css');
+    shadowRoot.appendChild(style);
 
-  // Font styyle
-  const fontURL = browser.runtime.getURL('/assets/');
-  const fontStyle = document.createElement('style');
-  fontStyle.textContent = fontCss.replaceAll('/assets/', fontURL);
-  document.head.appendChild(fontStyle);
+    // Font styyle
+    const fontURL = browser.runtime.getURL('/assets/');
+    const fontStyle = document.createElement('style');
+    fontStyle.textContent = fontCss.replaceAll('/assets/', fontURL);
+    document.head.appendChild(fontStyle);
 
-  applyTheme(rootIntoShadow);
+    applyTheme(rootIntoShadow);
 
-  // attachTwindStyle(rootIntoShadow, shadowRoot);
+    // attachTwindStyle(rootIntoShadow, shadowRoot);
 
-  /**
-   * https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/pull/174
-   *
-   * In the firefox environment, the adoptedStyleSheets bug may prevent contentStyle from being applied properly.
-   * Please refer to the PR link above and go back to the contentStyle.css implementation, or raise a PR if you have a better way to improve it.
-   */
+    /**
+     * https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/pull/174
+     *
+     * In the firefox environment, the adoptedStyleSheets bug may prevent contentStyle from being applied properly.
+     * Please refer to the PR link above and go back to the contentStyle.css implementation, or raise a PR if you have a better way to improve it.
+     */
+    const disableState = await disableExtStorage.get();
+    const isDisabled =
+      disableState.disabled ||
+      disableState.hostList.includes(window.location.hostname);
 
-  createRoot(rootIntoShadow).render(<App shadowRoot={shadowRoot} />);
+    createRoot(rootIntoShadow).render(
+      <App disabled={isDisabled} shadowRoot={shadowRoot} />,
+    );
+  } catch (error) {
+    console.error(error);
+  }
 })();

@@ -1,6 +1,6 @@
 import UiCommand from '@root/src/components/ui/command';
 import UiToggleGroup from '@root/src/components/ui/toggle-group';
-import { useState } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { useUpdateEffect } from 'usehooks-ts';
 import CommandKanjiEntries from './CommandKanjiEntries';
 import CommandNameEntries from './CommandNameEntries';
@@ -18,6 +18,20 @@ import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHan
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 
 type ItemType = 'words' | 'kanji' | 'names';
+type DictAllEntry =
+  | DictKanjiEntry
+  | DictionaryNameEntryResult
+  | DictionaryWordEntryResult;
+interface ActiveItem {
+  id: string;
+  type: ItemType;
+}
+
+export interface CommandContentRef {
+  activeItem: ActiveItem;
+  activeItemDetail: DictAllEntry | null;
+  setActiveItem: React.Dispatch<React.SetStateAction<ActiveItem>>;
+}
 
 const tabs: Array<{ name: string; id: CommandTabIds }> = [
   { name: 'All', id: 'all' },
@@ -28,10 +42,7 @@ const tabs: Array<{ name: string; id: CommandTabIds }> = [
 const itemDetailsMap: Record<
   ItemType,
   React.FC<{
-    entry:
-      | DictKanjiEntry
-      | DictionaryNameEntryResult
-      | DictionaryWordEntryResult;
+    entry: DictAllEntry;
     onClose?(): void;
   }>
 > = {
@@ -40,17 +51,14 @@ const itemDetailsMap: Record<
   kanji: CommandKanjiDetail,
 };
 
-function CommandContent({
-  query,
-  queryResult,
-}: {
-  queryResult: CommandQueryResult;
-  query: string;
-}) {
-  const [activeItem, setActiveItem] = useState<{
-    id: string;
-    type: ItemType;
-  }>({
+const CommandContent = forwardRef<
+  CommandContentRef,
+  {
+    query: string;
+    queryResult: CommandQueryResult;
+  }
+>(({ query, queryResult }, ref) => {
+  const [activeItem, setActiveItem] = useState<ActiveItem>({
     id: '',
     type: 'words',
   });
@@ -65,6 +73,16 @@ function CommandContent({
     activeItem.id &&
     queryResult[activeItem.type].find((item) => item.id === +activeItem.id);
   const ActiveItemDetail = itemDetailsMap[activeItem.type];
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      activeItem,
+      setActiveItem,
+      activeItemDetail,
+    }),
+    [activeItem, activeItemDetail],
+  );
 
   useUpdateEffect(() => {
     setActiveTab('all');
@@ -130,7 +148,7 @@ function CommandContent({
         )}
       </UiCommand.List>
       {activeItemDetail && (
-        <div className="w-96 border-l flex-shrink-0 text-sm">
+        <div className="border-l flex-shrink-0 text-sm overflow-hidden w-96">
           <ActiveItemDetail
             entry={activeItemDetail}
             onClose={() => setActiveItem({ id: '', type: 'words' })}
@@ -139,6 +157,7 @@ function CommandContent({
       )}
     </div>
   );
-}
+});
+CommandContent.displayName = 'CommandContent';
 
 export default CommandContent;

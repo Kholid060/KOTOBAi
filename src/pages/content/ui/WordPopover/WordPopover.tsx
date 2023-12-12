@@ -101,7 +101,12 @@ function WordPopover() {
   useEffectOnce(() => {
     contentEventEmitter.on('search-word-result', (result) => {
       const popover = popoverRef.current;
-      if (!result || !popover || !result.entry) {
+      if (
+        !result ||
+        !popover ||
+        !result.entry ||
+        result.entry.entries.length <= 0
+      ) {
         closePopup();
         return;
       }
@@ -109,6 +114,7 @@ function WordPopover() {
       setIsOpen(true);
 
       const { rect, point, frameSource, cursorOffset, entry } = result;
+
       setSearchResult(entry);
 
       popover.refs.setPositionReference({
