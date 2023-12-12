@@ -2,6 +2,7 @@ import pako from 'pako';
 import fs from 'fs-extra';
 import path from 'path';
 import libxmljs from 'libxmljs';
+import archiver from 'archiver';
 import readline from 'node:readline/promises';
 
 import { fileURLToPath } from 'url';
@@ -14,11 +15,11 @@ const __dirname = path.dirname(__filename);
 
 const rl = readline.createInterface({ input, output });
 
-let IS_DEV = true;
+let IS_DEV = false;
 
 const DATE_REGEX = /(\d{4}-\d{2}-\d{2})/;
 const DATA_DIR = path.join(__dirname, '../../dict-data');
-const GITHUB_API_BASE_URL = 'https://api.github.com/repos/';
+const GITHUB_API_BASE_URL = 'https://api.github.com/repos';
 const DATA_URL = {
   KANJIDIC: 'http://www.edrdg.org/kanjidic/kanjidic2.xml.gz',
   JMDICT: 'http://ftp.edrdg.org/pub/Nihongo/JMdict_e_examp.gz',
@@ -26,6 +27,34 @@ const DATA_URL = {
   KANJIVG_RELEASE: `${GITHUB_API_BASE_URL}/KanjiVG/kanjivg/releases/latest`,
 };
 
+const ZIP_DICT_DIR = path.join(DATA_DIR, 'zip');
+const META_FILEPATH = path.join(DATA_DIR, 'metadata.json');
+
+async function writeMetadata(meta) {
+  let currentMeta = {};
+  if (fs.existsSync(META_FILEPATH)) {
+    currentMeta = await fs.readJSON(META_FILEPATH);
+  }
+
+  await fs.writeJSON(META_FILEPATH, { ...currentMeta, ...meta });
+}
+async function archiveFile(dir) {
+  const dirPath = path.join(DATA_DIR, dir);
+  if (!fs.existsSync(dirPath)) throw new Error(`"${dir}" folder not found`);
+
+  const filePath = path.join(ZIP_DICT_DIR, `${dir}.zip`);
+  await fs.ensureFile(filePath);
+
+  const fileStream = fs.createWriteStream(filePath);
+
+  const archive = archiver('zip', {
+    zlib: { level: 9 },
+  });
+  archive.directory(dirPath, false);
+  archive.pipe(fileStream);
+
+  await archive.finalize();
+}
 async function getXMLDoc(url, name) {
   const XML_FILEPATH = path.join(DATA_DIR, `${name}.cache.xml`);
   const prefix = name.toUpperCase();
@@ -89,9 +118,8 @@ async function generateJMDictData(version) {
 
     if (!dataCreatedAt) throw new Error("Can't find JMDict date");
 
-    await fs.writeJSON(path.join(SLICE_DIR, 'jmdict-meta.json'), {
-      version,
-      dataCreatedAt,
+    await writeMetadata({
+      jmdict: { version, dataCreatedAt },
     });
   }
   async function mapJMDictEntries(doc) {
@@ -281,6 +309,7 @@ async function generateJMDictData(version) {
   const xmlDoc = await getXMLDoc(DATA_URL.JMDICT, 'jmdict');
   await mapJMDictEntries(xmlDoc);
   await generateMetadata(xmlDoc);
+  await archiveFile('jmdict');
 
   console.log('JMDICT: DONE');
 }
@@ -389,7 +418,6 @@ async function generateKANJIDicData(version) {
     });
   }
   async function generateMetadata(doc) {
-    const METADATA_PATH = path.join(FILE_DIR, 'kanjidic-meta.json');
     const metadata = {
       version,
       fileVersion: '',
@@ -415,12 +443,13 @@ async function generateKANJIDicData(version) {
       }
     });
 
-    await fs.writeJSON(METADATA_PATH, metadata);
+    await writeMetadata({ kanjidic: metadata });
   }
 
   const xmlDoc = await getXMLDoc(DATA_URL.KANJIDIC, 'kanjidic');
   await mapKanjiEntries(xmlDoc);
   await generateMetadata(xmlDoc);
+  await archiveFile('kanjidic');
 }
 
 async function generateENAMDICTData(version) {
@@ -529,22 +558,23 @@ async function generateENAMDICTData(version) {
 
     if (!dataCreatedAt) throw new Error("Can't find JMDict date");
 
-    await fs.writeJSON(path.join(SLICE_DIR, 'enamdict-meta.json'), {
-      version,
-      dataCreatedAt,
+    await writeMetadata({
+      enamdict: {
+        version,
+        dataCreatedAt,
+      },
     });
   }
 
   const xmlDoc = await getXMLDoc(DATA_URL.ENAMDICT, 'ENAMDICT');
   await mapCharacters(xmlDoc);
   await generateMetadata(xmlDoc);
+  await archiveFile('enamdict');
 }
 
 async function generateInitialData() {
   const jmdictDir = path.join(DATA_DIR, 'jmdict');
-  const jmdictDataExists = fs.existsSync(
-    path.join(jmdictDir, 'jmdict-meta.json'),
-  );
+  const jmdictDataExists = fs.existsSync(path.join(jmdictDir, 'jmdict-1.json'));
 
   if (!jmdictDataExists) {
     await ACTIONS_FUNCS.jmdict();
@@ -607,7 +637,7 @@ async function generateInitialData() {
   wordDataStream.end();
 }
 
-async function generateKanjiVG() {
+async function generateKanjiVG(version) {
   const apiResponse = await fetch(DATA_URL.KANJIVG_RELEASE);
   if (!apiResponse.ok) throw new Error(apiResponse.statusText);
 
@@ -621,7 +651,78 @@ async function generateKanjiVG() {
   const rootDoc = xmlDoc.get('//kanjivg');
   if (!rootDoc) throw new Error("Can't find KanjiVG root doc");
 
-  rootDoc.childNodes();
+  const currEntries = [];
+  const traverseKanjiPath = (node) => {
+    const nodeName = node.name();
+    if (nodeName === 'path') {
+      return {
+        d: node.getAttribute('d').value(),
+        id: node.getAttribute('id').value(),
+      };
+    }
+
+    if (nodeName !== 'g') return null;
+
+    const kanji = {
+      paths: [],
+    };
+    const posAttribute = node.getAttribute('position');
+    if (posAttribute) kanji.pos = posAttribute.value();
+
+    const traverseNode = (childNode) => {
+      const childNodeName = childNode.name();
+      if (childNodeName === 'path') {
+        kanji.paths.push({
+          d: childNode.getAttribute('d').value(),
+          id: childNode.getAttribute('id').value(),
+        });
+        return;
+      }
+      if (childNodeName === 'g') {
+        childNode.childNodes().forEach(traverseNode);
+      }
+    };
+    node.childNodes().forEach(traverseNode);
+
+    return kanji;
+  };
+
+  const nodes = rootDoc.childNodes();
+  for (let index = 0; index <= nodes.length; index += 1) {
+    const node = nodes[index];
+    const nodeName = node?.name();
+    if (nodeName !== 'kanji') continue;
+
+    const kanjiNode = node
+      .childNodes()
+      .find((childNode) => childNode.name() === 'g');
+    if (!kanjiNode) continue;
+
+    const currKanji = kanjiNode.getAttribute('element')?.value();
+    if (!currKanji) continue;
+
+    const paths = kanjiNode.childNodes().reduce((acc, curr) => {
+      const kanjiPaths = traverseKanjiPath(curr);
+      if (kanjiPaths) acc.push(kanjiPaths);
+
+      return acc;
+    }, []);
+
+    currEntries.push({
+      paths,
+      id: currKanji.codePointAt(0),
+    });
+  }
+
+  const kanjiVgDir = path.join(DATA_DIR, 'kanjivg');
+
+  await fs.emptyDir(kanjiVgDir);
+  await fs.ensureDir(kanjiVgDir);
+  await fs.writeJSON(path.join(kanjiVgDir, 'kanjivg.json'), currEntries);
+
+  const [dateCreatedAt] = latestFile.created_at.split('T');
+  await writeMetadata({ kanjivg: { version, dateCreatedAt } });
+  await archiveFile('kanjivg');
 }
 
 async function getVersion(name) {
@@ -646,7 +747,10 @@ const ACTIONS_FUNCS = {
     const enamDictVersion = await getVersion('ENAMDICT');
     await generateENAMDICTData(enamDictVersion);
   },
-  kanjivg: generateKanjiVG,
+  kanjivg: async () => {
+    const kanjiVgVersion = await getVersion('KanjiVG');
+    await generateKanjiVG(kanjiVgVersion);
+  },
   initial: generateInitialData,
 };
 
@@ -655,6 +759,7 @@ const AVAILABLE_OPTIONS = [...Object.keys(ACTIONS_FUNCS), 'all'];
 (async () => {
   try {
     await fs.ensureDir(DATA_DIR);
+    await fs.ensureDir(ZIP_DICT_DIR);
 
     const program = new Command();
     program
@@ -686,8 +791,8 @@ const AVAILABLE_OPTIONS = [...Object.keys(ACTIONS_FUNCS), 'all'];
 
     IS_DEV = options.Dev;
 
-    let dictKeys = options.Dict || 'all';
-    if (options.Dict === 'all') dictKeys = Object.keys(ACTIONS_FUNCS);
+    let dictKeys = (options.Dict || 'all').trim();
+    if (dictKeys === 'all') dictKeys = Object.keys(ACTIONS_FUNCS);
 
     for (const key of dictKeys) {
       await ACTIONS_FUNCS[key]();
