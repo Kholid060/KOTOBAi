@@ -4,15 +4,21 @@ import {
   StorageType,
 } from '@src/shared/storages/base';
 
-type Theme = 'light' | 'dark';
+export type ThemeList = 'light' | 'dark';
 
-type ThemeStorage = BaseStorage<Theme> & {
+type ThemeStorage = BaseStorage<ThemeList> & {
   toggle: () => void;
 };
 
-const storage = createStorage<Theme>('app-theme', 'light', {
-  storageType: StorageType.Local,
-});
+const isDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+const storage = createStorage<ThemeList>(
+  'app-theme',
+  isDarkTheme ? 'dark' : 'light',
+  {
+    storageType: StorageType.Local,
+  },
+);
 
 const themeStorage: ThemeStorage = {
   ...storage,

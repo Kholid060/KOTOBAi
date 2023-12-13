@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { type DialogProps } from '@radix-ui/react-dialog';
+import { DialogContentProps, type DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 
@@ -25,12 +25,14 @@ interface CommandDialogProps extends DialogProps {
   contentClass?: string;
   shouldFilter?: boolean;
   container?: HTMLElement;
+  contentProps?: DialogContentProps;
 }
 
 const UiCommandDialog = ({
   children,
   container,
   contentClass,
+  contentProps = {},
   shouldFilter = true,
   ...props
 }: CommandDialogProps) => {
@@ -39,6 +41,7 @@ const UiCommandDialog = ({
       <UiDialog.Content
         container={container}
         className={cn('overflow-hidden p-0 shadow-lg', contentClass)}
+        {...contentProps}
       >
         <UiCommandRoot
           shouldFilter={shouldFilter}

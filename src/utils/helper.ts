@@ -61,3 +61,7 @@ export function isObject<T>(input: T) {
 export function sleep(ms = 1000) {
   return new Promise((r) => setTimeout(r, ms));
 }
+
+export function getRandomArbitrary(min = 0, max = 10) {
+  return Math.random() * (max - min) + min;
+}

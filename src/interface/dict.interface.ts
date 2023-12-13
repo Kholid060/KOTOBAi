@@ -2,6 +2,7 @@ import {
   WORD_POS_TAG,
   WORD_PRIORITY_WEIGHT,
 } from '@root/src/shared/constant/word.const';
+import { DICTIONARY_NAME } from '../shared/constant/constant';
 
 export type DictLoadState = 'not_loaded' | 'loading_data' | 'loaded';
 
@@ -11,7 +12,11 @@ export type DictWordPriority =
   | keyof typeof WORD_PRIORITY_WEIGHT
   | `nf${number}`;
 
+export type DictEntry = DictWordEntry | DictNameEntry | DictKanjiEntry;
+
 export type DictWordEntryPriority = Record<number, DictWordPriority[]>;
+
+export type DictMetadataRecord = Record<DICTIONARY_NAME, DictMetadata>;
 
 export interface DictWordEntryExample {
   text: string;
@@ -81,4 +86,36 @@ export interface DictSearchOptions {
   maxResult: number;
   matchWhole?: boolean;
   input: string | string[];
+}
+
+export interface DictFileEntries<T extends DictEntry> {
+  records: T[];
+  counts: number;
+  isLastFile: boolean;
+}
+
+export type DictKanjiVGPathPosition =
+  | 'bottom'
+  | 'kamae'
+  | 'left'
+  | 'nyo'
+  | 'nyoc'
+  | 'right'
+  | 'tare'
+  | 'tarec'
+  | 'top';
+
+export interface DictKanjiVGEntryPath {
+  d: string;
+  id: string;
+}
+
+export interface DictKanjiVGEntryPathGroup {
+  pos: DictKanjiVGPathPosition;
+  paths: DictKanjiVGEntryPath[];
+}
+
+export interface DictKanjiVGEntry {
+  id: number;
+  paths: (DictKanjiVGEntryPath | DictKanjiVGEntryPathGroup)[];
 }

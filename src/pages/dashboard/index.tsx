@@ -1,9 +1,10 @@
 import { createRoot } from 'react-dom/client';
-import Newtab from '@root/src/pages/dashboard/Dashboard';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
 import './index.css';
+import React from 'react';
+import App from './app';
 
-refreshOnUpdate('pages/newtab');
+refreshOnUpdate('pages/dashboard');
 
 function init() {
   const appContainer = document.querySelector('#app-container');
@@ -12,7 +13,11 @@ function init() {
   }
   const root = createRoot(appContainer);
 
-  root.render(<Newtab />);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+  );
 }
 
 init();

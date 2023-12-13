@@ -148,7 +148,7 @@ const CommandContent = forwardRef<
         )}
       </UiCommand.List>
       {activeItemDetail && (
-        <div className="border-l flex-shrink-0 text-sm overflow-hidden w-96">
+        <div className="border-l flex-shrink-0 text-sm w-96 max-h-[500px] overflow-auto">
           <ActiveItemDetail
             entry={activeItemDetail}
             onClose={() => setActiveItem({ id: '', type: 'words' })}

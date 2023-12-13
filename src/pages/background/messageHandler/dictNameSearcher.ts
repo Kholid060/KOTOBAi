@@ -1,9 +1,8 @@
 import { MessageSearchNameOpts } from '@root/src/utils/RuntimeMessage';
-import { getBackgroundDictionary } from '../BackgroundDict';
 import MemoryCache from '@root/src/utils/MemoryCache';
 import { DictNameEntry } from '@root/src/interface/dict.interface';
 import { toHiragana } from 'wanakana';
-
+import dictDB from '@root/src/shared/db/dict.db';
 export interface DictionaryNameEntryResult extends DictNameEntry {
   word: string;
   oriWord?: string;
@@ -26,9 +25,6 @@ export function dictNameSearcher() {
     input: oriInput,
     maxQueryLimit = 3,
   }: MessageSearchNameOpts) => {
-    const dictionary = await getBackgroundDictionary();
-    if (dictionary.loadState !== 'loaded') return [];
-
     const cacheResult = resultCache.get(oriInput);
     if (cacheResult) return cacheResult.value;
 
@@ -38,7 +34,7 @@ export function dictNameSearcher() {
       const searchInput = [input];
       if (input !== oriInput) searchInput.push(oriInput);
 
-      const result = await dictionary.searchNames({
+      const result = await dictDB.searchNames({
         maxResult,
         input: searchInput,
         matchWhole: type !== 'search-forward',
@@ -56,7 +52,7 @@ export function dictNameSearcher() {
     while (copyInput.length) {
       if (result.length > maxResult) break;
 
-      const names = await dictionary.searchNames({
+      const names = await dictDB.searchNames({
         input: copyInput,
         maxResult: maxQueryLimit,
       });

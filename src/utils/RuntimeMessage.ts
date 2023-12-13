@@ -4,8 +4,12 @@ import { SearchDictWordResult } from '../pages/background/messageHandler/dictWor
 import { CursorPoint } from '../pages/content/content-handler/TextSearcher';
 import { SetOptional, SetRequired } from 'type-fest';
 import { ClientRect } from '../interface/shared.interface';
-import { DictSearchKanjiOptions } from './Dictionary';
-import { DictKanjiEntry, DictSearchOptions } from '../interface/dict.interface';
+import { DictSearchKanjiOptions } from '../shared/db/dict.db';
+import {
+  DictKanjiEntry,
+  DictKanjiVGEntry,
+  DictSearchOptions,
+} from '../interface/dict.interface';
 import { DictionaryNameEntryResult } from '../pages/background/messageHandler/dictNameSearcher';
 
 export interface WordFrameSource {
@@ -38,6 +42,9 @@ export interface RuntimeMsgEvents {
   'background:search-kanji': (
     detail: DictSearchKanjiOptions,
   ) => DictKanjiEntry[];
+  'background:search-kanjivg': (detail: {
+    input: number | number[];
+  }) => DictKanjiVGEntry[];
   'background:search-word-iframe': (
     detail: SetRequired<MessageSearchWordOpts, 'frameSource'>,
   ) => SearchDictWordResult;

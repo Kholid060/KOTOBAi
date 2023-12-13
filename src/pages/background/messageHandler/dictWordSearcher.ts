@@ -5,16 +5,14 @@ import {
   DictWordPriority,
   DictSearchOptions,
 } from '@root/src/interface/dict.interface';
-import { getBackgroundDictionary } from '../BackgroundDict';
 import RuntimeMessage, {
   MessageSearchWordOpts,
 } from '@root/src/utils/RuntimeMessage';
 import MemoryCache from '@root/src/utils/MemoryCache';
-import Dictionary from '@root/src/utils/Dictionary';
-import LocalDictionary from '@root/src/utils/LocalDictionary';
 import Browser from 'webextension-polyfill';
 import { Reason, deinflect, entryMatchesType } from '@src/shared/lib/deinflect';
 import { WORD_PRIORITY_WEIGHT } from '@root/src/shared/constant/word.const';
+import dictDB from '@root/src/shared/db/dict.db';
 
 export type DictionaryWordEntryResult = {
   word: string;
@@ -283,20 +281,12 @@ export default function dictWordSearcher(isIframe = false) {
       const cacheResult = resultCache.get(input);
       if (cacheResult) return cacheResult.value;
 
-      let dictionary: Dictionary | LocalDictionary =
-        await getBackgroundDictionary();
-      let searchWord = dictionary.searchWord;
-      if (dictionary.loadState !== 'loaded') {
-        dictionary = await getBackgroundDictionary(true);
-        searchWord = dictionary.searchWord.bind(dictionary);
-      }
-
       const searchPayload = {
         input,
         maxResult,
-        searchWord,
         maxQueryLimit,
         controller: searchController,
+        searchWord: dictDB.searchWord.bind(dictDB),
       };
 
       let result: SearchDictWordResult;

@@ -58,17 +58,17 @@ const queriesMap = {
     const kanjiIds = input
       .trim()
       .split('')
-      .reduce<number[]>((acc, char) => {
+      .reduce<Set<number>>((acc, char) => {
         if (isKanji(char)) {
-          acc.push(char.codePointAt(0));
+          acc.add(char.codePointAt(0));
         }
 
         return acc;
-      }, []);
+      }, new Set());
     const result = await RuntimeMessage.sendMessage('background:search-kanji', {
       by: 'id',
       maxResult: 5,
-      input: kanjiIds,
+      input: [...kanjiIds],
     });
 
     return result.filter(Boolean);
@@ -114,11 +114,13 @@ function CommandContainer() {
   );
 
   function onInputKeydown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (isLoading) event.preventDefault();
+
     if (event.code !== 'Escape' || !commandContentRef.current?.activeItemDetail)
       return;
 
     commandContentRef.current.setActiveItem({ id: '', type: 'words' });
-    event.preventDefault();
+    event.stopPropagation();
   }
 
   useEventListener('keydown', (event) => {
@@ -184,11 +186,6 @@ function CommandContainer() {
       } finally {
         await sleep(500);
         setIsLoading(false);
-
-        await sleep(100);
-        if (inputRef.current && convertRomaji.current) {
-          inputRef.current.value = query;
-        }
       }
     })();
   }, [query]);
@@ -201,6 +198,7 @@ function CommandContainer() {
       onOpenChange={setIsOpen}
       container={appCtx.shadowRoot.firstElementChild as HTMLElement}
     >
+      <div className="absolute top-0 left-0 -z-10 h-4/6 w-8/12 bg-gradient-to-br from-cyan-700/30 via-blue-700/30 dark:from-cyan-500/10 dark:via-blue-500/10 to-50% to-transparent"></div>
       <UiCommand.Input
         defaultValue={query}
         ref={inputRef}

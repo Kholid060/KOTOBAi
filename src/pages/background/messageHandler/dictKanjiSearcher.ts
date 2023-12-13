@@ -1,10 +1,14 @@
-import { DictSearchKanjiOptions } from '@root/src/utils/Dictionary';
-import { getBackgroundDictionary } from '../BackgroundDict';
+import dictDB, {
+  DictSearchKanjiOptions,
+  DictSearchKanjiVgOptions,
+} from '@root/src/shared/db/dict.db';
 
 export async function dictKanjiSearcher(detail: DictSearchKanjiOptions) {
-  const dictionary = await getBackgroundDictionary();
-  if (dictionary.loadState !== 'loaded') return [];
+  const result = await dictDB.searchKanji(detail);
+  return result;
+}
 
-  const result = await dictionary.searchKanji(detail);
+export async function dictKanjiVgSearcher(detail: DictSearchKanjiVgOptions) {
+  const result = await dictDB.searchKanjiVG(detail);
   return result;
 }

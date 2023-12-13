@@ -28,7 +28,7 @@ const DATA_URL = {
 };
 
 const ZIP_DICT_DIR = path.join(DATA_DIR, 'zip');
-const META_FILEPATH = path.join(DATA_DIR, 'metadata.json');
+const META_FILEPATH = path.join(DATA_DIR, 'dict-metadata.json');
 
 async function writeMetadata(meta) {
   let currentMeta = {};
@@ -572,71 +572,6 @@ async function generateENAMDICTData(version) {
   await archiveFile('enamdict');
 }
 
-async function generateInitialData() {
-  const jmdictDir = path.join(DATA_DIR, 'jmdict');
-  const jmdictDataExists = fs.existsSync(path.join(jmdictDir, 'jmdict-1.json'));
-
-  if (!jmdictDataExists) {
-    await ACTIONS_FUNCS.jmdict();
-  }
-
-  let fileIndex = 1;
-  let isDone = false;
-
-  const dataDir = path.join(__dirname, '../../public/data');
-  await fs.ensureDir(dataDir);
-
-  const wordDataStream = fs.createWriteStream(
-    path.join(dataDir, 'dictionary.data'),
-  );
-
-  const wordIndex = {};
-  let currentStrLength = 0;
-
-  const indexEntry = (chars) => {
-    chars.forEach((char) => {
-      if (!wordIndex[char]) wordIndex[char] = [];
-      wordIndex[char].push(currentStrLength);
-    });
-  };
-
-  while (!isDone) {
-    const filePartPath = path.join(jmdictDir, `jmdict-${fileIndex}.json`);
-
-    const partExists = fs.existsSync(filePartPath);
-    if (!partExists) {
-      isDone = true;
-      break;
-    }
-
-    const filePart = await fs.readJSON(filePartPath);
-    filePart.records.forEach(({ id, sense, reading, kanji, rPrio, kPrio }) => {
-      const entry = {
-        id,
-        kanji,
-        rPrio,
-        kPrio,
-        reading,
-        sense: sense.map(({ pos, gloss }) => ({ pos, gloss })),
-      };
-
-      if (kanji) indexEntry(kanji);
-      if (reading) indexEntry(reading);
-
-      const entryStr = `${JSON.stringify(entry)}\n`;
-      currentStrLength += entryStr.length;
-
-      wordDataStream.write(entryStr);
-    });
-
-    fileIndex += 1;
-  }
-
-  await fs.writeJSON(path.join(dataDir, 'dictionary.idx'), wordIndex);
-
-  wordDataStream.end();
-}
-
 async function generateKanjiVG(version) {
   const apiResponse = await fetch(DATA_URL.KANJIVG_RELEASE);
   if (!apiResponse.ok) throw new Error(apiResponse.statusText);
@@ -718,10 +653,14 @@ async function generateKanjiVG(version) {
 
   await fs.emptyDir(kanjiVgDir);
   await fs.ensureDir(kanjiVgDir);
-  await fs.writeJSON(path.join(kanjiVgDir, 'kanjivg.json'), currEntries);
+  await fs.writeJSON(path.join(kanjiVgDir, 'kanjivg.json'), {
+    isLastFile: true,
+    records: currEntries,
+    counts: currEntries.length,
+  });
 
-  const [dateCreatedAt] = latestFile.created_at.split('T');
-  await writeMetadata({ kanjivg: { version, dateCreatedAt } });
+  const [dataCreatedAt] = latestFile.created_at.split('T');
+  await writeMetadata({ kanjivg: { version, dataCreatedAt } });
   await archiveFile('kanjivg');
 }
 
@@ -751,7 +690,6 @@ const ACTIONS_FUNCS = {
     const kanjiVgVersion = await getVersion('KanjiVG');
     await generateKanjiVG(kanjiVgVersion);
   },
-  initial: generateInitialData,
 };
 
 const AVAILABLE_OPTIONS = [...Object.keys(ACTIONS_FUNCS), 'all'];
@@ -791,7 +729,9 @@ const AVAILABLE_OPTIONS = [...Object.keys(ACTIONS_FUNCS), 'all'];
 
     IS_DEV = options.Dev;
 
-    let dictKeys = (options.Dict || 'all').trim();
+    let dictKeys = Array.isArray(options.Dict)
+      ? options.Dict
+      : (options.Dict || 'all').trim();
     if (dictKeys === 'all') dictKeys = Object.keys(ACTIONS_FUNCS);
 
     for (const key of dictKeys) {

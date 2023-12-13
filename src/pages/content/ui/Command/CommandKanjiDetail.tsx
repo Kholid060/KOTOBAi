@@ -1,6 +1,44 @@
 import { UiButton } from '@root/src/components/ui/button';
-import { DictKanjiEntry } from '@root/src/interface/dict.interface';
+import ViewKanjiStrokes from '@root/src/components/view/ViewKanjiStrokes';
+import {
+  DictKanjiEntry,
+  DictKanjiVGEntry,
+} from '@root/src/interface/dict.interface';
+import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import { ArrowLeftIcon, BookmarkIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
+function KanjiStrokes({ entry }: { entry: DictKanjiEntry }) {
+  const kanjiVgCacheRef = useRef<Record<number, DictKanjiVGEntry>>({});
+
+  const [strokes, setStrokes] = useState<DictKanjiVGEntry | null>(null);
+
+  useEffect(() => {
+    const cache = kanjiVgCacheRef.current[entry.id];
+    if (cache) {
+      setStrokes(cache);
+    } else {
+      RuntimeMessage.sendMessage('background:search-kanjivg', {
+        input: entry.id,
+      }).then(([kanjiStroke]) => {
+        setStrokes(kanjiStroke);
+        kanjiVgCacheRef.current[entry.id] = kanjiStroke;
+      });
+    }
+
+    return () => {
+      kanjiVgCacheRef.current = {};
+    };
+  }, [entry]);
+
+  if (!strokes) return;
+
+  return (
+    <div className="mt-6">
+      <ViewKanjiStrokes entry={strokes} />
+    </div>
+  );
+}
 
 function CommandKanjiDetail({
   entry,
@@ -81,6 +119,7 @@ function CommandKanjiDetail({
           </tbody>
         </table>
       </div>
+      <KanjiStrokes entry={entry} />
     </div>
   );
 }

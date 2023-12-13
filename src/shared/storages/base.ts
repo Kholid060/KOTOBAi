@@ -10,9 +10,10 @@ export enum StorageType {
 type ValueOrUpdate<D> = D | ((prev: D) => Promise<D> | D);
 
 export type BaseStorage<D> = {
+  $key: string;
   get: () => Promise<D>;
-  set: (value: ValueOrUpdate<D>) => Promise<void>;
   getSnapshot: () => D | null;
+  set: (value: ValueOrUpdate<D>) => Promise<void>;
   subscribe: (listener: () => void) => () => void;
 };
 
@@ -75,9 +76,10 @@ export function createStorage<D>(
   });
 
   return {
-    get: _getDataFromStorage,
     set,
-    getSnapshot,
     subscribe,
+    $key: key,
+    getSnapshot,
+    get: _getDataFromStorage,
   };
 }

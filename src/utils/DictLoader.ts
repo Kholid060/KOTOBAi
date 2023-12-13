@@ -1,13 +1,16 @@
+import JSZip from 'jszip';
 import { DICTIONARY_NAME } from '../shared/constant/constant';
 import dictDB from '../shared/db/dict.db';
-import dictStateStorage from '../shared/storages/dictStateStorage';
 import { api } from './api';
+import { DictEntry, DictFileEntries } from '../interface/dict.interface';
+import { getRandomArbitrary } from './helper';
 
 const DB_NAME_MAP = {
   [DICTIONARY_NAME.JMDICT]: 'words',
+  [DICTIONARY_NAME.KANJIDIC]: 'kanji',
   [DICTIONARY_NAME.ENAMDICT]: 'names',
+  [DICTIONARY_NAME.KANJIVG]: 'kanjivg',
 };
-
 class DictLoader {
   static async loadAllDictionaries() {
     await Promise.all(
@@ -15,48 +18,45 @@ class DictLoader {
     );
   }
 
-  static async loadDictionary(name: `${DICTIONARY_NAME}`) {
+  static async loadDictionary(
+    name: `${DICTIONARY_NAME}`,
+    onProgress?: (event: {
+      progress: number;
+      type: 'downloading' | 'parsing';
+    }) => void,
+  ) {
     console.log('LOADING DICT DATA: ', name);
 
-    if (name === DICTIONARY_NAME.KANJIDIC) {
-      const result = await api.getKanjidicData();
-      await dictDB.kanji.bulkPut(result.records);
-    } else {
-      const savedFileIndex = +(await dictStateStorage.get()).loadState[name];
-
-      let allFetched = false;
-      let fileIndex = Number.isNaN(savedFileIndex) ? 1 : savedFileIndex;
-
-      while (!allFetched) {
-        await dictStateStorage.set((val) => {
-          val.loadState[name] = fileIndex;
-          return val;
+    const maxDownloadProgress = getRandomArbitrary(5, 75);
+    const zipBuffer = await api.downloadDictionaryZip(name, {
+      onDownloadProgress({ progress }) {
+        onProgress?.({
+          type: 'downloading',
+          progress: progress * maxDownloadProgress,
         });
-
-        const result = await api.getDictPartData(
-          <DICTIONARY_NAME.JMDICT>name,
-          fileIndex,
-        );
-        while (result.records.length > 0) {
-          const currRecords = result.records.splice(0, 10_000);
-          await dictDB[DB_NAME_MAP[name]].bulkPut(currRecords);
-        }
-
-        if (result.isLastFile) allFetched = true;
-        else fileIndex += 1;
-
-        await dictStateStorage.set((val) => {
-          val.loadState[name] = 1;
-          return val;
-        });
-      }
-    }
-
-    const metadata = await api.getDictMetadata(name);
-    await dictDB.metadata.put({
-      metadata,
-      id: name,
+      },
     });
+
+    const zip = await JSZip.loadAsync(zipBuffer);
+    const files = Object.values(zip.files);
+
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      const fileStr = await file.async('string');
+      const kanjiData = JSON.parse(fileStr) as DictFileEntries<DictEntry>;
+
+      while (kanjiData.records.length > 0) {
+        const currRecords = kanjiData.records.splice(0, 10_000);
+        await dictDB[DB_NAME_MAP[name]].bulkPut(currRecords);
+      }
+
+      const currProgress =
+        ((index + 1) / files.length) * (100 - maxDownloadProgress);
+      onProgress?.({
+        type: 'parsing',
+        progress: maxDownloadProgress + currProgress,
+      });
+    }
   }
 }
 
