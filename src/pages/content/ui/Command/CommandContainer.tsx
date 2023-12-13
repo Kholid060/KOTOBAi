@@ -1,10 +1,10 @@
-import { useEventListener, useUpdateEffect } from 'usehooks-ts';
+import { useDebounce, useEventListener, useUpdateEffect } from 'usehooks-ts';
 import UiCommand from '@root/src/components/ui/command';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { AppContentContext } from '../app';
-import { debounce, sleep } from '@root/src/utils/helper';
+import { sleep } from '@root/src/utils/helper';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
-import { isKanji, toKana } from 'wanakana';
+import { isKanji, toHiragana } from 'wanakana';
 import { DictKanjiEntry } from '@root/src/interface/dict.interface';
 import {
   ArrowDownIcon,
@@ -19,6 +19,7 @@ import CommandContent, { CommandContentRef } from './CommandContent';
 import UiSeparator from '@root/src/components/ui/separator';
 import UiToggle from '@root/src/components/ui/toggle';
 import UiTooltip from '@root/src/components/ui/tooltip';
+import SharedSearchSelection from '@root/src/components/shared/SharedSearchSelection';
 
 export type CommandTabIds = 'all' | 'words' | 'kanji' | 'names';
 export interface CommandQueryResult {
@@ -85,14 +86,65 @@ const queriesMap = {
   },
 };
 
+function CommandInput({
+  value = '',
+  isLoading,
+  ime = false,
+  onValueChange,
+  ...props
+}: {
+  ime?: boolean;
+  value?: string;
+  isLoading?: boolean;
+  onValueChange?: (str: string) => void;
+} & React.DetailsHTMLAttributes<HTMLInputElement>) {
+  const [realVal, setRealVal] = useState(() => value);
+
+  const debounceValue = useDebounce(realVal, 300);
+
+  function onInputValueChange(str: string) {
+    let newVal = str;
+    if (ime) newVal = toHiragana(newVal, { IMEMode: true });
+
+    setRealVal(newVal);
+  }
+
+  useEffect(() => {
+    onValueChange?.(debounceValue);
+  }, [onValueChange, debounceValue]);
+  useEffect(() => {
+    setRealVal(value);
+  }, [value]);
+
+  console.log(realVal);
+
+  return (
+    <UiCommand.Input
+      value={realVal}
+      prependSlot={
+        <div className="mr-2 shrink-0">
+          {isLoading ? (
+            <Loader2Icon className="h-4 w-4 animate-spin opacity-60" />
+          ) : (
+            <SearchIcon className="h-4 w-4 opacity-50" />
+          )}
+        </div>
+      }
+      onValueChange={onInputValueChange}
+      className="font-sans-jp placeholder:font-sans"
+      placeholder="Search words, kanji, or names (append > to only search kanji)"
+      {...props}
+    />
+  );
+}
+
 function CommandContainer() {
   const appCtx = useContext(AppContentContext);
 
-  const convertRomaji = useRef(true);
-  const inputRef = useRef<HTMLInputElement>(null);
   const commandContentRef = useRef<CommandContentRef | null>(null);
 
   const [query, setQuery] = useState('');
+  const [imeInput, setImeInput] = useState(true);
   const [queryResult, setQueryResult] = useState<CommandQueryResult>({
     kanji: [],
     names: [],
@@ -102,20 +154,7 @@ function CommandContainer() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const onQueryChange = useCallback(
-    debounce((val: string) => {
-      let newQuery = val;
-      if (convertRomaji.current) newQuery = toKana(val);
-
-      setQuery(newQuery);
-    }, 500),
-    [],
-  );
-
   function onInputKeydown(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (isLoading) event.preventDefault();
-
     if (event.code !== 'Escape' || !commandContentRef.current?.activeItemDetail)
       return;
 
@@ -199,36 +238,33 @@ function CommandContainer() {
       container={appCtx.shadowRoot.firstElementChild as HTMLElement}
     >
       <div className="absolute top-0 left-0 -z-10 h-4/6 w-8/12 bg-gradient-to-br from-cyan-700/30 via-blue-700/30 dark:from-cyan-500/10 dark:via-blue-500/10 to-50% to-transparent"></div>
-      <UiCommand.Input
-        defaultValue={query}
-        ref={inputRef}
+      <CommandInput
+        value={query}
+        ime={imeInput}
+        isLoading={isLoading}
+        onValueChange={setQuery}
         onKeyDownCapture={onInputKeydown}
-        prependSlot={
-          <div className="mr-2 shrink-0">
-            {isLoading ? (
-              <Loader2Icon className="h-4 w-4 animate-spin opacity-60" />
-            ) : (
-              <SearchIcon className="h-4 w-4 opacity-50" />
-            )}
-          </div>
-        }
-        onValueChange={onQueryChange}
-        className="font-sans-jp placeholder:font-sans"
-        placeholder="Search words, kanji, or names (append > to only search kanji)"
       />
       <CommandContent
-        ref={commandContentRef}
         query={query}
+        ref={commandContentRef}
         queryResult={queryResult}
+      />
+      <SharedSearchSelection
+        onSearch={(query) => {
+          setQuery(query);
+        }}
+        shadowRoot={appCtx.shadowRoot}
+        portalEl={appCtx.shadowRoot.firstElementChild}
       />
       <div className="py-2 px-4 gap-2 text-xs text-muted-foreground flex items-center border-t">
         <UiTooltip label="Auto convert romaji into kana" side="right">
           <div>
             <UiToggle
               size="xs"
-              defaultPressed={convertRomaji.current}
+              pressed={imeInput}
               className="text-sm h-7"
-              onPressedChange={(val) => (convertRomaji.current = val)}
+              onPressedChange={setImeInput}
             >
               <span>A</span> <span>{'=>'}</span>
               <span className="font-sans-jp inline-block">あ</span>

@@ -7,7 +7,7 @@ export default function customDynamicImport(): PluginOption {
       if (!moduleId.includes('node_modules') && process.env.__FIREFOX__) {
         return {
           left: `import(browser.runtime.getURL('./') + `,
-          right: ".split('../').join(''));",
+          right: ".split('../').join(''))",
         };
       }
       return {
