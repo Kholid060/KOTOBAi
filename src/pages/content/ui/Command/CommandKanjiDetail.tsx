@@ -1,11 +1,13 @@
-import { UiButton } from '@root/src/components/ui/button';
+import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 import ViewKanjiStrokes from '@root/src/components/view/ViewKanjiStrokes';
 import {
   DictKanjiEntry,
   DictKanjiVGEntry,
 } from '@root/src/interface/dict.interface';
+import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
+import { KANJI_DICT_INDICES } from '@root/src/shared/constant/word.const';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
-import { ArrowLeftIcon, BookmarkIcon } from 'lucide-react';
+import { ArrowLeftIcon } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 function KanjiStrokes({ entry }: { entry: DictKanjiEntry }) {
@@ -45,8 +47,11 @@ function CommandKanjiDetail({
   onClose,
 }: {
   onClose?(): void;
+  onBookmark?(): void;
   entry: DictKanjiEntry;
 }) {
+  const indices = Object.entries(entry.dicts ?? []);
+
   return (
     <div className="px-4 py-2">
       <button
@@ -87,13 +92,9 @@ function CommandKanjiDetail({
           </div>
         </div>
         <div className="self-start">
-          <UiButton
-            className="ml-1 flex-shrink-0"
-            size="icon-xs"
-            variant="secondary"
-          >
-            <BookmarkIcon className="h-4 w-4" />
-          </UiButton>
+          <SharedBookmarkBtnContent
+            entry={{ id: entry.id, type: DICTIONARY_NAME.KANJIDIC }}
+          />
         </div>
       </div>
       <div className="mt-2">
@@ -120,6 +121,21 @@ function CommandKanjiDetail({
         </table>
       </div>
       <KanjiStrokes entry={entry} />
+      {indices.length > 0 && (
+        <details className="mt-4">
+          <summary>Dictionary Indices</summary>
+          <table>
+            <tbody>
+              {indices.map(([name, value]) => (
+                <tr key={name} className="rounded-t-md">
+                  <td className="border p-1">{value}</td>
+                  <td className="border p-1">{KANJI_DICT_INDICES[name]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )}
     </div>
   );
 }

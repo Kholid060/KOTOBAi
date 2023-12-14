@@ -236,7 +236,11 @@ function WordPopover() {
             className={activeTab === 'words' ? '' : 'hidden'}
           />
           <WordKanji
-            result={searchResult}
+            cursorText={
+              searchResult
+                ? searchResult.input.slice(0, searchResult.maxLength)
+                : ''
+            }
             onToggleDisable={(disable) =>
               setTabDisabled((prevState) => ({ ...prevState, kanji: disable }))
             }

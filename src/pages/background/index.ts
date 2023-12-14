@@ -10,6 +10,7 @@ import {
 import disableExtStorage from '@root/src/shared/storages/disableExtStorage';
 import disableExtBadge from '@root/src/utils/disableExtBadge';
 import { dictNameSearcher } from './messageHandler/dictNameSearcher';
+import bookmarkDb from '@root/src/shared/db/bookmark.db';
 
 Browser.runtime.onInstalled.addListener(BackgroundEventListener.onInstalled);
 
@@ -61,6 +62,22 @@ RuntimeMessage.onMessage('background:set-disabled-badge', ({ tab }) => {
 
   disableExtBadge.set({ tabId: tab.id });
 });
+
+RuntimeMessage.onMessage(
+  'background:bookmark-toggle',
+  ({ id, type, value }) => {
+    const bookmarkId = { id, type };
+
+    if (value) {
+      return bookmarkDb.addBookmark({ id: bookmarkId, type });
+    }
+
+    return bookmarkDb.deleteBookmark(bookmarkId);
+  },
+);
+RuntimeMessage.onMessage('background:bookmark-get', (id) =>
+  bookmarkDb.items.get(id),
+);
 
 reloadOnUpdate('pages/background');
 

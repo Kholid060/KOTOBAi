@@ -9,6 +9,33 @@ export const WORD_PRIORITY_WEIGHT = {
   gail2: 5,
 } as const;
 
+export const KANJI_DICT_INDICES = {
+  nelson_c: 'Nelson (Classic) number',
+  nelson_n: 'Nelson (New) number',
+  halpern_njecd: 'NJECD number',
+  halpern_kkd: 'Kodansha Kanji Dictionary number',
+  halpern_kkld: 'Kanji Learners Dictionary number',
+  halpern_kkld_2ed: 'Kanji Learners Dictionary number (2nd ed)',
+  heisig: 'Remembering The Kanji number',
+  heisig6: 'Remembering The Kanji number (6th ed)',
+  gakken: 'Gakken number',
+  oneill_names: "O'Neill's Japanese Names number",
+  oneill_kk: "O'Neill's Essential Kanji number",
+  moro: 'Morohashi number',
+  henshall: 'Henshall number',
+  sh_kk: 'Kanji & Kana number',
+  sh_kk2: 'Kanji & Kana number (2011 ed)',
+  sakade: 'Sakade number',
+  jf_cards: 'Japanese Kanji Flashcards number',
+  henshall3: 'Henshall Guide number',
+  tutt_cards: 'Tuttle Kanji Cards number',
+  crowley: 'Crowley number',
+  kanji_in_context: 'Kanji in Context number',
+  kodansha_compact: 'Kodansha Compact Kanji Guide number',
+  busy_people: 'Japanese For Busy People number',
+  maniette: 'Maniette number',
+} as const;
+
 export const NAME_TYPES = {
   ev: 'event',
   dei: 'deity',

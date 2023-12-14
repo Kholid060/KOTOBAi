@@ -19,6 +19,13 @@ export interface DictSearchKanjiVgOptions {
   input: number | number[];
 }
 
+export const DICTIONARY_TABLE_NAME_MAP = {
+  [DICTIONARY_NAME.JMDICT]: 'words',
+  [DICTIONARY_NAME.KANJIDIC]: 'kanji',
+  [DICTIONARY_NAME.ENAMDICT]: 'names',
+  [DICTIONARY_NAME.KANJIVG]: 'kanjivg',
+} as const;
+
 class DictDB extends Dexie {
   words!: Dexie.Table<DictWordEntry, number>;
   names!: Dexie.Table<DictNameEntry, number>;

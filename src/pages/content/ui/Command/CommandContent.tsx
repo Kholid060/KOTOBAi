@@ -42,8 +42,9 @@ const tabs: Array<{ name: string; id: CommandTabIds }> = [
 const itemDetailsMap: Record<
   ItemType,
   React.FC<{
-    entry: DictAllEntry;
     onClose?(): void;
+    onBookmark?(): void;
+    entry: DictAllEntry;
   }>
 > = {
   names: CommandNameDetail,
@@ -55,9 +56,10 @@ const CommandContent = forwardRef<
   CommandContentRef,
   {
     query: string;
+    children?: React.ReactNode;
     queryResult: CommandQueryResult;
   }
->(({ query, queryResult }, ref) => {
+>(({ query, queryResult, children }, ref) => {
   const [activeItem, setActiveItem] = useState<ActiveItem>({
     id: '',
     type: 'words',
@@ -100,7 +102,23 @@ const CommandContent = forwardRef<
           transition: 'height 250ms ease',
         }}
       >
-        {query && <UiCommand.Empty>No results found.</UiCommand.Empty>}
+        {children}
+        {!query.trim() && !hasResult && (
+          <div className="px-4 py-8 text-sm text-muted-foreground w-full mx-auto max-w-md">
+            Search options
+            <ul className="mt-3 list-disc pl-4 space-y-2">
+              <li>
+                Append <kbd className="kbd">{'>'}</kbd> to only search kanji
+              </li>
+              <li>
+                Append <kbd className="kbd">{'#'}</kbd> to only search words
+              </li>
+              <li>
+                Append <kbd className="kbd">{'@'}</kbd> to only search names
+              </li>
+            </ul>
+          </div>
+        )}
         {showTab && (
           <div className="px-4 pt-2 pb-1 flex gap-2 items-center">
             <UiToggleGroup

@@ -1,7 +1,7 @@
 import { memo, useRef } from 'react';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { UiButton } from '@root/src/components/ui/button';
-import { BookmarkIcon, Volume2Icon } from 'lucide-react';
+import { Volume2Icon } from 'lucide-react';
 import {
   WORD_POS_TAG,
   WORD_REASONS,
@@ -10,9 +10,11 @@ import {
   DictionaryWordEntryResult,
   SearchDictWordResult,
 } from '../../../background/messageHandler/dictWordSearcher';
-import UiTooltip from '@root/src/components/ui/tooltip';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
+import { BookmarkDictionaryPayload } from '@root/src/utils/RuntimeMessage';
+import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
+import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 
 function WordEntry({
   entry,
@@ -30,15 +32,9 @@ function WordEntry({
           entry={entry}
           className="text-lg leading-tight pt-0.5 flex-grow"
         />
-        <UiTooltip label="Bookmark word">
-          <UiButton
-            className="ml-1 flex-shrink-0"
-            size="icon-xs"
-            variant="secondary"
-          >
-            <BookmarkIcon className="h-4 w-4" />
-          </UiButton>
-        </UiTooltip>
+        <SharedBookmarkBtnContent
+          entry={{ id: entry.id, type: DICTIONARY_NAME.JMDICT }}
+        />
         {speechAvailable && (
           <UiButton
             variant="secondary"
@@ -103,6 +99,7 @@ function WordEntries({
   ...props
 }: {
   result: SearchDictWordResult;
+  onBookmark?: (payload: BookmarkDictionaryPayload) => void;
 } & React.DetailsHTMLAttributes<HTMLDivElement>) {
   const containerRef = useRef<HTMLDivElement>(null);
 

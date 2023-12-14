@@ -1,19 +1,18 @@
-import { SearchDictWordResult } from '../../../background/messageHandler/dictWordSearcher';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import { memo, useEffect, useRef, useState } from 'react';
 import { DictKanjiEntry } from '@root/src/interface/dict.interface';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
-import { UiButton } from '@root/src/components/ui/button';
-import { BookmarkIcon } from 'lucide-react';
 import { isKanji } from 'wanakana';
+import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
+import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 
 function WordKanji({
-  result,
   className,
+  cursorText,
   onToggleDisable,
   ...props
 }: {
-  result: SearchDictWordResult;
+  cursorText: string;
   onToggleDisable?: (disable: boolean) => void;
 } & React.DetailsHTMLAttributes<HTMLDivElement>) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -21,28 +20,23 @@ function WordKanji({
   const [kanjiList, setKanjiList] = useState<DictKanjiEntry[]>([]);
 
   useEffect(() => {
-    const [firstEntry] = result.entries;
-    if (!firstEntry?.kanji) {
+    if (!cursorText.trim()) {
       setKanjiList([]);
       return;
     }
 
-    const currKanji =
-      firstEntry.kanji.length === 1
-        ? firstEntry.kanji[0]
-        : firstEntry.kanji.find((kanji) => kanji === firstEntry.word);
-    if (!currKanji) {
-      setKanjiList([]);
-      return;
-    }
-
-    const kanji = currKanji.split('').reduce<Set<number>>((acc, char) => {
-      if (!isKanji(char)) return acc;
-
-      acc.add(char.codePointAt(0));
+    const kanji = cursorText.split('').reduce<Set<number>>((acc, char) => {
+      if (isKanji(char)) {
+        acc.add(char.codePointAt(0));
+      }
 
       return acc;
     }, new Set());
+    if (kanji.size === 0) {
+      setKanjiList([]);
+      return;
+    }
+
     RuntimeMessage.sendMessage('background:search-kanji', {
       by: 'id',
       maxResult: 10,
@@ -55,7 +49,7 @@ function WordKanji({
         console.error(error);
         setKanjiList([]);
       });
-  }, [result.entries]);
+  }, [cursorText]);
   useEffect(() => {
     onToggleDisable?.(kanjiList.length <= 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,13 +97,9 @@ function WordKanji({
               </div>
             </div>
             <div className="self-start">
-              <UiButton
-                className="ml-1 flex-shrink-0"
-                size="icon-xs"
-                variant="secondary"
-              >
-                <BookmarkIcon className="h-4 w-4" />
-              </UiButton>
+              <SharedBookmarkBtnContent
+                entry={{ id: kanji.id, type: DICTIONARY_NAME.KANJIDIC }}
+              />
             </div>
           </div>
           <div className="mt-2">

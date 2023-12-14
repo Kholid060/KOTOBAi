@@ -149,6 +149,8 @@ class ContentHandler {
       const searchResult = await RuntimeMessage.sendMessage(messageKey, {
         frameSource,
         input: text,
+        maxResult: 7,
+        maxQueryLimit: 2,
         type: NodeTypeChecker.isImage(cursorOffset.offsetNode)
           ? 'whole'
           : 'search-backward',

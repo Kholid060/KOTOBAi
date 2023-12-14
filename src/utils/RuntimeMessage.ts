@@ -11,6 +11,8 @@ import {
   DictSearchOptions,
 } from '../interface/dict.interface';
 import { DictionaryNameEntryResult } from '../pages/background/messageHandler/dictNameSearcher';
+import { DICTIONARY_NAME } from '../shared/constant/constant';
+import { BookmarkItem } from '../shared/db/bookmark.db';
 
 export interface WordFrameSource {
   frameURL: string;
@@ -31,7 +33,18 @@ export type DisableExtPayload =
   | { type: 'all'; disable: boolean }
   | { type: 'host'; host: string; disable: boolean };
 
+export interface BookmarkDictionaryPayload {
+  id: number;
+  value: boolean;
+  type:
+    | DICTIONARY_NAME.KANJIDIC
+    | DICTIONARY_NAME.ENAMDICT
+    | DICTIONARY_NAME.JMDICT;
+}
+
 export interface RuntimeMsgEvents {
+  'background:bookmark-get': (id: string) => BookmarkItem;
+  'background:bookmark-toggle': (payload: BookmarkDictionaryPayload) => void;
   'background:set-disabled-badge': () => void;
   'background:search-name': (
     detail: MessageSearchNameOpts,

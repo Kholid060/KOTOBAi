@@ -1,13 +1,14 @@
+import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 import { UiButton } from '@root/src/components/ui/button';
-import UiTooltip from '@root/src/components/ui/tooltip';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
+import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import {
   WORD_POS_TAG,
   WORD_REASONS,
 } from '@root/src/shared/constant/word.const';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
-import { ArrowLeftIcon, BookmarkIcon, Volume2Icon } from 'lucide-react';
+import { ArrowLeftIcon, Volume2Icon } from 'lucide-react';
 import { useRef } from 'react';
 
 function CommandWordDetail({
@@ -36,15 +37,9 @@ function CommandWordDetail({
           onMatchWord={(word) => (matchWord.current = word)}
           className="text-lg mt-px leading-tight flex-grow"
         />
-        <UiTooltip label="Bookmark word">
-          <UiButton
-            className="ml-2 flex-shrink-0"
-            size="icon-xs"
-            variant="secondary"
-          >
-            <BookmarkIcon className="h-4 w-4" />
-          </UiButton>
-        </UiTooltip>
+        <SharedBookmarkBtnContent
+          entry={{ id: entry.id, type: DICTIONARY_NAME.JMDICT }}
+        />
         {isSpeechAvailable && (
           <UiButton
             variant="secondary"

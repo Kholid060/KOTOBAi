@@ -228,6 +228,8 @@ async function generateJMDictData(version) {
             if (!entry.kanji) entry.kanji = [];
             if (!Object.hasOwn(tempStorage, idxPropName)) {
               tempStorage[idxPropName] = 0;
+            } else {
+              tempStorage[idxPropName] += 1;
             }
 
             entry.kanji.push(childNode.text());
@@ -243,7 +245,9 @@ async function generateJMDictData(version) {
             if (!entry.kInfo) entry.kInfo = {};
             if (!entry.kInfo[index]) entry.kInfo[index] = [];
 
-            entry.kInfo[index].push(childNode.text());
+            entry.kInfo[index].push(
+              getEntityText('ke_inf', childNode.toString()),
+            );
           }
         });
       },

@@ -1,6 +1,6 @@
 import { useDebounce, useEventListener, useUpdateEffect } from 'usehooks-ts';
 import UiCommand from '@root/src/components/ui/command';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
 import { AppContentContext } from '../app';
 import { sleep } from '@root/src/utils/helper';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
@@ -86,18 +86,15 @@ const queriesMap = {
   },
 };
 
-function CommandInput({
-  value = '',
-  isLoading,
-  ime = false,
-  onValueChange,
-  ...props
-}: {
-  ime?: boolean;
-  value?: string;
-  isLoading?: boolean;
-  onValueChange?: (str: string) => void;
-} & React.DetailsHTMLAttributes<HTMLInputElement>) {
+const CommandInput = forwardRef<
+  HTMLInputElement,
+  {
+    ime?: boolean;
+    value?: string;
+    isLoading?: boolean;
+    onValueChange?: (str: string) => void;
+  } & React.DetailsHTMLAttributes<HTMLInputElement>
+>(({ value = '', isLoading, ime = false, onValueChange, ...props }, ref) => {
   const [realVal, setRealVal] = useState(() => value);
 
   const debounceValue = useDebounce(realVal, 300);
@@ -116,10 +113,9 @@ function CommandInput({
     setRealVal(value);
   }, [value]);
 
-  console.log(realVal);
-
   return (
     <UiCommand.Input
+      ref={ref}
       value={realVal}
       prependSlot={
         <div className="mr-2 shrink-0">
@@ -136,11 +132,13 @@ function CommandInput({
       {...props}
     />
   );
-}
+});
+CommandInput.displayName = 'CommandInput';
 
 function CommandContainer() {
   const appCtx = useContext(AppContentContext);
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const commandContentRef = useRef<CommandContentRef | null>(null);
 
   const [query, setQuery] = useState('');
@@ -235,12 +233,18 @@ function CommandContainer() {
       shouldFilter={false}
       contentClass="max-w-2xl"
       onOpenChange={setIsOpen}
+      contentProps={{
+        onKeyDown: (event) => {
+          event.stopPropagation();
+        },
+      }}
       container={appCtx.shadowRoot.firstElementChild as HTMLElement}
     >
       <div className="absolute top-0 left-0 -z-10 h-4/6 w-8/12 bg-gradient-to-br from-cyan-700/30 via-blue-700/30 dark:from-cyan-500/10 dark:via-blue-500/10 to-50% to-transparent"></div>
       <CommandInput
         value={query}
         ime={imeInput}
+        ref={inputRef}
         isLoading={isLoading}
         onValueChange={setQuery}
         onKeyDownCapture={onInputKeydown}
@@ -249,10 +253,13 @@ function CommandContainer() {
         query={query}
         ref={commandContentRef}
         queryResult={queryResult}
-      />
+      >
+        {query && <UiCommand.Empty>No results found.</UiCommand.Empty>}
+      </CommandContent>
       <SharedSearchSelection
         onSearch={(query) => {
           setQuery(query);
+          inputRef.current?.focus();
         }}
         shadowRoot={appCtx.shadowRoot}
         portalEl={appCtx.shadowRoot.firstElementChild}

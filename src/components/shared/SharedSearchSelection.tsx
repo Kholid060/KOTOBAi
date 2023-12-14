@@ -62,7 +62,7 @@ function SharedSearchSelection({
       console.log(selection, range, rangeRect);
 
       setIsOpen(true);
-    }, 500);
+    }, 250);
     document.addEventListener('selectionchange', onSelectionChange);
 
     return () => {

@@ -55,7 +55,7 @@ const ViewKanjiStrokes = memo(
       <div className={cn('w-full overflow-x-auto', className)} {...props}>
         <div
           style={{ width: width * paths.length }}
-          className="flex divide-x-2 border-2 boredr-t border-b"
+          className="flex divide-x-2 border-2 border-t border-b rounded-md"
         >
           {paths.map((path, index) => (
             <svg
