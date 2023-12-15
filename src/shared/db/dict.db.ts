@@ -41,8 +41,8 @@ class DictDB extends Dexie {
     this.version(1).stores({
       kanjivg: 'id',
       metadata: 'id',
-      words: 'id, *kanji, *reading',
       names: 'id, *kanji, *reading',
+      words: 'id, *kanji, *reading',
       kanji: 'id, *reading.ja_on, *reading.ja_kun, *reading.nanori',
     });
   }

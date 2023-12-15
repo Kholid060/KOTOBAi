@@ -124,6 +124,7 @@ async function generateJMDictData(version) {
   }
   async function mapJMDictEntries(doc) {
     const MAX_ENTRIES_RECORD_SIZE = 10_000;
+    const COMMON_PRIO_TAG = ['news1', 'ichi1', 'spec1', 'spec2', 'gai1'];
 
     const filenames = [];
 
@@ -133,6 +134,10 @@ async function generateJMDictData(version) {
       if (!entry[propName][index]) entry[propName][index] = [];
 
       entry[propName][index].push(node.text());
+
+      if (COMMON_PRIO_TAG.includes(node.text())) {
+        entry.common = true;
+      }
     };
 
     const nodeHandler = {

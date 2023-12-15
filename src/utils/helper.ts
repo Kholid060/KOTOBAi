@@ -62,6 +62,14 @@ export function sleep(ms = 1000) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-export function getRandomArbitrary(min = 0, max = 10) {
-  return Math.random() * (max - min) + min;
+export function getRandomArbitrary(min = 0, max = 10, remainder?: number) {
+  let randomInteger = Math.floor(Math.random() * (max - min + 1) + min);
+
+  if (typeof remainder === 'number') {
+    const adjustment =
+      (remainder - ((randomInteger - min) % remainder)) % remainder;
+    randomInteger += adjustment;
+  }
+
+  return randomInteger;
 }

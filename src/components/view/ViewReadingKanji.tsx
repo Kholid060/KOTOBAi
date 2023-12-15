@@ -1,11 +1,25 @@
+import {
+  DictNameEntry,
+  DictWordEntry,
+} from '@root/src/interface/dict.interface';
 import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHandler/dictNameSearcher';
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { useEffect } from 'react';
 
-type DictEntry = DictionaryNameEntryResult | DictionaryWordEntryResult;
+type DictEntry =
+  | DictWordEntry
+  | DictNameEntry
+  | DictionaryNameEntryResult
+  | DictionaryWordEntryResult;
 
 function findMatchWord(entry: DictEntry, prop: 'kanji' | 'reading') {
+  if (!('word' in entry))
+    return {
+      match: '',
+      text: entry[prop]?.join('、') ?? '',
+    };
+
   const match = entry[prop].find(
     (str) => str.startsWith(entry.oriWord) || str.startsWith(entry.word),
   );

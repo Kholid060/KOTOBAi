@@ -2,20 +2,15 @@ import { useEffectOnce } from 'usehooks-ts';
 import { contentEventEmitter } from '../../content-handler/ContentHandler';
 import { useContext, useEffect, useRef, useState } from 'react';
 import WordPopoverBase, { WordPopoverRef } from './WordPopoverBase';
-import RuntimeMessage, {
-  DisableExtPayload,
-  WordFrameSource,
-} from '@root/src/utils/RuntimeMessage';
+import { WordFrameSource } from '@root/src/utils/RuntimeMessage';
 import { ClientRect } from '@root/src/interface/shared.interface';
 import { NodeTypeChecker } from '../../content-handler/content-handler-utils';
 import { SearchDictWordResult } from '../../../background/messageHandler/dictWordSearcher';
 import WordEntries from './WordEntries';
-import { ChevronDown, PowerIcon, SettingsIcon, X } from 'lucide-react';
+import { SettingsIcon, X } from 'lucide-react';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import WordKanji from './WordKanji';
 import { UiButton } from '@root/src/components/ui/button';
-import UiTooltip from '@root/src/components/ui/tooltip';
-import UiHoverCard from '@root/src/components/ui/hover-card';
 import { AppContentContext } from '../app';
 
 type TabItems = 'words' | 'kanji' | 'names';
@@ -78,12 +73,6 @@ function WordPopover() {
     setSearchResult(null);
 
     if (clearResult) contentEventEmitter.emit('clear-result');
-  }
-  function disableExtension(payload: DisableExtPayload) {
-    closePopup();
-    RuntimeMessage.sendMessage('background:disable-ext', payload).catch(
-      console.error,
-    );
   }
 
   useEffect(() => {
@@ -179,48 +168,6 @@ function WordPopover() {
             <UiButton variant="secondary" size="icon-xs" className="ml-1">
               <SettingsIcon className="h-4 w-4" />
             </UiButton>
-            <div className="border rounded-md ml-2 h-8 flex items-center">
-              <UiTooltip side="bottom" label="Disable extension">
-                <UiButton
-                  variant="ghost"
-                  size="icon-xs"
-                  className="rounded-r-none"
-                  onClick={() =>
-                    disableExtension({ type: 'all', disable: true })
-                  }
-                >
-                  <PowerIcon className="h-4 w-4" />
-                </UiButton>
-              </UiTooltip>
-              <hr className="w-px bg-border h-4/5" />
-              <UiHoverCard openDelay={100}>
-                <UiHoverCard.Trigger>
-                  <UiButton
-                    variant="ghost"
-                    size="icon-xs"
-                    className="rounded-l-none"
-                  >
-                    <ChevronDown className="h-4 w-4" />
-                  </UiButton>
-                </UiHoverCard.Trigger>
-                <UiHoverCard.Content align="end" className="p-2">
-                  <UiButton
-                    size="sm"
-                    variant="ghost"
-                    className="w-full justify-start text-left"
-                    onClick={() =>
-                      disableExtension({
-                        type: 'host',
-                        disable: true,
-                        host: window.location.hostname,
-                      })
-                    }
-                  >
-                    Disable only on this site
-                  </UiButton>
-                </UiHoverCard.Content>
-              </UiHoverCard>
-            </div>
             <button
               onPointerDown={(event) => {
                 event.preventDefault();

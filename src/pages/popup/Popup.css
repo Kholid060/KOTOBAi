@@ -1,4 +1,5 @@
 @import '@assets/style/theme.css';
+@import '@assets/style/fonts.css';
 
 html {
   min-width: 300px;

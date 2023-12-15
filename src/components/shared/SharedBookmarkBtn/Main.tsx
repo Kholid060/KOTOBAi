@@ -21,7 +21,7 @@ function SharedBookmarkBtnMain({
     bookmarkDb
       .toggleBookmark(
         {
-          id: entry.id,
+          id: entry,
           type: entry.type,
         },
         newValue,

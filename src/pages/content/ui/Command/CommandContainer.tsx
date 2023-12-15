@@ -1,4 +1,9 @@
-import { useDebounce, useEventListener, useUpdateEffect } from 'usehooks-ts';
+import {
+  useDebounce,
+  useEffectOnce,
+  useEventListener,
+  useUpdateEffect,
+} from 'usehooks-ts';
 import UiCommand from '@root/src/components/ui/command';
 import { forwardRef, useContext, useEffect, useRef, useState } from 'react';
 import { AppContentContext } from '../app';
@@ -160,13 +165,18 @@ function CommandContainer() {
     event.stopPropagation();
   }
 
-  useEventListener('keydown', (event) => {
-    const { ctrlKey, altKey, code } = event;
-    if (!ctrlKey || !altKey || code !== 'KeyA') return;
+  useEventListener(
+    'keydown',
+    (event) => {
+      const { ctrlKey, altKey, code } = event;
+      if (!ctrlKey || !altKey || code !== 'KeyA') return;
 
-    event.preventDefault();
-    setIsOpen(true);
-  });
+      event.preventDefault();
+      setIsOpen(true);
+    },
+    null,
+    { capture: true },
+  );
 
   useEffect(() => {
     if (appCtx.isDisabled) setIsOpen(false);
@@ -226,6 +236,16 @@ function CommandContainer() {
       }
     })();
   }, [query]);
+  useEffectOnce(() => {
+    const onMessage = () => {
+      setIsOpen(true);
+    };
+    RuntimeMessage.onMessage('content:open-search-command', onMessage);
+
+    return () => {
+      RuntimeMessage.removeListener('content:open-search-command');
+    };
+  });
 
   return (
     <UiCommand.Dialog

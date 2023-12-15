@@ -16,10 +16,10 @@ const manifest = {
   },
   action: {
     default_popup: 'src/pages/popup/index.html',
-    default_icon: 'icon-34.png',
+    default_icon: 'icon.png',
   },
   icons: {
-    128: 'icon-128.png',
+    128: 'icon.png',
   },
   content_scripts: [
     {
@@ -34,8 +34,7 @@ const manifest = {
         'assets/js/*.js',
         'assets/css/*.css',
         'assets/woff2/*.woff2',
-        'icon-128.png',
-        'icon-34.png',
+        'icon.png',
       ],
       matches: ['*://*/*'],
     },

@@ -38,6 +38,9 @@ export default defineConfig({
     isDev && watchRebuild(),
   ],
   publicDir,
+  define: {
+    IS_FIREFOX: Boolean(process.env.__FIREFOX__),
+  },
   build: {
     outDir,
     /** Can slowDown build speed. */

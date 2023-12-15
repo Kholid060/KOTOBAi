@@ -1,17 +1,13 @@
 import Browser from 'webextension-polyfill';
 
-type BadgeOpts = Pick<
-  Browser.Action.SetBadgeTextDetailsType,
-  'windowId' | 'tabId'
->;
+type IconOpts = Pick<Browser.Action.SetIconDetailsType, 'windowId' | 'tabId'>;
 
-async function setBadge(opts: BadgeOpts = {}) {
-  await Browser.action.setBadgeText({ text: 'OFF', ...opts });
-  await Browser.action.setBadgeBackgroundColor({ color: '#dc2626', ...opts });
+function setBadge(opts: IconOpts = {}) {
+  return Browser.action.setIcon({ path: '/icon-bw.png', ...opts });
 }
 
-async function removeBadge(opts: BadgeOpts = {}) {
-  await Browser.action.setBadgeText({ text: '', ...opts });
+function removeBadge(opts: IconOpts = {}) {
+  return Browser.action.setIcon({ path: '/icon.png', ...opts });
 }
 
 const disableExtBadge = {

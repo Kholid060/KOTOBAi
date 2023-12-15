@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  :root, :host {
+  :root, :host, .light {
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 
     --background: 0 0% 100%;

@@ -1,4 +1,4 @@
-import Browser from 'webextension-polyfill';
+import Browser, { Runtime } from 'webextension-polyfill';
 import { isObject } from './helper';
 import { SearchDictWordResult } from '../pages/background/messageHandler/dictWordSearcher';
 import { CursorPoint } from '../pages/content/content-handler/TextSearcher';
@@ -65,6 +65,7 @@ export interface RuntimeMsgEvents {
   'content:iframe-word-result': (
     result: SearchDictWordResult & { frameSource: WordFrameSource },
   ) => void;
+  'content:open-search-command': () => void;
   'content:disable-ext-state': (disabled: boolean) => void;
 }
 
@@ -80,19 +81,17 @@ class RuntimeMessage {
 
   constructor() {
     this.eventListeners = new Map();
-
-    this.init();
+    this.runtimeMessageListener = this.runtimeMessageListener.bind(this);
   }
 
-  private init() {
-    Browser.runtime.onMessage.addListener((message, sender) => {
-      if (!isObject(message) || !Object.hasOwn(message, 'name')) return;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private runtimeMessageListener(message: any, sender: Runtime.MessageSender) {
+    if (!isObject(message) || !Object.hasOwn(message, 'name')) return;
 
-      const callback = this.eventListeners.get(message.name);
-      if (!callback) return;
+    const callback = this.eventListeners.get(message.name);
+    if (!callback) return;
 
-      return callback(...(message.args ?? []), sender) as Promise<unknown>;
-    });
+    return callback(...(message.args ?? []), sender) as Promise<unknown>;
   }
 
   onMessage<T extends keyof RuntimeMsgEvents>(
@@ -108,7 +107,22 @@ class RuntimeMessage {
   ) {
     this.eventListeners.set(name, callback);
 
+    const hasListener = Browser.runtime.onMessage.hasListener(
+      this.runtimeMessageListener,
+    );
+    if (!hasListener) {
+      Browser.runtime.onMessage.addListener(this.runtimeMessageListener);
+    }
+
     return this.onMessage;
+  }
+
+  removeListener(name: keyof RuntimeMsgEvents) {
+    this.eventListeners.delete(name);
+
+    if (this.eventListeners.size === 0) {
+      Browser.runtime.onMessage.removeListener(this.runtimeMessageListener);
+    }
   }
 
   sendMessage<T extends keyof RuntimeMsgEvents>(
