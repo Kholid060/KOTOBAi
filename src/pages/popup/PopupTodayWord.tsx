@@ -113,7 +113,7 @@ function PopupTodayWord({
                 {todayWord.reading[0]}
               </p>
             )}
-            <ul className="font-sans list-disc text-sm mt-2 line-clamp-4 hover:line-clamp-none">
+            <ul className="font-sans list-decimal text-sm mt-2 line-clamp-4 hover:line-clamp-none">
               {todayWord.sense.map((sense, idx) => (
                 <li key={idx} className="first-letter:capitalize leading-tight">
                   {sense.gloss.join('; ')}

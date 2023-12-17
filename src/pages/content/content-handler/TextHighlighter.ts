@@ -25,13 +25,32 @@ type PrevSelection =
       endNode: Node;
       startNode: Node;
     };
+
+const STYLE_ID = 'extension-name';
+
 class TextHighlighter {
   private selectedText: string | null;
   private prevSelection: PrevSelection;
 
+  private highlightApiAvailable: boolean;
+  private highlightStyleEl?: HTMLStyleElement;
+
   constructor() {
     this.selectedText = null;
     this.prevSelection = null;
+    this.highlightApiAvailable = 'Highlight' in window && 'highlights' in CSS;
+  }
+
+  private injectHighlightStyle() {
+    if (this.highlightStyleEl && this.highlightStyleEl.parentElement) return;
+
+    const styleEl = document.createElement('style');
+    styleEl.id = STYLE_ID;
+    styleEl.textContent = `::highlight(${STYLE_ID}) { background-color: #0ea5e9; color: #f0f9ff }`;
+
+    document.head.appendChild(styleEl);
+
+    this.highlightStyleEl = styleEl;
   }
 
   highlighText({
@@ -43,6 +62,8 @@ class TextHighlighter {
     textRange: TextRange[];
     cursorOffset: CursorOffset;
   }) {
+    CSS?.highlights?.delete(STYLE_ID);
+
     const documentCtx = cursorOffset.offsetNode.ownerDocument;
     if (!documentCtx || NodeTypeChecker.isImage(cursorOffset.offsetNode))
       return;
@@ -106,6 +127,19 @@ class TextHighlighter {
 
       endNode = item.node;
       endOffset = item.start + length;
+    }
+
+    if (this.highlightApiAvailable) {
+      const range = new StaticRange({
+        endOffset: endOffset,
+        endContainer: endNode,
+        startOffset: startOffset,
+        startContainer: startNode,
+      });
+      CSS.highlights.set(STYLE_ID, new window.Highlight(range));
+
+      this.injectHighlightStyle();
+      return;
     }
 
     const range = documentCtx.createRange();
@@ -190,6 +224,10 @@ class TextHighlighter {
   }
 
   clearHighlight() {
+    if (this.highlightApiAvailable) {
+      CSS.highlights.delete(STYLE_ID);
+    }
+
     this.restorePrevSelection();
 
     this.selectedText = null;

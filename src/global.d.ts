@@ -33,3 +33,17 @@ declare module '*.json' {
 declare interface ShadowRoot {
   getSelection?(): Selection;
 }
+
+interface Highlight {
+  prototype: Highlight;
+  // eslint-disable-next-line @typescript-eslint/no-misused-new
+  new (...ranges: Array<StaticRange>): Highlight;
+}
+
+declare interface Window {
+  Highlight?: Highlight;
+}
+
+declare namespace CSS {
+  const highlights: Map<string, Highlight> | undefined;
+}
