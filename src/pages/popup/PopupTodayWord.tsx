@@ -109,7 +109,7 @@ function PopupTodayWord({
                 <span className="inline-block">{todayWord.reading[0]}</span>
               </p>
             ) : (
-              <p className="font-semibold leading-tight text-xl">
+              <p className="font-semibold leading-tight text-xl tracking-tight">
                 {todayWord.reading[0]}
               </p>
             )}

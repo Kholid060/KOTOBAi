@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client';
 import refreshOnUpdate from 'virtual:reload-on-update-in-view';
 import './index.css';
 import React from 'react';
-import App from './app';
+import App from './App';
 
 refreshOnUpdate('pages/dashboard');
 

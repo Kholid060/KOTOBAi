@@ -3,6 +3,7 @@ import router from './router';
 import { useEffectOnce } from 'usehooks-ts';
 import themeStorage from '@root/src/shared/storages/themeStorage';
 import dictDB from '@root/src/shared/db/dict.db';
+import { UiTooltipProvider } from '@root/src/components/ui/tooltip';
 
 function App() {
   useEffectOnce(() => {
@@ -17,7 +18,11 @@ function App() {
 
   console.log(dictDB);
 
-  return <RouterProvider router={router} />;
+  return (
+    <UiTooltipProvider>
+      <RouterProvider router={router} />
+    </UiTooltipProvider>
+  );
 }
 
 export default App;

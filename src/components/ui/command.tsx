@@ -56,14 +56,19 @@ const UiCommandDialog = ({
 
 interface UiCommandInputProps
   extends React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> {
+  wrapperClass?: string;
+  appendSlot?: React.ReactNode;
   prependSlot?: React.ReactNode;
 }
 
 const UiCommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   UiCommandInputProps
->(({ className, prependSlot, ...props }, ref) => (
-  <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+>(({ className, prependSlot, wrapperClass, appendSlot, ...props }, ref) => (
+  <div
+    className={cn('flex items-center border-b px-3', wrapperClass)}
+    cmdk-input-wrapper=""
+  >
     {prependSlot ? (
       prependSlot
     ) : (
@@ -77,6 +82,7 @@ const UiCommandInput = React.forwardRef<
       )}
       {...props}
     />
+    {appendSlot}
   </div>
 ));
 
