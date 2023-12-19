@@ -81,6 +81,7 @@ export default async function searchDictEntries(query: string) {
   if (!trimmedQuery) return null;
 
   const queryType = getDictQueryType(query);
+  console.log(query, queryType);
   if (queryType !== 'all' && trimmedQuery.length <= 1) return;
 
   if (queryType === 'all') {

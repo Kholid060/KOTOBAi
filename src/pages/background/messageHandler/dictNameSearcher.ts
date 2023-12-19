@@ -52,16 +52,16 @@ export function dictNameSearcher() {
     while (copyInput.length) {
       if (result.length > maxResult) break;
 
+      const input = [copyInput];
+      const oriWord = oriInput.slice(0, copyInput.length);
+      if (oriWord !== copyInput) input.push(oriWord);
+
       const names = await dictDB.searchNames({
-        input: copyInput,
+        input,
         maxResult: maxQueryLimit,
       });
-      const mappedNames = mapNameEntries(
-        names,
-        copyInput,
-        oriInput.slice(0, copyInput.length),
-      );
-      result.concat(mappedNames);
+      const mappedNames = mapNameEntries(names, copyInput, oriWord);
+      result.push(...mappedNames);
 
       copyInput = copyInput.slice(0, -1);
     }

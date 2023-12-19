@@ -12,6 +12,7 @@ import { cn } from '@root/src/shared/lib/shadcn-utils';
 import WordKanji from './WordKanji';
 import { UiButton } from '@root/src/components/ui/button';
 import { AppContentContext } from '../app';
+import WordNames from './WordNames';
 
 type TabItems = 'words' | 'kanji' | 'names';
 const TAB_ITEMS: { name: string; id: TabItems }[] = [
@@ -192,6 +193,17 @@ function WordPopover() {
               setTabDisabled((prevState) => ({ ...prevState, kanji: disable }))
             }
             className={activeTab === 'kanji' ? '' : 'hidden'}
+          />
+          <WordNames
+            cursorText={
+              searchResult
+                ? searchResult.input.slice(0, searchResult.maxLength)
+                : ''
+            }
+            onToggleDisable={(disable) =>
+              setTabDisabled((prevState) => ({ ...prevState, names: disable }))
+            }
+            className={activeTab === 'names' ? '' : 'hidden'}
           />
         </>
       )}

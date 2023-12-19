@@ -119,7 +119,7 @@ function DashboardSearchInput() {
         />
         {isOpen && query && (
           <UiCommand.List
-            className="absolute w-full max-h-80 bg-popover pt-1 rounded-lg border top-14 z-50"
+            className="absolute w-full max-h-80 bg-popover pt-1 rounded-lg shadow-xl border top-14 z-50"
             style={{
               minHeight: '150px',
               height: 'var(--cmdk-list-height)',

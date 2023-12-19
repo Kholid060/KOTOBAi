@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import libxmljs from 'libxmljs';
 import archiver from 'archiver';
+import { isKanji } from 'wanakana';
 import readline from 'node:readline/promises';
 
 import { fileURLToPath } from 'url';
@@ -124,7 +125,7 @@ async function generateJMDictData(version) {
   }
   async function mapJMDictEntries(doc) {
     const MAX_ENTRIES_RECORD_SIZE = 10_000;
-    const COMMON_PRIO_TAG = ['news1', 'ichi1', 'spec1', 'spec2', 'gai1'];
+    const COMMON_PRIO_TAG = ['news1', 'ichi1', 'spec1', 'gai1'];
 
     const filenames = [];
 
@@ -302,6 +303,20 @@ async function generateJMDictData(version) {
         if (!handler) return;
 
         handler.apply(nodeHandler, [childNode, entry, tempStorage]);
+
+        if (entry.kanji) {
+          const kanjiToken = new Set();
+          entry.kanji.forEach((kanji) => {
+            const tokens = kanji.split('');
+            tokens.forEach((token) => {
+              if (!isKanji(token)) return;
+
+              kanjiToken.add(token);
+            });
+          });
+
+          entry.kToken = [...kanjiToken];
+        }
       });
 
       currEntries.push(entry);
@@ -548,6 +563,20 @@ async function generateENAMDICTData(version) {
       });
 
       currEntries.push(entry);
+
+      if (entry.kanji) {
+        const kanjiToken = new Set();
+        entry.kanji.forEach((kanji) => {
+          const tokens = kanji.split('');
+          tokens.forEach((token) => {
+            if (!isKanji(token)) return;
+
+            kanjiToken.add(token);
+          });
+        });
+
+        entry.kToken = [...kanjiToken];
+      }
 
       if (currEntries.length >= MAX_ENTRIES)
         await saveCurrEntries(index + 1 >= childNodes.length);

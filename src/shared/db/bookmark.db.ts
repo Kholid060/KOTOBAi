@@ -1,11 +1,6 @@
 import Dexie from 'dexie';
 import { DICTIONARY_NAME } from '../constant/constant';
-
-export interface BookmarkItem {
-  id: string;
-  note?: string;
-  type: DICTIONARY_NAME;
-}
+import { BookmarkItem } from '../../interface/bookmark.interface';
 
 type BookmarkIdPayload = string | { id: number; type: DICTIONARY_NAME };
 type BookmarkPayload = Omit<BookmarkItem, 'id'> & { id: BookmarkIdPayload };
@@ -23,7 +18,8 @@ class BookmarkDb extends Dexie {
   constructor() {
     super('bookmarks');
     this.version(1).stores({
-      items: 'id, type',
+      folders: 'id',
+      items: 'id, type, folderId',
     });
   }
 

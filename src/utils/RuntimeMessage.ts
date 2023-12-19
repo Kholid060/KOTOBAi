@@ -12,7 +12,7 @@ import {
 } from '../interface/dict.interface';
 import { DictionaryNameEntryResult } from '../pages/background/messageHandler/dictNameSearcher';
 import { DICTIONARY_NAME } from '../shared/constant/constant';
-import { BookmarkItem } from '../shared/db/bookmark.db';
+import { BookmarkItem } from '../interface/bookmark.interface';
 
 export interface WordFrameSource {
   frameURL: string;

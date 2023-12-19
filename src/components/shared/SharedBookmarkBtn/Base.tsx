@@ -14,7 +14,7 @@ function SharedBookmarkBtnBase({
   ...props
 }: UiButtonProps & { isBookmarked: boolean }) {
   return (
-    <UiTooltip label={isBookmarked ? 'Remove bookmark' : 'Bookmark word'}>
+    <UiTooltip label={isBookmarked ? 'Remove bookmark' : 'Bookmark'}>
       <UiButton
         className="ml-1 flex-shrink-0"
         size="icon-xs"

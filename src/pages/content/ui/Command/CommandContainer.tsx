@@ -122,7 +122,6 @@ function CommandContainer() {
         words: [],
       });
       setQuery('');
-      RuntimeMessage.removeListener('content:open-search-command');
     };
   });
 
@@ -235,6 +234,11 @@ function CommandContainerWrapper() {
       contentProps={{
         onKeyDown: (event) => {
           event.stopPropagation();
+
+          const { ctrlKey, shiftKey, metaKey, code } = event;
+          if (ctrlKey || shiftKey || metaKey || code !== 'Escape') return;
+
+          setIsOpen(false);
         },
       }}
       container={appCtx.shadowRoot.firstElementChild as HTMLElement}

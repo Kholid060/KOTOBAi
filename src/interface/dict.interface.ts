@@ -37,6 +37,7 @@ export interface DictWordEntry {
   sense: DictWordEntrySense[];
   rPrio?: DictWordEntryPriority;
   kPrio?: DictWordEntryPriority;
+  kInfo: Record<number, string[]>;
 }
 
 export interface DictWordLocalEntry extends DictWordEntry {
