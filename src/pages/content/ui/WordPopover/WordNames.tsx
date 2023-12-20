@@ -65,7 +65,13 @@ function WordKanji({
               className="text-lg leading-tight pt-0.5 flex-grow"
             />
             <SharedBookmarkBtnContent
-              entry={{ id: name.id, type: DICTIONARY_NAME.ENAMDICT }}
+              entry={{
+                id: name.id,
+                kanji: name.kanji,
+                reading: name.reading,
+                meaning: name.tr.detail,
+                type: DICTIONARY_NAME.ENAMDICT,
+              }}
             />
             {isSpeechAvailable && (
               <UiButton
@@ -82,10 +88,10 @@ function WordKanji({
             {name.tr.detail.map((detail, idx) => (
               <li key={idx}>
                 <span
-                  title={NAME_TYPES[name.tr.type[idx]].value}
+                  title={NAME_TYPES[name.tr.type[idx]]}
                   className="text-xs px-1 py-0.5 bg-fuchsia-400/20 dark:text-fuchsia-400 text-fuchsia-700 rounded inline-block"
                 >
-                  {NAME_TYPES[name.tr.type[idx]].name || name.tr.type[idx]}
+                  {NAME_TYPES[name.tr.type[idx]] || name.tr.type[idx]}
                 </span>{' '}
                 <span>{detail}</span>
               </li>

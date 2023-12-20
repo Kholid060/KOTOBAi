@@ -63,10 +63,10 @@ function ViewReadingKanji({
       {matchReading && (
         <span
           className={cn(
-            'mr-2 dark:text-emerald-400 text-emerald-00',
+            'mr-2',
             matchReading.match
-              ? 'font-semibold text-emerald-700'
-              : 'text-emerald-700/90',
+              ? 'font-semibold dark:text-emerald-400 text-emerald-700'
+              : 'dark:text-emerald-400/90 text-emerald-700/90',
           )}
         >
           {matchReading.match || matchReading.text}

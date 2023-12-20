@@ -564,20 +564,6 @@ async function generateENAMDICTData(version) {
 
       currEntries.push(entry);
 
-      if (entry.kanji) {
-        const kanjiToken = new Set();
-        entry.kanji.forEach((kanji) => {
-          const tokens = kanji.split('');
-          tokens.forEach((token) => {
-            if (!isKanji(token)) return;
-
-            kanjiToken.add(token);
-          });
-        });
-
-        entry.kToken = [...kanjiToken];
-      }
-
       if (currEntries.length >= MAX_ENTRIES)
         await saveCurrEntries(index + 1 >= childNodes.length);
     }

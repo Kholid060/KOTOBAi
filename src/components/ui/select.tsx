@@ -69,7 +69,7 @@ export const UiSelectRoot = React.forwardRef<
           <span className="truncate flex-1 text-left">
             <SelectPrimitive.Value placeholder={placeholder} />
           </span>
-          <SelectPrimitive.Icon>
+          <SelectPrimitive.Icon className="ml-1">
             <ChevronDown />
           </SelectPrimitive.Icon>
         </SelectPrimitive.Trigger>

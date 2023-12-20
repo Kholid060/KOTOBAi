@@ -11,18 +11,22 @@ function SharedBookmarkBtnContent({
   const [isLoading, setIsLoading] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
-  const bookmarkId = `${entry.type}:${entry.id}`;
-
   function toggleBookmark() {
     setIsLoading(true);
 
     const newValue = !isBookmarked;
 
-    RuntimeMessage.sendMessage('background:bookmark-toggle', {
-      id: entry.id,
-      value: newValue,
-      type: entry.type,
-    })
+    RuntimeMessage.sendMessage(
+      'background:bookmark-toggle',
+      {
+        type: entry.type,
+        entryId: entry.id,
+        kanji: entry.kanji,
+        meaning: entry.meaning,
+        reading: entry.reading,
+      },
+      !isBookmarked,
+    )
       .then(() => {
         onValueChange?.(newValue);
         setIsBookmarked(newValue);
@@ -37,7 +41,8 @@ function SharedBookmarkBtnContent({
       try {
         const bookmarkItem = await RuntimeMessage.sendMessage(
           'background:bookmark-get',
-          bookmarkId,
+          { entryId: entry.id, type: entry.type },
+          true,
         );
 
         setIsBookmarked(Boolean(bookmarkItem));
@@ -45,7 +50,7 @@ function SharedBookmarkBtnContent({
         console.error(error);
       }
     })();
-  }, [bookmarkId]);
+  }, [entry]);
 
   return (
     <SharedBookmarkBtnBase

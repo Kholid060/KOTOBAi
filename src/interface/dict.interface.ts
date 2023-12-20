@@ -18,6 +18,13 @@ export type DictWordEntryPriority = Record<number, DictWordPriority[]>;
 
 export type DictMetadataRecord = Record<DICTIONARY_NAME, DictMetadata>;
 
+export interface DictEntryMap {
+  [DICTIONARY_NAME.KANJIVG]: null;
+  [DICTIONARY_NAME.JMDICT]: DictWordEntry;
+  [DICTIONARY_NAME.ENAMDICT]: DictNameEntry;
+  [DICTIONARY_NAME.KANJIDIC]: DictKanjiEntry;
+}
+
 export interface DictWordEntryExample {
   text: string;
   sourceId: string;

@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from 'react';
 import themeStorage, { ThemeList } from '../storages/themeStorage';
+import useStorage from '../hooks/useStorage';
 
 interface ThemeContext {
   theme: ThemeList;
@@ -11,6 +12,9 @@ export const ThemeContext = createContext<ThemeContext>({
   setTheme() {},
 });
 
+const isSystemDarkTheme = () =>
+  window.matchMedia('(prefers-color-scheme: dark)').matches;
+
 export function ThemeProvider({
   children,
   container = document.documentElement,
@@ -18,11 +22,8 @@ export function ThemeProvider({
   children?: React.ReactNode;
   container?: HTMLElement;
 }) {
-  const [theme, setTheme] = useState<ThemeList>(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light',
-  );
+  const currTheme = useStorage(themeStorage);
+  const [theme, setTheme] = useState<ThemeList>(currTheme);
 
   function setCurrentTheme(theme: ThemeList) {
     setTheme(theme);
@@ -30,7 +31,11 @@ export function ThemeProvider({
   }
 
   useEffect(() => {
-    container.classList.toggle('dark', theme === 'dark');
+    const isDarkTheme =
+      theme === 'system' ? isSystemDarkTheme() : theme === 'dark';
+
+    container.classList.toggle('dark', isDarkTheme);
+    container.style.setProperty('color-scheme', isDarkTheme ? 'dark' : 'light');
   }, [container, theme]);
 
   return (

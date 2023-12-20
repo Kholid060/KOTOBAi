@@ -5,7 +5,7 @@ import PopupDisableBtn from './PopupDisableBtn';
 import { useState } from 'react';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import Browser from 'webextension-polyfill';
-import PopupTodayWord from './PopupTodayWord';
+import SharedTodayWord from '@root/src/components/shared/SharedTodayWord';
 
 function Popup() {
   const [isExtDisabled, setExtDisabled] = useState(false);
@@ -77,7 +77,7 @@ function Popup() {
         </div>
         <PopupDisableBtn onValueChanged={setExtDisabled} />
       </div>
-      <PopupTodayWord className="mt-4" />
+      <SharedTodayWord className="mt-4" />
     </div>
   );
 }

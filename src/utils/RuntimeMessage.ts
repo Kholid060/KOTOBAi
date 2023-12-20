@@ -13,6 +13,10 @@ import {
 import { DictionaryNameEntryResult } from '../pages/background/messageHandler/dictNameSearcher';
 import { DICTIONARY_NAME } from '../shared/constant/constant';
 import { BookmarkItem } from '../interface/bookmark.interface';
+import {
+  BookmarkAddPayload,
+  BookmarkIdPayload,
+} from '../shared/db/bookmark.db';
 
 export interface WordFrameSource {
   frameURL: string;
@@ -43,8 +47,14 @@ export interface BookmarkDictionaryPayload {
 }
 
 export interface RuntimeMsgEvents {
-  'background:bookmark-get': (id: string) => BookmarkItem;
-  'background:bookmark-toggle': (payload: BookmarkDictionaryPayload) => void;
+  'background:bookmark-get': <T extends boolean>(
+    id: BookmarkIdPayload,
+    boolean?: T,
+  ) => T extends true ? boolean : BookmarkItem[];
+  'background:bookmark-toggle': (
+    payload: BookmarkAddPayload & { id?: string },
+    value: boolean,
+  ) => void;
   'background:set-disabled-badge': () => void;
   'background:search-name': (
     detail: MessageSearchNameOpts,

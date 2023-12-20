@@ -50,6 +50,7 @@ function CommandKanjiDetail({
   onBookmark?(): void;
   entry: DictKanjiEntry;
 }) {
+  const kanji = String.fromCodePoint(entry.id);
   const indices = Object.entries(entry.dicts ?? []);
 
   return (
@@ -63,7 +64,7 @@ function CommandKanjiDetail({
       </button>
       <div className="flex items-center gap-2 mt-2">
         <p className="text-6xl dark:text-indigo-400 text-indigo-600 font-sans-jp">
-          {String.fromCodePoint(entry.id)}
+          {kanji}
         </p>
         <div className="flex-grow">
           <div className="text-xs grid grid-cols-2 gap-1 ml-1">
@@ -93,7 +94,13 @@ function CommandKanjiDetail({
         </div>
         <div className="self-start">
           <SharedBookmarkBtnContent
-            entry={{ id: entry.id, type: DICTIONARY_NAME.KANJIDIC }}
+            entry={{
+              reading: [],
+              id: entry.id,
+              kanji: [kanji],
+              meaning: entry.meanings,
+              type: DICTIONARY_NAME.KANJIDIC,
+            }}
           />
         </div>
       </div>

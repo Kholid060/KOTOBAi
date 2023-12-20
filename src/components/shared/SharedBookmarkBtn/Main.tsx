@@ -13,32 +13,39 @@ function SharedBookmarkBtnMain({
 
   const bookmarkId = `${entry.type}:${entry.id}`;
 
-  function toggleBookmark() {
-    setIsLoading(true);
+  async function toggleBookmark() {
+    try {
+      setIsLoading(true);
 
-    const newValue = !isBookmarked;
-
-    bookmarkDb
-      .toggleBookmark(
-        {
-          id: entry,
+      const newValue = !isBookmarked;
+      if (newValue) {
+        await bookmarkDb.addBookmark({
           type: entry.type,
-        },
-        newValue,
-      )
-      .then(() => {
-        onValueChange?.(newValue);
-        setIsBookmarked(newValue);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+          entryId: entry.id,
+          kanji: entry.kanji,
+          meaning: entry.meaning,
+          reading: entry.reading,
+        });
+      } else {
+        await bookmarkDb.removeBookmarks({
+          entryId: entry.id,
+          type: entry.type,
+        });
+      }
+
+      onValueChange?.(newValue);
+      setIsBookmarked(newValue);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {
     (async () => {
       try {
-        const bookmarkItem = await bookmarkDb.getBookmark(bookmarkId);
+        const bookmarkItem = await bookmarkDb.getBookmarks(bookmarkId);
         setIsBookmarked(Boolean(bookmarkItem));
       } catch (error) {
         console.error(error);

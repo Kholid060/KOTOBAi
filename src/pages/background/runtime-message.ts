@@ -28,16 +28,14 @@ RuntimeMessage.onMessage('background:set-disabled-badge', ({ tab }) => {
 
 RuntimeMessage.onMessage(
   'background:bookmark-toggle',
-  ({ id, type, value }) => {
-    const bookmarkId = { id, type };
-
-    if (value) {
-      return bookmarkDb.addBookmark({ id: bookmarkId, type });
-    }
-
-    return bookmarkDb.deleteBookmark(bookmarkId);
+  async (payload, value) => {
+    if (value) await bookmarkDb.addBookmark(payload);
+    else await bookmarkDb.removeBookmarks(payload);
   },
 );
-RuntimeMessage.onMessage('background:bookmark-get', (id) =>
-  bookmarkDb.items.get(id),
-);
+RuntimeMessage.onMessage('background:bookmark-get', async (id, boolean) => {
+  const result = await bookmarkDb.getBookmarks(id);
+  if (typeof boolean === 'boolean' && boolean) return Boolean(result[0]);
+
+  return result;
+});

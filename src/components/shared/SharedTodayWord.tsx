@@ -2,9 +2,11 @@ import UiSkeleton from '@root/src/components/ui/skeleton';
 import { DictWordEntry } from '@root/src/interface/dict.interface';
 import { LOCALSTORAGE_KEYS } from '@root/src/shared/constant/constant';
 import dictDB from '@root/src/shared/db/dict.db';
+import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { getRandomArbitrary, parseJSON } from '@root/src/utils/helper';
 import dayjs from 'dayjs';
+import { Volume2Icon } from 'lucide-react';
 import { useState } from 'react';
 import { useEffectOnce } from 'usehooks-ts';
 
@@ -38,12 +40,18 @@ async function findRandomWord(retryCount = 0) {
   return await findRandomWord(retryCount + 1);
 }
 
-function PopupTodayWord({
+function SharedTodayWord({
+  onOpen,
+  onClick,
   className,
   ...props
-}: React.DetailsHTMLAttributes<HTMLDivElement>) {
+}: React.DetailsHTMLAttributes<HTMLDivElement> & {
+  onOpen?: (entryId: number) => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [todayWord, setTodayWord] = useState<DictWordEntry>(null);
+
+  const { speak, isSpeechAvailable } = useSpeechSynthesis();
 
   useEffectOnce(() => {
     (async () => {
@@ -87,9 +95,13 @@ function PopupTodayWord({
   return (
     <div
       className={cn(
-        'bg-primary text-primary-foreground relative p-4 cursor-pointer rounded-lg shadow-xl',
+        'bg-primary text-primary-foreground relative p-4 cursor-pointer rounded-lg',
         className,
       )}
+      onClick={(event) => {
+        onClick?.(event);
+        if (todayWord) onOpen?.(todayWord.id);
+      }}
       {...props}
     >
       {isLoading || !todayWord ? (
@@ -103,16 +115,30 @@ function PopupTodayWord({
             Today&apos;s word
           </p>
           <div className="font-sans-jp mt-1">
-            {todayWord.kanji ? (
-              <p className="leading-tight text-xl">
-                <span className="font-semibold">{todayWord.kanji[0]}</span>{' '}
-                <span className="inline-block">{todayWord.reading[0]}</span>
-              </p>
-            ) : (
-              <p className="font-semibold leading-tight text-xl tracking-tight">
-                {todayWord.reading[0]}
-              </p>
-            )}
+            <div className="flex items-start">
+              {todayWord.kanji ? (
+                <p className="leading-tight text-xl flex-grow">
+                  <span className="font-semibold">{todayWord.kanji[0]}</span>{' '}
+                  <span className="inline-block">{todayWord.reading[0]}</span>
+                </p>
+              ) : (
+                <p className="font-semibold leading-tight text-xl tracking-tight flex-grow">
+                  {todayWord.reading[0]}
+                </p>
+              )}
+              {isSpeechAvailable && (
+                <button
+                  className="mt-px"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    speak(todayWord.reading[0]);
+                  }}
+                >
+                  <Volume2Icon className="h-5 w-5" />
+                </button>
+              )}
+            </div>
             <ul className="font-sans list-decimal text-sm mt-2 line-clamp-4 hover:line-clamp-none">
               {todayWord.sense.map((sense, idx) => (
                 <li key={idx} className="first-letter:capitalize leading-tight">
@@ -127,4 +153,4 @@ function PopupTodayWord({
   );
 }
 
-export default PopupTodayWord;
+export default SharedTodayWord;

@@ -4,6 +4,7 @@ import { UiTooltipProvider } from '@root/src/components/ui/tooltip';
 import { useEffectOnce } from 'usehooks-ts';
 import { contentEventEmitter } from '../content-handler/ContentHandler';
 import CommandContainer from './Command/CommandContainer';
+import { ThemeProvider } from '@root/src/shared/context/theme.context';
 
 export const AppContentContext = createContext<{
   isDisabled?: boolean;
@@ -30,10 +31,12 @@ export default function App({
 
   return (
     <UiTooltipProvider>
-      <AppContentContext.Provider value={{ shadowRoot, isDisabled }}>
-        <WordPopover />
-        <CommandContainer />
-      </AppContentContext.Provider>
+      <ThemeProvider>
+        <AppContentContext.Provider value={{ shadowRoot, isDisabled }}>
+          <WordPopover />
+          <CommandContainer />
+        </AppContentContext.Provider>
+      </ThemeProvider>
     </UiTooltipProvider>
   );
 }

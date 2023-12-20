@@ -33,7 +33,13 @@ function WordEntry({
           className="text-lg leading-tight pt-0.5 flex-grow"
         />
         <SharedBookmarkBtnContent
-          entry={{ id: entry.id, type: DICTIONARY_NAME.JMDICT }}
+          entry={{
+            id: entry.id,
+            kanji: entry.kanji,
+            reading: entry.reading,
+            type: DICTIONARY_NAME.JMDICT,
+            meaning: entry.sense.map((sense) => sense.gloss.join('; ')),
+          }}
         />
         {speechAvailable && (
           <UiButton

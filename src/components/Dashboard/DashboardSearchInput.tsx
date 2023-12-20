@@ -40,6 +40,7 @@ function DashboardSearchInput() {
   const debouncedQuery = useDebounce(query, 500);
 
   function appendFilter(symbol: string) {
+    d;
     const querySymbols = Object.keys(dictQueryTypeSymbol);
     setQuery(
       symbol + (querySymbols.includes(query[0]) ? query.slice(1) : query),
@@ -88,6 +89,7 @@ function DashboardSearchInput() {
     return () => {
       setSearchResult(null);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery]);
 
   return (

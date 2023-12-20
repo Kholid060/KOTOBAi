@@ -1,53 +1,47 @@
 import Dexie from 'dexie';
-import { DICTIONARY_NAME } from '../constant/constant';
 import { BookmarkItem } from '../../interface/bookmark.interface';
 
-type BookmarkIdPayload = string | { id: number; type: DICTIONARY_NAME };
-type BookmarkPayload = Omit<BookmarkItem, 'id'> & { id: BookmarkIdPayload };
+export type BookmarkIdPayload =
+  | BookmarkItem['id']
+  | BookmarkItem['id'][]
+  | Pick<BookmarkItem, 'type' | 'entryId'>;
 
-const getBookmarkId = (payload: BookmarkIdPayload) =>
-  typeof payload === 'string' ? payload : `${payload.type}:${payload.id}`;
-const getBookmarkItem = ({ id, ...detail }: BookmarkPayload) => ({
-  id: getBookmarkId(id),
-  ...detail,
-});
+export type BookmarkAddPayload = Pick<
+  BookmarkItem,
+  'type' | 'folderId' | 'kanji' | 'meaning' | 'reading' | 'note' | 'entryId'
+>;
 
 class BookmarkDb extends Dexie {
-  items!: Dexie.Table<BookmarkItem, string>;
+  items!: Dexie.Table<BookmarkItem, number>;
 
   constructor() {
     super('bookmarks');
     this.version(1).stores({
-      folders: 'id',
-      items: 'id, type, folderId',
+      folders: '++id',
+      items: '++id, type, entryId, *folderId, status',
     });
   }
 
-  addBookmark(payload: BookmarkPayload) {
-    return this.items.put(getBookmarkItem(payload));
+  addBookmark(payload: BookmarkAddPayload) {
+    return this.items.put({
+      ...payload,
+      status: 'learn',
+      createdAt: new Date().toString(),
+    });
   }
 
-  deleteBookmark(payload: BookmarkIdPayload) {
-    return this.items.delete(getBookmarkId(payload));
+  async getBookmarks(ids: BookmarkIdPayload) {
+    if (Array.isArray(ids)) return this.items.bulkGet(ids);
+    if (typeof ids === 'number') return [await this.items.get(ids)];
+
+    return this.items.where(ids).toArray();
   }
 
-  getBookmark(id: BookmarkIdPayload) {
-    return this.items.get(getBookmarkId(id));
-  }
+  async removeBookmarks(ids: BookmarkIdPayload) {
+    if (Array.isArray(ids)) return this.items.bulkDelete(ids);
+    if (typeof ids === 'number') return [await this.items.delete(ids)];
 
-  async toggleBookmark(payload: BookmarkPayload, force?: boolean) {
-    const item = getBookmarkItem(payload);
-
-    const isExists =
-      typeof force === 'boolean' ? !force : await this.items.get(item.id);
-    if (isExists) {
-      await this.items.delete(item.id);
-      return false;
-    }
-
-    await this.items.add(item);
-
-    return true;
+    return this.items.where(ids).delete();
   }
 }
 

@@ -98,7 +98,13 @@ function WordKanji({
             </div>
             <div className="self-start">
               <SharedBookmarkBtnContent
-                entry={{ id: kanji.id, type: DICTIONARY_NAME.KANJIDIC }}
+                entry={{
+                  id: kanji.id,
+                  reading: [],
+                  meaning: kanji.meanings,
+                  type: DICTIONARY_NAME.KANJIDIC,
+                  kanji: [String.fromCodePoint(kanji.id)],
+                }}
               />
             </div>
           </div>
