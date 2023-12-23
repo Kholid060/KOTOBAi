@@ -3,7 +3,8 @@ import DashboardNavigation from '@root/src/components/Dashboard/DashboardNavigat
 import DashboardSearchInput from '@root/src/components/Dashboard/DashboardSearchInput';
 import SharedTodayWord from '@root/src/components/shared/SharedTodayWord';
 import UiCard from '@root/src/components/ui/card';
-import { useNavigate } from 'react-router-dom';
+import { FileStackIcon, PencilLineIcon } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -17,16 +18,29 @@ function DashboardPage() {
         </div>
       </div>
       <div className="w-full max-w-5xl mx-auto mt-12">
-        <div className="flex gap-4">
+        <div className="flex gap-4 h-40">
           <SharedTodayWord
-            className="w-72"
+            className="w-64"
             onOpen={(entryId) => navigate(`/words/${entryId}`)}
           />
-          <UiCard className="flex-grow h-48">
+          <div className="w-48 flex flex-col gap-4">
+            <Link
+              to="/flashcards"
+              className="bg-indigo-400 dark:bg-indigo-500 flex items-center rounded-lg px-2 gap-2 relative flex-grow dark:highlight-white/10"
+            >
+              <FileStackIcon className="h-12 w-12 flex-shrink-0 dark:text-indigo-400 text-indigo-500" />
+              <p className="text-lg">Flashcards</p>
+            </Link>
+            <button className="relative bg-emerald-400 dark:bg-emerald-500 flex items-center rounded-lg px-2 gap-2 flex-grow dark:highlight-white/10">
+              <PencilLineIcon className="h-12 w-12 flex-shrink-0 dark:text-emerald-400 text-emerald-500" />
+              <p className="text-lg">Practice</p>
+            </button>
+          </div>
+          <UiCard className="flex-grow h-full">
             <UiCard.Content>Stats</UiCard.Content>
           </UiCard>
         </div>
-        <DashboardBookmarkList className="mt-4" />
+        <DashboardBookmarkList className="mt-8" />
       </div>
     </div>
   );

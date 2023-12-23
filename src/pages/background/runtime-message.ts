@@ -1,5 +1,5 @@
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
-import bookmarkDb from '@root/src/shared/db/bookmark.db';
+import bookmarkDB from '@root/src/shared/db/bookmark.db';
 import { IS_FIREFOX } from '@root/src/shared/constant/constant';
 import disableExtBadge from '@root/src/utils/disableExtBadge';
 import {
@@ -29,12 +29,12 @@ RuntimeMessage.onMessage('background:set-disabled-badge', ({ tab }) => {
 RuntimeMessage.onMessage(
   'background:bookmark-toggle',
   async (payload, value) => {
-    if (value) await bookmarkDb.addBookmark(payload);
-    else await bookmarkDb.removeBookmarks(payload);
+    if (value) await bookmarkDB.addBookmark(payload);
+    else await bookmarkDB.removeBookmarks(payload);
   },
 );
 RuntimeMessage.onMessage('background:bookmark-get', async (id, boolean) => {
-  const result = await bookmarkDb.getBookmarks(id);
+  const result = await bookmarkDB.getBookmarks(id);
   if (typeof boolean === 'boolean' && boolean) return Boolean(result[0]);
 
   return result;

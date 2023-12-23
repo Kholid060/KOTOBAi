@@ -40,7 +40,6 @@ function DashboardSearchInput() {
   const debouncedQuery = useDebounce(query, 500);
 
   function appendFilter(symbol: string) {
-    d;
     const querySymbols = Object.keys(dictQueryTypeSymbol);
     setQuery(
       symbol + (querySymbols.includes(query[0]) ? query.slice(1) : query),

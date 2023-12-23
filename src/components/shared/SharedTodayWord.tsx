@@ -95,7 +95,7 @@ function SharedTodayWord({
   return (
     <div
       className={cn(
-        'bg-primary text-primary-foreground relative p-4 cursor-pointer rounded-lg',
+        'bg-primary text-primary-foreground relative p-4 cursor-pointer rounded-lg dark:highlight-white/10',
         className,
       )}
       onClick={(event) => {

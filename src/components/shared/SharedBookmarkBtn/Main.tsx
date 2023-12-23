@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import SharedBookmarkBtnBase, { SharedBookmarkBtnProps } from './Base';
-import bookmarkDb from '@root/src/shared/db/bookmark.db';
+import bookmarkDB from '@root/src/shared/db/bookmark.db';
 
 function SharedBookmarkBtnMain({
   entry,
@@ -11,15 +11,13 @@ function SharedBookmarkBtnMain({
   const [isLoading, setIsLoading] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
 
-  const bookmarkId = `${entry.type}:${entry.id}`;
-
   async function toggleBookmark() {
     try {
       setIsLoading(true);
 
       const newValue = !isBookmarked;
       if (newValue) {
-        await bookmarkDb.addBookmark({
+        await bookmarkDB.addBookmark({
           type: entry.type,
           entryId: entry.id,
           kanji: entry.kanji,
@@ -27,7 +25,7 @@ function SharedBookmarkBtnMain({
           reading: entry.reading,
         });
       } else {
-        await bookmarkDb.removeBookmarks({
+        await bookmarkDB.removeBookmarks({
           entryId: entry.id,
           type: entry.type,
         });
@@ -45,13 +43,16 @@ function SharedBookmarkBtnMain({
   useEffect(() => {
     (async () => {
       try {
-        const bookmarkItem = await bookmarkDb.getBookmarks(bookmarkId);
+        const bookmarkItem = await bookmarkDB.getBookmarks({
+          entryId: entry.id,
+          type: entry.type,
+        });
         setIsBookmarked(Boolean(bookmarkItem));
       } catch (error) {
         console.error(error);
       }
     })();
-  }, [bookmarkId]);
+  }, [entry]);
 
   return (
     <SharedBookmarkBtnBase

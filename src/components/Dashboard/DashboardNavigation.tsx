@@ -10,6 +10,7 @@ import { useContext } from 'react';
 import { ThemeContext } from '@root/src/shared/context/theme.context';
 import UiDropdownMenu from '../ui/dropdown-menu';
 import { ThemeList } from '@root/src/shared/storages/themeStorage';
+import { cn } from '@root/src/shared/lib/shadcn-utils';
 
 const themeIcon = {
   light: SunIcon,
@@ -61,7 +62,7 @@ function DashboardNavigation() {
               <UiDropdownMenu.Item
                 key={item}
                 onClick={() => setTheme(item)}
-                className="first-letter:capitalize"
+                className={cn('capitalize', item === theme && 'bg-primary/20')}
               >
                 {item}
               </UiDropdownMenu.Item>

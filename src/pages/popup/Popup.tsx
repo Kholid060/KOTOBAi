@@ -10,12 +10,12 @@ import SharedTodayWord from '@root/src/components/shared/SharedTodayWord';
 function Popup() {
   const [isExtDisabled, setExtDisabled] = useState(false);
 
-  async function openDashboard() {
+  async function openDashboard(path = '') {
     try {
-      const extURL = Browser.runtime.getURL('');
+      const EXT_URL = Browser.runtime.getURL('');
       const [dashboardTab] = await Browser.tabs.query({
         currentWindow: true,
-        url: `${extURL}/**/*`,
+        url: `${EXT_URL}/**/*`,
       });
       if (dashboardTab) {
         await Browser.tabs.update(dashboardTab.id, { active: true });
@@ -24,7 +24,7 @@ function Popup() {
 
       await Browser.tabs.create({
         active: true,
-        url: `${extURL}/src/pages/dashboard/index.html`,
+        url: `${EXT_URL}src/pages/dashboard/index.html#${path}`,
       });
     } catch (error) {
       console.error(error);
@@ -33,7 +33,8 @@ function Popup() {
   async function searchEntry() {
     try {
       if (isExtDisabled) {
-        // Open dashboard
+        await openDashboard();
+        window.close();
         return;
       }
 
@@ -43,11 +44,16 @@ function Popup() {
       });
       if (!currentTab?.url) return;
 
-      await RuntimeMessage.sendMessageToTab({
-        frameId: 0,
-        tabId: currentTab.id,
-        name: 'content:open-search-command',
-      });
+      if (!currentTab.url.startsWith('http')) {
+        await openDashboard();
+      } else {
+        await RuntimeMessage.sendMessageToTab({
+          frameId: 0,
+          tabId: currentTab.id,
+          name: 'content:open-search-command',
+        });
+      }
+
       window.close();
     } catch (error) {
       console.error(error);
@@ -64,7 +70,7 @@ function Popup() {
         <div className="flex items-center border rounded-lg flex-grow bg-muted/50">
           <UiButton
             variant="ghost"
-            onClick={openDashboard}
+            onClick={() => openDashboard()}
             className="flex-1 text-foreground text-left justify-start"
           >
             <HomeIcon className="h-5 w-5" />
@@ -77,7 +83,10 @@ function Popup() {
         </div>
         <PopupDisableBtn onValueChanged={setExtDisabled} />
       </div>
-      <SharedTodayWord className="mt-4" />
+      <SharedTodayWord
+        className="mt-4"
+        onOpen={(entryId) => openDashboard(`/words/${entryId}`)}
+      />
     </div>
   );
 }

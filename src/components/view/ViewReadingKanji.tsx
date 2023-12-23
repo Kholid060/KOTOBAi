@@ -43,8 +43,8 @@ function ViewReadingKanji({
   const matchReading = entry.reading && findMatchWord(entry, 'reading');
 
   useEffect(() => {
-    onMatchWord?.(matchKanji?.match || matchReading?.match);
-  }, [matchKanji, matchReading, onMatchWord]);
+    onMatchWord?.(matchKanji?.match ? entry.reading[0] : matchReading?.match);
+  }, [matchKanji, matchReading, onMatchWord, entry.reading]);
 
   return (
     <p className={cn('font-sans-jp leading-tight', className)} {...props}>

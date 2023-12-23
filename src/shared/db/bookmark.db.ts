@@ -18,7 +18,7 @@ class BookmarkDb extends Dexie {
     super('bookmarks');
     this.version(1).stores({
       folders: '++id',
-      items: '++id, type, entryId, *folderId, status',
+      items: '++id, type, entryId, *folderId, status, lastReviewedAt',
     });
   }
 
@@ -27,6 +27,7 @@ class BookmarkDb extends Dexie {
       ...payload,
       status: 'learn',
       createdAt: new Date().toString(),
+      lastReviewedAt: new Date().toString(),
     });
   }
 
@@ -45,6 +46,6 @@ class BookmarkDb extends Dexie {
   }
 }
 
-const bookmarkDb = new BookmarkDb();
+const bookmarkDB = new BookmarkDb();
 
-export default bookmarkDb;
+export default bookmarkDB;

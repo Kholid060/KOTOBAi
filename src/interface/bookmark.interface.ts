@@ -1,7 +1,13 @@
 import { DICTIONARY_NAME } from '../shared/constant/constant';
 import { DictEntryMap } from './dict.interface';
 
-export type BookmarkItemStatus = 'learn' | 'know' | 'learned';
+export enum BOOKMARK_ITEM_STATUS {
+  KNOW = 'know',
+  LEARN = 'learn',
+  LEARNED = 'learned',
+}
+
+export type BookmarkItemStatus = `${BOOKMARK_ITEM_STATUS}`;
 
 export interface BookmarkItem<T extends DICTIONARY_NAME = DICTIONARY_NAME> {
   type: T;
@@ -12,6 +18,7 @@ export interface BookmarkItem<T extends DICTIONARY_NAME = DICTIONARY_NAME> {
   reading: string[];
   meaning: string[];
   createdAt: string;
+  lastReviewedAt: string;
   entry?: DictEntryMap[T];
   status: BookmarkItemStatus;
   folderId?: string[] | null;

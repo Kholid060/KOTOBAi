@@ -31,7 +31,7 @@ export default function App({
 
   return (
     <UiTooltipProvider>
-      <ThemeProvider>
+      <ThemeProvider container={shadowRoot.firstElementChild as HTMLElement}>
         <AppContentContext.Provider value={{ shadowRoot, isDisabled }}>
           <WordPopover />
           <CommandContainer />

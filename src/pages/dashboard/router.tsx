@@ -3,6 +3,7 @@ import DashboardPage from './routes';
 import SettingsIndex from './routes/Settings';
 import SettingsDictData from './routes/settings/SettingsDictData';
 import WelcomePage from './routes/welcome';
+import FlashcardsPage from './routes/flashcards';
 
 const router = createHashRouter([
   {
@@ -12,6 +13,10 @@ const router = createHashRouter([
   {
     path: '/welcome',
     element: <WelcomePage />,
+  },
+  {
+    path: '/flashcards',
+    element: <FlashcardsPage />,
   },
   {
     path: '/settings',

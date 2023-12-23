@@ -48,11 +48,8 @@ function BookmarksTable({ bookmarks }: { bookmarks: BookmarkItem[] }) {
       <table className="w-full">
         <tbody className="divide-y divide-border/70">
           {bookmarks.map((bookmark) => (
-            <tr
-              key={bookmark.id}
-              className="hover:bg-muted/50 transition-colors group"
-            >
-              <td className="font-sans-jp p-3">
+            <tr key={bookmark.id} className="hover:bg-muted/50 group">
+              <td className="font-sans-jp p-3 max-w-[12rem]">
                 <p className="dark:text-indigo-400 line-clamp-1 text-indigo-600 leading-tight">
                   {bookmark.kanji?.join('、')}
                 </p>
@@ -152,7 +149,7 @@ function DashboardBookmarkList(props: React.HTMLAttributes<HTMLDivElement>) {
           <UiInput
             value={query}
             className="w-56"
-            placeholder="Search"
+            placeholder="Search..."
             onChange={(event) => setQuery(event.target.value)}
           />
           <UiSelect
