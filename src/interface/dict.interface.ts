@@ -39,6 +39,7 @@ export interface DictWordEntrySense {
 
 export interface DictWordEntry {
   id: number;
+  common: boolean;
   kanji?: string[];
   reading: string[];
   sense: DictWordEntrySense[];

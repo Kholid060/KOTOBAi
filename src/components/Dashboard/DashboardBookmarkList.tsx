@@ -13,6 +13,8 @@ import UiInput from '../ui/input';
 import UiSelect from '../ui/select';
 import Dexie from 'dexie';
 import { useDebounce } from 'usehooks-ts';
+import { Link } from 'react-router-dom';
+import { DICTIONARY_TABLE_NAME_MAP } from '@root/src/shared/db/dict.db';
 
 const BOOKMARK_ITEM_STATUS: Record<
   BookmarkItemStatus,
@@ -50,12 +52,18 @@ function BookmarksTable({ bookmarks }: { bookmarks: BookmarkItem[] }) {
           {bookmarks.map((bookmark) => (
             <tr key={bookmark.id} className="hover:bg-muted/50 group">
               <td className="font-sans-jp p-3 max-w-[12rem]">
-                <p className="dark:text-indigo-400 line-clamp-1 text-indigo-600 leading-tight">
-                  {bookmark.kanji?.join('、')}
-                </p>
-                <p className="dark:text-emerald-400 line-clamp-1 text-emerald-700 leading-tight">
-                  {bookmark.reading.join('、')}
-                </p>
+                <Link
+                  to={`/${DICTIONARY_TABLE_NAME_MAP[bookmark.type]}/${
+                    bookmark.entryId
+                  }`}
+                >
+                  <p className="dark:text-indigo-400 line-clamp-1 text-indigo-600 leading-tight">
+                    {bookmark.kanji?.join('、')}
+                  </p>
+                  <p className="dark:text-emerald-400 line-clamp-1 text-emerald-700 leading-tight">
+                    {bookmark.reading.join('、')}
+                  </p>
+                </Link>
               </td>
               <td className="max-w-[12rem] first-letter:capitalize text-muted-foreground p-3">
                 <p className="line-clamp-2">{bookmark.meaning.join('; ')}</p>

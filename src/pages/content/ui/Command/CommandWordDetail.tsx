@@ -1,12 +1,10 @@
 import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 import { UiButton } from '@root/src/components/ui/button';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
+import ViewWordSense from '@root/src/components/view/ViewWordSense';
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
-import {
-  WORD_POS_TAG,
-  WORD_REASONS,
-} from '@root/src/shared/constant/word.const';
+import { WORD_REASONS } from '@root/src/shared/constant/word.const';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { ArrowLeftIcon, Volume2Icon } from 'lucide-react';
 import { useRef } from 'react';
@@ -67,45 +65,9 @@ function CommandWordDetail({
               {WORD_REASONS[reason]}
             </span>
           ))}
-          <ul className="mt-2 list-decimal pl-4 space-y-2">
-            {entry.sense.map((sense, idx) => (
-              <li key={idx}>
-                <span className="inline space-x-0.5">
-                  {sense.pos.map((pos) => (
-                    <span
-                      key={pos}
-                      title={WORD_POS_TAG[pos].value}
-                      className="text-xs px-1 py-0.5 bg-fuchsia-400/20 dark:text-fuchsia-400 text-fuchsia-700 rounded inline-block"
-                    >
-                      {WORD_POS_TAG[pos].name || pos}
-                    </span>
-                  ))}
-                </span>
-                <p className="leading-tight inline">
-                  {' '}
-                  {sense.gloss.join('; ')}{' '}
-                </p>
-                {sense.example && (
-                  <div className="mt-px text-muted-foreground">
-                    <p className="font-sans-jp">
-                      {sense.example.sent[0]?.text}
-                      {isSpeechAvailable && (
-                        <Volume2Icon
-                          className="h-4 w-4 cursor-pointer  inline-block"
-                          onClick={() => speak(sense.example.sent[0]?.text)}
-                        />
-                      )}
-                    </p>
-                    <p className="leading-tight">
-                      {sense.example.sent[1]?.text}
-                    </p>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
         </div>
       )}
+      <ViewWordSense sense={entry.sense} className="mt-2 space-y-1" />
       {(entry.kanji?.length > 1 || entry.reading?.length > 1) && (
         <div className="mt-4">
           <p className="text-muted-foreground">Other forms </p>

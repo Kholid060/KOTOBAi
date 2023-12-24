@@ -43,7 +43,7 @@ function SharedBookmarkBtnMain({
   useEffect(() => {
     (async () => {
       try {
-        const bookmarkItem = await bookmarkDB.getBookmarks({
+        const [bookmarkItem] = await bookmarkDB.getBookmarks({
           entryId: entry.id,
           type: entry.type,
         });

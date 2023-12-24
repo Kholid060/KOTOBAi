@@ -12,7 +12,12 @@ import UiTooltip from '../ui/tooltip';
 import { useDebounce, useOnClickOutside } from 'usehooks-ts';
 import { sleep } from '@root/src/utils/helper';
 import SharedDictSearchList from '../shared/SharedDictSearchList';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  createSearchParams,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom';
+import SharedSearchSelection from '../shared/SharedSearchSelection';
 
 const searchFilters = [
   { name: 'Words', symbol: '#' },
@@ -25,12 +30,12 @@ function DashboardSearchInput() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
-  const [searchParamss, setSearchParams] = useSearchParams({ query: '' });
+  const [searchParams, setSearchParams] = useSearchParams({ query: '' });
 
   const [isOpen, setIsOpen] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [query, setQuery] = useState(() => searchParamss.get('query'));
+  const [query, setQuery] = useState(() => searchParams.get('query'));
   const [searchResult, setSearchResult] = useState<DictQueryResult | null>(
     null,
   );
@@ -132,7 +137,18 @@ function DashboardSearchInput() {
               <SharedDictSearchList
                 query={query}
                 result={searchResult}
-                onSelect={({ id, type }) => navigate(`/${type}/${id}`)}
+                onSelect={({ id, type, entry, word }) =>
+                  navigate(
+                    {
+                      pathname: `/${type}/${id}`,
+                      search: createSearchParams({
+                        ...Object.fromEntries(searchParams.entries()),
+                        word,
+                      }).toString(),
+                    },
+                    { state: { dictEntry: entry } },
+                  )
+                }
               />
             )}
           </UiCommand.List>
@@ -166,6 +182,7 @@ function DashboardSearchInput() {
           </div>
         </UiTooltip>
       </div>
+      <SharedSearchSelection onSearch={setQuery} />
     </>
   );
 }

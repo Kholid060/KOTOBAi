@@ -7,8 +7,8 @@ function CommandNameEntries({
   onSelect,
 }: {
   query: string;
-  onSelect?: (id: string) => void;
   entries: DictionaryNameEntryResult[];
+  onSelect?: (id: string, entry?: DictionaryNameEntryResult) => void;
 }) {
   if (entries.length <= 0) return null;
 
@@ -18,8 +18,8 @@ function CommandNameEntries({
         <UiCommand.Item
           key={entry.id}
           className="block !py-2"
-          onSelect={onSelect}
           value={entry.id.toString()}
+          onSelect={(id) => onSelect(id, entry)}
         >
           <ViewReadingKanji entry={entry} />
           <p className="line-clamp-2">{entry.tr.detail.join(', ')}</p>

@@ -27,11 +27,13 @@ const ViewKanjiStrokes = memo(
     className,
     width = 80,
     height = 80,
+    showCharAtFirst: showChatAtFirst,
     ...props
   }: {
     width?: number;
-    entry: DictKanjiVGEntry;
     height?: number;
+    entry: DictKanjiVGEntry;
+    showCharAtFirst?: boolean;
   } & React.DetailsHTMLAttributes<HTMLDivElement>) => {
     const paths = useMemo(() => {
       const kanjiPaths: {
@@ -48,8 +50,12 @@ const ViewKanjiStrokes = memo(
         });
       });
 
+      if (showChatAtFirst && kanjiPaths.length > 0) {
+        kanjiPaths.unshift({ ...kanjiPaths.at(-1), dotPos: undefined });
+      }
+
       return kanjiPaths;
-    }, [entry]);
+    }, [entry, showChatAtFirst]);
 
     return (
       <div className={cn('w-full overflow-x-auto', className)} {...props}>
@@ -57,9 +63,9 @@ const ViewKanjiStrokes = memo(
           style={{ width: width * paths.length }}
           className="flex divide-x-2 border-2 border-t border-b rounded-md"
         >
-          {paths.map((path, index) => (
+          {paths.map((path, svgIndex) => (
             <svg
-              key={index}
+              key={svgIndex}
               xmlns="http://www.w3.org/2000/svg"
               width={width}
               height={height}
@@ -94,6 +100,7 @@ const ViewKanjiStrokes = memo(
                   key={subPath.id + index}
                   d={subPath.d}
                   className={
+                    (showChatAtFirst && svgIndex === 0) ||
                     index === path.paths.length - 1
                       ? ''
                       : 'dark:text-muted-foreground text-zinc-400'

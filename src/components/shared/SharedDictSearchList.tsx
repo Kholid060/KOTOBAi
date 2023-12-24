@@ -9,11 +9,22 @@ import {
 import UiToggleGroup from '../ui/toggle-group';
 import { useState } from 'react';
 import { useUpdateEffect } from 'usehooks-ts';
+import { DictKanjiEntry } from '@root/src/interface/dict.interface';
+import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
+import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHandler/dictNameSearcher';
 
 interface SharedDictSearchListProp {
   query: string;
   result: DictQueryResult | null;
-  onSelect?: (item: { type: 'words' | 'kanji' | 'names'; id: string }) => void;
+  onSelect?: (item: {
+    id: string;
+    type: 'words' | 'kanji' | 'names';
+    word?: string;
+    entry?:
+      | DictionaryWordEntryResult
+      | DictKanjiEntry
+      | DictionaryNameEntryResult;
+  }) => void;
 }
 
 const tabs: Array<{ name: string; id: DictQueryType }> = [
@@ -67,21 +78,23 @@ function SharedDictSearchList({
         <CommandWordEntries
           query={query}
           entries={result.words}
-          onSelect={(id) => onSelect({ id, type: 'words' })}
+          onSelect={(id, entry, word) => {
+            onSelect({ id, entry, word, type: 'words' });
+          }}
         />
       )}
       {(activeTab === 'all' || activeTab === 'kanji') && (
         <CommandKanjiEntries
           query={query}
           entries={result.kanji}
-          onSelect={(id) => onSelect({ id, type: 'kanji' })}
+          onSelect={(id, entry) => onSelect({ id, entry, type: 'kanji' })}
         />
       )}
       {(activeTab === 'all' || activeTab === 'names') && (
         <CommandNameEntries
           query={query}
           entries={result.names}
-          onSelect={(id) => onSelect({ id, type: 'names' })}
+          onSelect={(id, entry) => onSelect({ id, entry, type: 'names' })}
         />
       )}
     </>

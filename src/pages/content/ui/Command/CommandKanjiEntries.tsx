@@ -7,7 +7,7 @@ function CommandKanjiEntries({
 }: {
   query: string;
   entries: DictKanjiEntry[];
-  onSelect?: (id: string) => void;
+  onSelect?: (id: string, entry?: DictKanjiEntry) => void;
 }) {
   if (entries.length <= 0) return null;
 
@@ -17,8 +17,8 @@ function CommandKanjiEntries({
         <UiCommand.Item
           key={entry.id}
           className="block !py-2"
-          onSelect={onSelect}
           value={entry.id.toString()}
+          onSelect={(id) => onSelect(id, entry)}
         >
           <p className="dark:text-indigo-400 text-indigo-600 font-sans-jp font-semibold">
             {String.fromCodePoint(entry.id)}

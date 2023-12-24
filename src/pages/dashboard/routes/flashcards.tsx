@@ -198,7 +198,7 @@ function FlashcardDecks({
       <div className="flex-grow relative select-none">
         <animated.div
           ref={cardElRef}
-          className="h-full border bg-card p-6 z-10 ring ring-transparent cursor-grab rounded-lg overflow-hidden absolute top-0 left-0 w-full"
+          className="shadow-sm h-full border bg-card p-6 z-10 ring ring-transparent cursor-grab rounded-lg overflow-hidden absolute top-0 left-0 w-full"
           style={spring}
           {...bind()}
         >
