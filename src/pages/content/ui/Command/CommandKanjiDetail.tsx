@@ -1,4 +1,6 @@
 import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
+import { UiButton } from '@root/src/components/ui/button';
+import UiTooltip from '@root/src/components/ui/tooltip';
 import ViewKanjiStrokes from '@root/src/components/view/ViewKanjiStrokes';
 import {
   DictKanjiEntry,
@@ -7,7 +9,7 @@ import {
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import { KANJI_DICT_INDICES } from '@root/src/shared/constant/word.const';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
-import { ArrowLeftIcon } from 'lucide-react';
+import { ArrowLeftIcon, ExternalLink } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 function KanjiStrokes({ entry }: { entry: DictKanjiEntry }) {
@@ -102,6 +104,21 @@ function CommandKanjiDetail({
               type: DICTIONARY_NAME.KANJIDIC,
             }}
           />
+          <UiTooltip label="See detail">
+            <UiButton
+              variant="secondary"
+              className="ml-1"
+              size="icon-xs"
+              onClick={() => {
+                RuntimeMessage.sendMessage(
+                  'background:dashboard-open',
+                  `/kanji/${entry.id}`,
+                );
+              }}
+            >
+              <ExternalLink className="h-4 w-4" />
+            </UiButton>
+          </UiTooltip>
         </div>
       </div>
       <div className="mt-2">

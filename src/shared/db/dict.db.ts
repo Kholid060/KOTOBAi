@@ -42,8 +42,8 @@ class DictDB extends Dexie {
       kanjivg: 'id',
       metadata: 'id',
       names: 'id, *kanji, *reading',
-      words: 'id, *kanji, *reading',
-      kanji: 'id, *reading.ja_on, *reading.ja_kun, *reading.nanori',
+      words: 'id, *kanji, *reading, *kToken',
+      kanji: 'id, *reading.ja_on, *reading.ja_kun',
     });
   }
 

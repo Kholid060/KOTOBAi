@@ -26,7 +26,7 @@ function DashboardNavigation() {
   const ThemeIcon = themeIcon[theme];
 
   return (
-    <div className="fixed top w-full left-0 top-4 z-[51] h-14">
+    <div className="fixed top w-full left-0 top-4 z-[51] h-14 px-4 lg:px-0">
       <nav className="bg-background/80 backdrop-blur-sm w-full h-full mx-auto max-w-5xl rounded-lg px-4 py-2 flex items-center border">
         <Link to="/" className="flex items-center">
           <img src="/icon.png" height="28" width="28" />

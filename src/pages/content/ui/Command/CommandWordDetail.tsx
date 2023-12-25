@@ -1,12 +1,14 @@
 import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 import { UiButton } from '@root/src/components/ui/button';
+import UiTooltip from '@root/src/components/ui/tooltip';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
 import ViewWordSense from '@root/src/components/view/ViewWordSense';
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import { WORD_REASONS } from '@root/src/shared/constant/word.const';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
-import { ArrowLeftIcon, Volume2Icon } from 'lucide-react';
+import RuntimeMessage from '@root/src/utils/RuntimeMessage';
+import { ArrowLeftIcon, ExternalLink, Volume2Icon } from 'lucide-react';
 import { useRef } from 'react';
 
 function CommandWordDetail({
@@ -44,6 +46,21 @@ function CommandWordDetail({
             meaning: entry.sense.map((sense) => sense.gloss.join('; ')),
           }}
         />
+        <UiTooltip label="See detail">
+          <UiButton
+            variant="secondary"
+            className="ml-1"
+            size="icon-xs"
+            onClick={() => {
+              RuntimeMessage.sendMessage(
+                'background:dashboard-open',
+                `/words/${entry.id}`,
+              );
+            }}
+          >
+            <ExternalLink className="h-4 w-4" />
+          </UiButton>
+        </UiTooltip>
         {isSpeechAvailable && (
           <UiButton
             variant="secondary"

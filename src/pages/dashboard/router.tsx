@@ -5,6 +5,8 @@ import SettingsDictData from './routes/settings/SettingsDictData';
 import WelcomePage from './routes/welcome';
 import FlashcardsPage from './routes/flashcards';
 import WordDetailPage from './routes/words/[entryId]';
+import KanjiDetailPage from './routes/kanji/[entryId]';
+import NameDetailPage from './routes/names/[entryId]';
 
 const router = createHashRouter([
   {
@@ -18,6 +20,14 @@ const router = createHashRouter([
       {
         path: '/words/:entryId',
         element: <WordDetailPage />,
+      },
+      {
+        path: '/kanji/:entryId',
+        element: <KanjiDetailPage />,
+      },
+      {
+        path: '/names/:entryId',
+        element: <NameDetailPage />,
       },
     ],
   },

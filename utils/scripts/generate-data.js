@@ -304,18 +304,28 @@ async function generateJMDictData(version) {
 
         handler.apply(nodeHandler, [childNode, entry, tempStorage]);
 
-        if (entry.kanji) {
+        if (entry.kanji && entry.kanji.length > 1) {
           const kanjiToken = new Set();
+          const excludeKanjiChar = new Set();
           entry.kanji.forEach((kanji) => {
-            const tokens = kanji.split('');
-            tokens.forEach((token) => {
+            kanji.split('').forEach((token, charIndex) => {
+              if (excludeKanjiChar.has(token)) return;
+
+              if (charIndex === 0) {
+                if (kanjiToken.has(token)) {
+                  kanjiToken.delete(token);
+                  excludeKanjiChar.add(token);
+                }
+                return;
+              }
+
               if (!isKanji(token)) return;
 
               kanjiToken.add(token);
             });
           });
 
-          entry.kToken = [...kanjiToken];
+          if (kanjiToken.size > 0) entry.kToken = [...kanjiToken];
         }
       });
 

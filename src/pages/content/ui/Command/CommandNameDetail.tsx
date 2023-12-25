@@ -1,10 +1,13 @@
+import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 import { UiButton } from '@root/src/components/ui/button';
 import UiTooltip from '@root/src/components/ui/tooltip';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
 import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHandler/dictNameSearcher';
+import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import { NAME_TYPES } from '@root/src/shared/constant/word.const';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
-import { ArrowLeftIcon, BookmarkIcon, Volume2Icon } from 'lucide-react';
+import RuntimeMessage from '@root/src/utils/RuntimeMessage';
+import { ArrowLeftIcon, ExternalLink, Volume2Icon } from 'lucide-react';
 import { useRef } from 'react';
 
 function CommandNameDetail({
@@ -33,13 +36,28 @@ function CommandNameDetail({
           onMatchWord={(word) => (matchWord.current = word)}
           className="text-lg mt-px leading-tight flex-grow"
         />
-        <UiTooltip label="Bookmark word">
+        <SharedBookmarkBtnContent
+          entry={{
+            reading: [],
+            id: entry.id,
+            kanji: entry.kanji,
+            meaning: entry.tr.detail,
+            type: DICTIONARY_NAME.ENAMDICT,
+          }}
+        />
+        <UiTooltip label="See detail">
           <UiButton
-            className="ml-2 flex-shrink-0"
-            size="icon-xs"
             variant="secondary"
+            className="ml-1"
+            size="icon-xs"
+            onClick={() => {
+              RuntimeMessage.sendMessage(
+                'background:dashboard-open',
+                `/names/${entry.id}`,
+              );
+            }}
           >
-            <BookmarkIcon className="h-4 w-4" />
+            <ExternalLink className="h-4 w-4" />
           </UiButton>
         </UiTooltip>
         {isSpeechAvailable && (

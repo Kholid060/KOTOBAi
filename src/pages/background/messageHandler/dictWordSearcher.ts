@@ -2,7 +2,6 @@ import { toHiragana } from 'wanakana';
 import {
   DictWordEntry,
   DictWordLocalEntry,
-  DictWordPriority,
   DictSearchOptions,
 } from '@root/src/interface/dict.interface';
 import RuntimeMessage, {
@@ -11,8 +10,8 @@ import RuntimeMessage, {
 import MemoryCache from '@root/src/utils/MemoryCache';
 import Browser from 'webextension-polyfill';
 import { Reason, deinflect, entryMatchesType } from '@src/shared/lib/deinflect';
-import { WORD_PRIORITY_WEIGHT } from '@root/src/shared/constant/word.const';
 import dictDB from '@root/src/shared/db/dict.db';
+import wordEntriesSorter from '@root/src/utils/wordEntriesSorter';
 
 export type DictionaryWordEntryResult = {
   word: string;
@@ -207,53 +206,6 @@ async function handleSearchBackward({
   return searchResult;
 }
 
-function sortSearchResult(result: SearchDictWordResult): SearchDictWordResult {
-  const getScore = (items: DictWordPriority[]) => {
-    let sum = 0;
-
-    items.forEach((str) => {
-      if (str.startsWith('nf')) {
-        const freq = +str.slice(2);
-        sum += Math.floor(65 * Math.exp(-0.1 * freq));
-
-        return;
-      }
-
-      sum += WORD_PRIORITY_WEIGHT[str] || 0;
-    });
-
-    return sum;
-  };
-  const getPriority = (entry: DictionaryWordEntryResult) => {
-    if (!entry.kPrio && !entry.rPrio) return 0;
-
-    let score = 0;
-    entry.reading?.forEach((reading, index) => {
-      if (reading !== entry.word || !entry.rPrio || !entry.rPrio[index]) return;
-
-      score = Math.max(score, getScore(entry.rPrio[index]));
-    });
-    entry.kanji?.forEach((kanji, index) => {
-      if (kanji !== entry.word || !entry.kPrio || !entry.kPrio[index]) return;
-
-      score = Math.max(score, getScore(entry.kPrio[index]));
-    });
-
-    return score;
-  };
-
-  const sortedEntries = [...result.entries].sort((a, b) => {
-    if (a.word !== b.word) return 0;
-
-    return getPriority(b) - getPriority(a);
-  });
-
-  return {
-    ...result,
-    entries: sortedEntries,
-  };
-}
-
 export default function dictWordSearcher(isIframe = false) {
   let searchController: AbortController | null = null;
 
@@ -302,7 +254,10 @@ export default function dictWordSearcher(isIframe = false) {
           break;
       }
 
-      result = sortSearchResult(result);
+      result = {
+        ...result,
+        entries: <DictionaryWordEntryResult[]>wordEntriesSorter(result.entries),
+      };
 
       resultCache.add(input, result);
 

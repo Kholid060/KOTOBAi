@@ -51,6 +51,7 @@ export interface RuntimeMsgEvents {
     id: BookmarkIdPayload,
     boolean?: T,
   ) => T extends true ? boolean : BookmarkItem[];
+  'background:dashboard-open': (path?: string) => void;
   'background:bookmark-toggle': (
     payload: BookmarkAddPayload & { id?: string },
     value: boolean,

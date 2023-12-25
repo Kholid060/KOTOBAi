@@ -10,25 +10,8 @@ import SharedTodayWord from '@root/src/components/shared/SharedTodayWord';
 function Popup() {
   const [isExtDisabled, setExtDisabled] = useState(false);
 
-  async function openDashboard(path = '') {
-    try {
-      const EXT_URL = Browser.runtime.getURL('');
-      const [dashboardTab] = await Browser.tabs.query({
-        currentWindow: true,
-        url: `${EXT_URL}/**/*`,
-      });
-      if (dashboardTab) {
-        await Browser.tabs.update(dashboardTab.id, { active: true });
-        return;
-      }
-
-      await Browser.tabs.create({
-        active: true,
-        url: `${EXT_URL}src/pages/dashboard/index.html#${path}`,
-      });
-    } catch (error) {
-      console.error(error);
-    }
+  function openDashboard(path = '') {
+    return RuntimeMessage.sendMessage('background:dashboard-open', path);
   }
   async function searchEntry() {
     try {

@@ -6,22 +6,6 @@ import UiCard from '@root/src/components/ui/card';
 import { FileStackIcon, PencilLineIcon } from 'lucide-react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 
-function DashboardPage() {
-  return (
-    <div className="pb-24">
-      <DashboardNavigation />
-      <div className="h-[500px] bg-gradient-to-b from-muted/80 to-transparent flex items-center w-full border-border/70">
-        <div className="w-full max-w-2xl mx-auto pt-10">
-          <DashboardSearchInput />
-        </div>
-      </div>
-      <div className="w-full max-w-5xl mx-auto">
-        <Outlet />
-      </div>
-    </div>
-  );
-}
-
 export function DashboardBasePage() {
   const navigate = useNavigate();
 
@@ -51,6 +35,22 @@ export function DashboardBasePage() {
       </div>
       <DashboardBookmarkList className="mt-8" />
     </>
+  );
+}
+
+function DashboardPage() {
+  return (
+    <div className="pb-24">
+      <DashboardNavigation />
+      <div className="h-[500px] bg-gradient-to-b from-muted/80 to-transparent flex items-center w-full border-border/70">
+        <div className="w-full max-w-2xl mx-auto pt-10">
+          <DashboardSearchInput />
+        </div>
+      </div>
+      <div className="w-full max-w-5xl mx-auto px-4 lg:px-0">
+        <Outlet />
+      </div>
+    </div>
   );
 }
 

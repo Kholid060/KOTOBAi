@@ -188,14 +188,16 @@ function WordDetailPage() {
               <li>
                 <p className="dark:text-indigo-400 text-indigo-600">
                   {wordDetail.kanji?.map((str, index) => {
-                    const info = wordDetail.kInfo?.[index]?.[0];
+                    const info = wordDetail.kInfo?.[index]
+                      ?.filter((item) => item !== 'sK')
+                      .map((item) => WORD_KANJI_INFO_TAG[item].value);
 
                     return (
                       <span key={index}>
                         <span>{str}</span>
-                        {info && info !== 'sK' && (
+                        {info && info.length > 0 && (
                           <span className="font-sans text-muted-foreground">
-                            ({WORD_KANJI_INFO_TAG[info].value})
+                            【{info.join(', ')}】
                           </span>
                         )}
                         {index !== wordDetail.kanji.length - 1 ? '、' : ''}

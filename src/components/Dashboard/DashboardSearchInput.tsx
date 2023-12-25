@@ -137,18 +137,20 @@ function DashboardSearchInput() {
               <SharedDictSearchList
                 query={query}
                 result={searchResult}
-                onSelect={({ id, type, entry, word }) =>
+                onSelect={({ id, type, entry, word }) => {
+                  const newSearchParams = createSearchParams(
+                    Object.fromEntries(searchParams.entries()),
+                  );
+                  if (word) newSearchParams.set('word', word);
+
                   navigate(
                     {
                       pathname: `/${type}/${id}`,
-                      search: createSearchParams({
-                        ...Object.fromEntries(searchParams.entries()),
-                        word,
-                      }).toString(),
+                      search: newSearchParams.toString(),
                     },
                     { state: { dictEntry: entry } },
-                  )
-                }
+                  );
+                }}
               />
             )}
           </UiCommand.List>
