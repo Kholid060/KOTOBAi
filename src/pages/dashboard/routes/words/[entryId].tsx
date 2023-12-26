@@ -26,47 +26,58 @@ import {
 import SharedBookmarkBtnMain from '@root/src/components/shared/SharedBookmarkBtn/Main';
 import { isKanji } from 'wanakana';
 
+interface KanjiPath {
+  paths: DictKanjiVGEntry;
+  char: string;
+  isKanji: boolean;
+}
+
 function WordStrokeOrderDiagrams({
   entry,
 }: {
   entry: DictWordEntry | DictionaryWordEntryResult;
 }) {
-  const [kanjiPaths, setKanjiPaths] = useState<
-    { paths: DictKanjiVGEntry; char: string; isKanji: boolean }[]
-  >([]);
+  const [kanjiPaths, setKanjiPaths] = useState<KanjiPath[]>([]);
 
   useEffect(() => {
     if (!entry?.kanji) return;
 
     let kanji = entry.kanji[0];
     if ('oriWord' in entry) {
-      kanji ||= entry.kanji.find(
-        (str) => str === entry.oriWord || str === entry.word,
-      );
+      kanji =
+        entry.kanji.find(
+          (str) => str === entry.oriWord || str === entry.word,
+        ) || kanji;
     }
 
     if (kanji) {
-      const ids = kanji.split('').map((char) => char.codePointAt(0));
+      const ids = kanji
+        .split('')
+        .map((char) => char.codePointAt(0)) as number[];
       dictDB.kanjivg.bulkGet(ids).then((items) => {
-        const result = items.filter(Boolean).map((paths) => {
-          const char = String.fromCodePoint(paths.id);
+        const result = items.reduce<KanjiPath[]>((acc, paths) => {
+          if (!paths) return acc;
 
-          return {
+          const char = String.fromCodePoint(paths.id);
+          acc.push({
             char,
             paths,
             isKanji: isKanji(char),
-          };
-        });
+          });
+
+          return acc;
+        }, []);
+
         setKanjiPaths(result);
       });
     }
 
     return () => {
-      setKanjiPaths(null);
+      setKanjiPaths([]);
     };
   }, [entry]);
 
-  if (!entry.kanji) return null;
+  if (!entry.kanji || kanjiPaths.length === 0) return null;
 
   return (
     <div className="mt-6">
@@ -111,7 +122,7 @@ function WordDetailPage() {
     setWordDetail(dictEntry);
     if (dictEntry) {
       setWordDetail(dictEntry);
-    } else {
+    } else if (entryId) {
       dictDB.words.get(+entryId).then((result) => {
         if (!result) {
           navigate('/');
@@ -135,7 +146,7 @@ function WordDetailPage() {
         <ViewReadingKanji
           className="text-3xl flex-grow"
           onMatchWord={(match) => (matchWord.current = match)}
-          entry={{ word: searchParams.get('word'), ...wordDetail }}
+          entry={{ word: searchParams.get('word') ?? undefined, ...wordDetail }}
         />
         <SharedBookmarkBtnMain
           entry={{
@@ -175,22 +186,28 @@ function WordDetailPage() {
         </div>
       )}
       <ViewWordSense
-        className="mt-6 mb-10 space-y-3"
+        showReference
         sense={wordDetail.sense}
+        className="mt-6 mb-10 space-y-3"
       />
-      {(wordDetail.kanji?.length > 1 ||
+      {((wordDetail.kanji && wordDetail.kanji.length > 1) ||
         wordDetail.kInfo ||
         wordDetail.reading?.length > 1) && (
         <>
           <p className="font-semibold text-muted-foreground">Other Forms </p>
           <ol className="opacity-90 list-disc font-sans-jp pl-4">
-            {wordDetail.kanji?.length > 1 && (
+            {wordDetail.kanji && wordDetail.kanji.length > 1 && (
               <li>
                 <p className="dark:text-indigo-400 text-indigo-600">
                   {wordDetail.kanji?.map((str, index) => {
                     const info = wordDetail.kInfo?.[index]
                       ?.filter((item) => item !== 'sK')
-                      .map((item) => WORD_KANJI_INFO_TAG[item].value);
+                      .map(
+                        (item) =>
+                          WORD_KANJI_INFO_TAG[
+                            item as keyof typeof WORD_KANJI_INFO_TAG
+                          ]?.value,
+                      );
 
                     return (
                       <span key={index}>
@@ -200,7 +217,7 @@ function WordDetailPage() {
                             【{info.join(', ')}】
                           </span>
                         )}
-                        {index !== wordDetail.kanji.length - 1 ? '、' : ''}
+                        {index !== wordDetail.kanji!.length - 1 ? '、' : ''}
                       </span>
                     );
                   })}

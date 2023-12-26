@@ -32,6 +32,8 @@ export interface DictWordEntryExample {
 }
 
 export interface DictWordEntrySense {
+  misc?: string;
+  xref?: string[];
   gloss: string[];
   pos: DictWordPosTag[];
   example?: DictWordEntryExample;

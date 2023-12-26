@@ -131,6 +131,19 @@ function WordKanji({
               </tbody>
             </table>
           </div>
+          <div className="text-right mt-1">
+            <button
+              className="underline text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                RuntimeMessage.sendMessage(
+                  'background:dashboard-open',
+                  `/kanji/${kanji.id}`,
+                );
+              }}
+            >
+              <span>See detail</span>
+            </button>
+          </div>
         </div>
       ))}
     </div>

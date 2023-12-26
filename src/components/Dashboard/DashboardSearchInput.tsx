@@ -9,7 +9,7 @@ import { toKana } from 'wanakana';
 import UiCommand from '../ui/command';
 import UiToggle from '../ui/toggle';
 import UiTooltip from '../ui/tooltip';
-import { useDebounce, useOnClickOutside } from 'usehooks-ts';
+import { useDebounce, useEffectOnce, useOnClickOutside } from 'usehooks-ts';
 import { sleep } from '@root/src/utils/helper';
 import SharedDictSearchList from '../shared/SharedDictSearchList';
 import {
@@ -35,7 +35,7 @@ function DashboardSearchInput() {
   const [isOpen, setIsOpen] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [query, setQuery] = useState(() => searchParams.get('query'));
+  const [query, setQuery] = useState(() => searchParams.get('query') ?? '');
   const [searchResult, setSearchResult] = useState<DictQueryResult | null>(
     null,
   );
@@ -60,9 +60,22 @@ function DashboardSearchInput() {
     setIsOpen(false);
   });
 
+  useEffectOnce(() => {
+    const searchEventListener = (event: Event) => {
+      const { detail } = event as CustomEvent<string>;
+      if (!detail || !detail.trim()) return null;
+
+      setQuery(detail);
+    };
+    window.addEventListener('search', searchEventListener);
+
+    return () => {};
+  });
   useEffect(() => {
     (async () => {
       try {
+        if (!debouncedQuery) return;
+
         const trimmedQuery = debouncedQuery.trim();
 
         setSearchParams((prevState) => {
@@ -75,8 +88,7 @@ function DashboardSearchInput() {
         if (trimmedQuery) setIsLoading(true);
 
         const result = await searchDictEntries(trimmedQuery);
-
-        setSearchResult(result);
+        setSearchResult(result ?? null);
 
         if (firstInit.current && !result) return;
         setIsOpen(true);

@@ -10,6 +10,8 @@ import { Volume2Icon } from 'lucide-react';
 import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHandler/dictNameSearcher';
 
+type NameTypeKey = keyof typeof NAME_TYPES;
+
 function WordKanji({
   className,
   cursorText,
@@ -88,10 +90,11 @@ function WordKanji({
             {name.tr.detail.map((detail, idx) => (
               <li key={idx}>
                 <span
-                  title={NAME_TYPES[name.tr.type[idx]]}
+                  title={NAME_TYPES[name.tr.type[idx] as NameTypeKey]}
                   className="text-xs px-1 py-0.5 bg-fuchsia-400/20 dark:text-fuchsia-400 text-fuchsia-700 rounded inline-block"
                 >
-                  {NAME_TYPES[name.tr.type[idx]] || name.tr.type[idx]}
+                  {NAME_TYPES[name.tr.type[idx] as NameTypeKey] ||
+                    name.tr.type[idx]}
                 </span>{' '}
                 <span>{detail}</span>
               </li>

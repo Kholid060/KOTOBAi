@@ -2,6 +2,7 @@
   "compilerOptions": {
     "noEmit": true,
     "baseUrl": ".",
+    "strict": true,
     "allowJs": false,
     "target": "esnext",
     "module": "esnext",

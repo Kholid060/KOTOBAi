@@ -9,7 +9,9 @@ import {
 } from '../../../background/messageHandler/dictWordSearcher';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
-import { BookmarkDictionaryPayload } from '@root/src/utils/RuntimeMessage';
+import RuntimeMessage, {
+  BookmarkDictionaryPayload,
+} from '@root/src/utils/RuntimeMessage';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 import ViewWordSense from '@root/src/components/view/ViewWordSense';
@@ -67,6 +69,19 @@ function WordEntry({
         sense={entry.sense}
         className="mt-2 space-y-1"
       />
+      <div className="text-right mt-1">
+        <button
+          className="underline text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => {
+            RuntimeMessage.sendMessage(
+              'background:dashboard-open',
+              `/words/${entry.id}`,
+            );
+          }}
+        >
+          <span>See detail</span>
+        </button>
+      </div>
     </div>
   );
 }
