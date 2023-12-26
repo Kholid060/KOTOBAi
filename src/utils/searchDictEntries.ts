@@ -12,7 +12,7 @@ export interface DictQueryResult {
   words: DictionaryWordEntryResult[];
 }
 
-export const dictQueryTypeSymbol = {
+export const dictQueryTypeSymbol: Record<string, DictQueryType> = {
   '#': 'words',
   '＃': 'words',
   '>': 'kanji',
@@ -23,7 +23,9 @@ export const dictQueryTypeSymbol = {
 
 export const getDictQueryType = (str: string): DictQueryType => {
   const { 0: firstChar } = str.trim();
-  if (dictQueryTypeSymbol[firstChar]) return dictQueryTypeSymbol[firstChar];
+  if (dictQueryTypeSymbol[firstChar]) {
+    return dictQueryTypeSymbol[firstChar];
+  }
 
   return 'all';
 };
@@ -45,7 +47,7 @@ const queriesMap = {
       .split('')
       .reduce<Set<number>>((acc, char) => {
         if (isKanji(char)) {
-          acc.add(char.codePointAt(0));
+          acc.add(char.codePointAt(0) as number);
         }
 
         return acc;

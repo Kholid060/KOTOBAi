@@ -136,7 +136,7 @@ class TextHighlighter {
         startOffset: startOffset,
         startContainer: startNode,
       });
-      CSS.highlights.set(STYLE_ID, new window.Highlight(range));
+      CSS.highlights!.set(STYLE_ID, new window.Highlight!(range));
 
       this.injectHighlightStyle();
       return;
@@ -147,6 +147,8 @@ class TextHighlighter {
     range.setEnd(endNode, endOffset);
 
     const selection = documentCtx.getSelection();
+    if (!selection) return;
+
     selection.removeAllRanges();
     selection.addRange(range);
 
@@ -156,7 +158,8 @@ class TextHighlighter {
   private storeCurrSelection(cursorOffset: CursorOffset) {
     if (this.prevSelection) return;
 
-    const isInputFocus = NodeTypeChecker.isInput(document.activeElement);
+    const isInputFocus =
+      document.activeElement && NodeTypeChecker.isInput(document.activeElement);
     if (isInputFocus) {
       const { selectionStart, selectionEnd, selectionDirection } =
         document.activeElement as HTMLInputElement;
@@ -164,9 +167,9 @@ class TextHighlighter {
 
       this.prevSelection = {
         type: 'input',
-        end: selectionEnd,
-        start: selectionStart,
-        dir: selectionDirection,
+        end: selectionEnd!,
+        start: selectionStart!,
+        dir: selectionDirection!,
         el: document.activeElement as HTMLInputElement,
       };
       return;
@@ -184,16 +187,16 @@ class TextHighlighter {
     this.prevSelection = {
       type: 'node',
       end: selection.focusOffset,
-      endNode: selection.focusNode,
+      endNode: selection.focusNode!,
       start: selection.anchorOffset,
-      startNode: selection.anchorNode,
+      startNode: selection.anchorNode!,
     };
   }
 
   private restorePrevSelection() {
     if (!this.prevSelection) {
       const selection = window.getSelection();
-      if (selection.toString() === this.selectedText) {
+      if (selection && selection.toString() === this.selectedText) {
         selection.removeAllRanges();
       }
 
@@ -218,6 +221,8 @@ class TextHighlighter {
       range.setStart(startNode, start);
 
       const selection = window.getSelection();
+      if (!selection) return;
+
       selection.removeAllRanges();
       selection.addRange(range);
     }
@@ -225,7 +230,7 @@ class TextHighlighter {
 
   clearHighlight() {
     if (this.highlightApiAvailable) {
-      CSS.highlights.delete(STYLE_ID);
+      CSS.highlights!.delete(STYLE_ID);
     }
 
     this.restorePrevSelection();

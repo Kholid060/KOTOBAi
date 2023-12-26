@@ -6,6 +6,7 @@ import {
 import { NON_JP_CHARS_REGEX } from '@root/src/shared/constant/char.const';
 import { TextRange, extractTextNodeContent } from './extract-text-content';
 import { caretPositionFromPoint } from './caretPositionFromPoint';
+import { SetOptional } from 'type-fest';
 
 export interface CursorPoint {
   x: number;
@@ -22,7 +23,7 @@ export type GetTextByPointResult = {
   rect: DOMRect;
   textRange: TextRange[];
   cursorOffset: CursorOffset;
-} | null;
+};
 
 function findJPText(str: string, maxLength: number) {
   let text = str.slice(0, maxLength).trim();
@@ -47,10 +48,10 @@ class TextSearcher {
     element: Element;
     maxLength: number;
     point: CursorPoint;
-  }): GetTextByPointResult {
+  }): GetTextByPointResult | null {
     if (NodeTypeChecker.isImage(element)) {
       const text = findJPText(
-        element.getAttribute('alt') || element.getAttribute('title'),
+        (element.getAttribute('alt') || element.getAttribute('title')) ?? '',
         maxLength,
       );
       if (!text) return this.cacheTextResult(null);
@@ -110,8 +111,8 @@ class TextSearcher {
   }
 
   private cacheTextResult(
-    result: Omit<GetTextByPointResult, 'rect'> | null,
-  ): GetTextByPointResult {
+    result: SetOptional<GetTextByPointResult, 'rect'> | null,
+  ): GetTextByPointResult | null {
     if (!result) {
       this.previousResult = null;
       return null;
@@ -125,12 +126,12 @@ class TextSearcher {
         start: cursorOffset.offset,
         end: Math.min(
           cursorOffset.offset + 1,
-          cursorOffset.offsetNode.textContent.length,
+          cursorOffset.offsetNode.textContent!.length,
         ),
       };
     }
 
-    const rect = getNodeBoundingClientRect(cursorOffset.offsetNode, offset);
+    const rect = getNodeBoundingClientRect(cursorOffset.offsetNode, offset!);
     const finalResult = { ...result, rect };
 
     if (

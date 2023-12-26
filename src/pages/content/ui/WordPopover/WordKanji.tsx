@@ -27,7 +27,8 @@ function WordKanji({
 
     const kanji = cursorText.split('').reduce<Set<number>>((acc, char) => {
       if (isKanji(char)) {
-        acc.add(char.codePointAt(0));
+        const kanjiCodePoint = char.codePointAt(0);
+        if (kanjiCodePoint) acc.add(kanjiCodePoint);
       }
 
       return acc;

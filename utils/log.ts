@@ -2,7 +2,7 @@ type ColorType = 'success' | 'info' | 'error' | 'warning' | keyof typeof COLORS;
 type ValueOf<T> = T[keyof T];
 
 export default function colorLog(message: string, type?: ColorType) {
-  let color: ValueOf<typeof COLORS>;
+  let color: ValueOf<typeof COLORS> | undefined = undefined;
 
   switch (type) {
     case 'success':
@@ -18,7 +18,7 @@ export default function colorLog(message: string, type?: ColorType) {
       color = COLORS.FgYellow;
       break;
     default:
-      color = COLORS[type];
+      if (type) color = COLORS[type];
       break;
   }
 

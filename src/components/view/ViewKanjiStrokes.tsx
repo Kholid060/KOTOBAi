@@ -51,7 +51,10 @@ const ViewKanjiStrokes = memo(
       });
 
       if (showChatAtFirst && kanjiPaths.length > 0) {
-        kanjiPaths.unshift({ ...kanjiPaths.at(-1), dotPos: undefined });
+        kanjiPaths.unshift({
+          ...(kanjiPaths.at(-1) ?? { paths: [] }),
+          dotPos: undefined,
+        });
       }
 
       return kanjiPaths;

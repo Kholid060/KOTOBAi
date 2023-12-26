@@ -119,14 +119,16 @@ class DictDB extends Dexie {
         .toArray();
     } else if (searchBy === 'id') {
       if (Array.isArray(input)) {
-        result = await this.kanji.bulkGet(input as unknown as number[]);
+        result = (await this.kanji.bulkGet(
+          input as unknown as number[],
+        )) as DictKanjiEntry[];
       } else {
         const kanji = await this.kanji.get(+input);
         result = kanji ? [kanji] : [];
       }
     }
 
-    return result;
+    return result!;
   }
 
   async searchKanjiVG({ input }: DictSearchKanjiVgOptions) {

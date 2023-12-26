@@ -77,7 +77,7 @@ function CommandContainer() {
   const commandContentRef = useRef<CommandContentRef | null>(null);
 
   const [query, setQuery] = useState(() => {
-    const selection = window.getSelection().toString();
+    const selection = window.getSelection()?.toString() ?? '';
     if (!selection.trim() || !isJapanese(selection)) return '';
 
     return selection;
@@ -148,8 +148,8 @@ function CommandContainer() {
           setQuery(query);
           inputRef.current?.focus();
         }}
-        shadowRoot={appCtx.shadowRoot}
-        portalEl={appCtx.shadowRoot.firstElementChild}
+        shadowRoot={appCtx.shadowRoot ?? undefined}
+        portalEl={appCtx.shadowRoot?.firstElementChild ?? undefined}
       />
       <div className="py-2 px-4 gap-2 text-xs text-muted-foreground flex items-center border-t">
         <UiTooltip label="Auto convert romaji into hiragana" side="right">
@@ -221,7 +221,7 @@ function CommandContainerWrapper() {
       event.preventDefault();
       setIsOpen(true);
     },
-    null,
+    undefined,
     { capture: true },
   );
 
@@ -241,7 +241,7 @@ function CommandContainerWrapper() {
           setIsOpen(false);
         },
       }}
-      container={appCtx.shadowRoot.firstElementChild as HTMLElement}
+      container={appCtx.shadowRoot?.firstElementChild as HTMLElement}
     >
       <CommandContainer />
     </UiCommand.Dialog>

@@ -10,6 +10,8 @@ export function useIntersectionObserver(
   deps?: DependencyList,
 ) {
   useEffect(() => {
+    if (!callback) return;
+
     const intersectinObserver = new IntersectionObserver(callback, opts);
     if (target.current) intersectinObserver.observe(target.current);
 

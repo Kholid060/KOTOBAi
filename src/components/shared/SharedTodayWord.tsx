@@ -49,7 +49,7 @@ function SharedTodayWord({
   onOpen?: (entryId: number) => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [todayWord, setTodayWord] = useState<DictWordEntry>(null);
+  const [todayWord, setTodayWord] = useState<DictWordEntry | null>(null);
 
   const { speak, isSpeechAvailable } = useSpeechSynthesis();
 
@@ -59,15 +59,18 @@ function SharedTodayWord({
         setIsLoading(true);
 
         const currentWord = parseJSON<TodayWordStorage, null>(
-          localStorage.getItem(LOCALSTORAGE_KEYS.TODAY_WORD),
+          localStorage.getItem(LOCALSTORAGE_KEYS.TODAY_WORD) ?? '',
           null,
         );
         if (currentWord) {
           const date = dayjs(currentWord.date).get('date');
           if (date === dayjs().get('date')) {
             const word = await dictDB.words.get(currentWord.id);
-            setTodayWord(word);
-            return;
+
+            if (word) {
+              setTodayWord(word);
+              return;
+            }
           }
         }
 

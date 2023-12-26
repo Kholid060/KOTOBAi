@@ -45,13 +45,14 @@ class WindowMessage {
     if (!this.eventListeners[name]) {
       this.eventListeners[name] = [];
     }
+    // @ts-expect-error aaa
     this.eventListeners[name].push(callback);
 
     return this.onMessage;
   }
 
   sendMessage<T extends keyof Events>(name: T, ...args: Parameters<Events[T]>) {
-    window.top.postMessage({ name, args }, '*');
+    window.top?.postMessage({ name, args }, '*');
   }
 }
 

@@ -1,5 +1,6 @@
 import Dexie from 'dexie';
 import { BookmarkItem } from '../../interface/bookmark.interface';
+import { SetOptional } from 'type-fest';
 
 export type BookmarkIdPayload =
   | BookmarkItem['id']
@@ -12,7 +13,7 @@ export type BookmarkAddPayload = Pick<
 >;
 
 class BookmarkDb extends Dexie {
-  items!: Dexie.Table<BookmarkItem, number>;
+  items!: Dexie.Table<SetOptional<BookmarkItem, 'id'>, number>;
 
   constructor() {
     super('bookmarks');

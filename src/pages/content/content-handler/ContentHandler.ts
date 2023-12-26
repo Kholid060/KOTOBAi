@@ -92,7 +92,8 @@ class ContentHandler {
 
     this.isPointerDown = true;
 
-    if (!isInContentPopup(target)) this.textHighlighter.clearHighlight();
+    if (target && !isInContentPopup(target))
+      this.textHighlighter.clearHighlight();
   }
 
   private onPointerUp() {
@@ -102,7 +103,11 @@ class ContentHandler {
   }
 
   private onPointerMove(event: PointerEvent) {
-    if (this.isPointerDown || this._disabled || isInContentPopup(event.target))
+    if (
+      this.isPointerDown ||
+      this._disabled ||
+      (event.target && isInContentPopup(event.target))
+    )
       return;
 
     const cursorPoint = { x: event.clientX, y: event.clientY };

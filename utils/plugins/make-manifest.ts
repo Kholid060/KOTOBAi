@@ -37,10 +37,11 @@ export default function makeManifest(config: {
 
     // Naming change for cache invalidation
     if (config.contentScriptCssKey) {
-      manifest.content_scripts.forEach((script) => {
+      manifest.content_scripts?.forEach((script) => {
         if (!script.css) return;
 
         script.css = script.css.map((css) =>
+          // @ts-expect-error xxx
           css.replace('<KEY>', config.contentScriptCssKey),
         );
       });

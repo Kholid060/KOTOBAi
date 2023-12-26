@@ -19,7 +19,7 @@ function CommandNameEntries({
           key={entry.id}
           className="block !py-2"
           value={entry.id.toString()}
-          onSelect={(id) => onSelect(id, entry)}
+          onSelect={(id) => onSelect?.(id, entry)}
         >
           <ViewReadingKanji entry={entry} />
           <p className="line-clamp-2">{entry.tr.detail.join(', ')}</p>

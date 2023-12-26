@@ -63,15 +63,17 @@ function PopupDisableBtn({
 
         if (newValue) await disableExtBadge.set();
         else await disableExtBadge.remove();
-      } else if (type === 'host') {
+      } else if (type === 'host' && currHost) {
         if (newValue) await disableExtStorage.addHost(currHost);
         else await disableExtStorage.removeHost(currHost);
 
         tabs = await Browser.tabs.query({ url: `*://${currHost}/*` });
       }
 
-      const res = await Promise.allSettled(
+      await Promise.allSettled(
         tabs.map(async ({ id, windowId }) => {
+          if (!id) return;
+
           if (type === 'host') {
             const payload: { tabId: number; windowId?: number } = { tabId: id };
             if (IS_FIREFOX) payload.windowId = windowId;
@@ -90,12 +92,10 @@ function PopupDisableBtn({
         }),
       );
 
-      console.log(res);
-
       setExtDisabled({
         type,
-        currHost,
         disabled: newValue,
+        currHost: typeof currHost === 'string' ? currHost : '',
       });
       onValueChanged?.(newValue);
     } catch (error) {
@@ -117,7 +117,8 @@ function PopupDisableBtn({
         }
 
         const activeTabHost = await getCurrTabHost();
-        const isHostDisabled = disableState.hostList.includes(activeTabHost);
+        const isHostDisabled =
+          activeTabHost && disableState.hostList.includes(activeTabHost);
         if (!isHostDisabled) return;
 
         setExtDisabled({

@@ -35,7 +35,7 @@ function NameDetailPage() {
     setWordDetail(dictEntry);
     if (dictEntry) {
       setWordDetail(dictEntry);
-    } else {
+    } else if (entryId) {
       dictDB.names.get(+entryId).then((result) => {
         if (!result) {
           navigate('/');
@@ -59,7 +59,7 @@ function NameDetailPage() {
         <ViewReadingKanji
           className="text-3xl flex-grow"
           onMatchWord={(match) => (matchWord.current = match)}
-          entry={{ word: searchParams.get('word'), ...nameDetail }}
+          entry={{ word: searchParams.get('word') ?? undefined, ...nameDetail }}
         />
         <SharedBookmarkBtnMain
           entry={{

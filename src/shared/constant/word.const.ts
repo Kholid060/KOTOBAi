@@ -36,7 +36,7 @@ export const KANJI_DICT_INDICES: Record<string, string> = {
   maniette: 'Maniette number',
 } as const;
 
-export const NAME_TYPES = {
+export const NAME_TYPES: Record<string, string> = {
   ev: 'event',
   dei: 'deity',
   oth: 'other',
@@ -631,7 +631,10 @@ export const WORD_KANJI_INFO_TAG = {
   },
 } as const;
 
-export const WORD_MISC_TAG = {
+export const WORD_MISC_TAG: Record<
+  string,
+  { id: string; tag: string; name: string; value: string }
+> = {
   abbr: {
     id: 'abbr',
     tag: 'misc',

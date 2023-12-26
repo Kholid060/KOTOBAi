@@ -42,6 +42,7 @@ function BookmarksTable({ bookmarks }: { bookmarks: BookmarkItem[] }) {
     bookmarkId: BookmarkItem['id'],
     newVal: Partial<Omit<BookmarkItem, 'id'>>,
   ) {
+    if (!bookmarkId) return;
     bookmarkDB.items.update(bookmarkId, newVal);
   }
 
@@ -98,7 +99,7 @@ function BookmarksTable({ bookmarks }: { bookmarks: BookmarkItem[] }) {
               <td className="p-4 text-right align-bottom">
                 <button
                   className="text-red-500 group-hover:visible invisible"
-                  onClick={() => bookmarkDB.items.delete(bookmark.id)}
+                  onClick={() => bookmarkDB.items.delete(bookmark.id!)}
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>

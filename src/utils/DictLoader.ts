@@ -32,7 +32,7 @@ class DictLoader {
       onDownloadProgress({ progress }) {
         onProgress?.({
           type: 'downloading',
-          progress: progress * maxDownloadProgress,
+          progress: (progress || 0) * maxDownloadProgress,
         });
       },
     });
@@ -47,6 +47,8 @@ class DictLoader {
 
       while (kanjiData.records.length > 0) {
         const currRecords = kanjiData.records.splice(0, 10_000);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         await dictDB[DB_NAME_MAP[name]].bulkPut(currRecords);
       }
 

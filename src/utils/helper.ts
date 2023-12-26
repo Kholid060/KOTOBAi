@@ -43,13 +43,15 @@ export function throttle<T extends unknown[]>(
   };
 }
 
-export function parseJSON<T = unknown, K = null>(
+export function parseJSON<T = unknown, K = unknown>(
   input: string,
-  def: K = null,
+  def?: K,
 ): T | K {
   try {
     return JSON.parse(input) as T;
   } catch (_error) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return def;
   }
 }

@@ -11,7 +11,7 @@ export type BookmarkItemStatus = `${BOOKMARK_ITEM_STATUS}`;
 
 export interface BookmarkItem<T extends DICTIONARY_NAME = DICTIONARY_NAME> {
   type: T;
-  id?: number;
+  id: number;
   note?: string;
   entryId: number;
   kanji?: string[];

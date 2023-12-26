@@ -18,7 +18,7 @@ function CommandKanjiEntries({
           key={entry.id}
           className="block !py-2"
           value={entry.id.toString()}
-          onSelect={(id) => onSelect(id, entry)}
+          onSelect={(id) => onSelect?.(id, entry)}
         >
           <p className="dark:text-indigo-400 text-indigo-600 font-sans-jp font-semibold">
             {String.fromCodePoint(entry.id)}

@@ -59,7 +59,7 @@ function FlashcardMeaning({
         style={style}
       >
         <p className="text-muted-foreground text-sm uppercase">
-          [{ITEM_TYPE_NAME[item.type]}]
+          [{ITEM_TYPE_NAME[item.type as keyof typeof ITEM_TYPE_NAME]}]
         </p>
         {item.kanji && (
           <p className="leading-tight mt-1 font-sans-jp mb-2 dark:text-emerald-400 text-emerald-700">
@@ -239,7 +239,7 @@ function FlashcardDecks({
             size="icon"
             disabled={activeIndex <= 0}
             variant="secondary"
-            onClick={() => onChangeIdx(activeIndex - 1, 'undo')}
+            onClick={() => onChangeIdx?.(activeIndex - 1, 'undo')}
           >
             <Undo2Icon className="h-5 w-5" />
           </UiButton>
@@ -296,8 +296,8 @@ function FlashcardsPage() {
     if (typeof type !== 'string') return;
 
     const currIndex = type === 'learned' ? index - 1 : index + 1;
-    const bookmarkId = bookmarks[currIndex].id;
-    console.log(currIndex, bookmarks[currIndex], type);
+    const bookmarkId = bookmarks[currIndex]?.id;
+    if (!bookmarkId) return;
 
     if (type === 'learned') {
       learnedStatus.current.set(bookmarkId, bookmarkId);

@@ -20,13 +20,15 @@ function findMatchWord(entry: DictEntry, prop: 'kanji' | 'reading') {
       text: entry[prop]?.join('、') ?? '',
     };
 
-  const match = entry[prop].find(
-    (str) => str.startsWith(entry.oriWord) || str.startsWith(entry.word),
+  const match = entry[prop]?.find(
+    (str) =>
+      (entry.oriWord && str.startsWith(entry.oriWord)) ||
+      str.startsWith(entry.word),
   );
 
   return {
     match,
-    text: match ? '' : entry[prop].join('、'),
+    text: match ? '' : entry[prop]?.join('、'),
   };
 }
 
@@ -43,7 +45,10 @@ function ViewReadingKanji({
   const matchReading = entry.reading && findMatchWord(entry, 'reading');
 
   useEffect(() => {
-    onMatchWord?.(matchKanji?.match ? entry.reading[0] : matchReading?.match);
+    const matchWord = matchKanji?.match
+      ? entry.reading[0]
+      : matchReading?.match;
+    if (matchWord) onMatchWord?.(matchWord);
   }, [matchKanji, matchReading, onMatchWord, entry.reading]);
 
   return (

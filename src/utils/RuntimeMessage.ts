@@ -116,6 +116,7 @@ class RuntimeMessage {
       ? void
       : Promise<ReturnType<RuntimeMsgEvents[T]>>,
   ) {
+    // @ts-expect-error aaa
     this.eventListeners.set(name, callback);
 
     const hasListener = Browser.runtime.onMessage.hasListener(

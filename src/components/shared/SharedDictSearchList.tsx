@@ -41,16 +41,18 @@ function SharedDictSearchList({
 }: SharedDictSearchListProp) {
   const [activeTab, setActiveTab] = useState<DictQueryType>('all');
 
-  const hasResult =
-    result && Object.values(result).some((entries) => entries.length > 0);
-  const showTab = hasResult && getDictQueryType(query) === 'all';
-  const filteredTabs =
-    showTab &&
-    tabs.filter((tab) => tab.id === 'all' || result[tab.id].length > 0);
-
   useUpdateEffect(() => {
     setActiveTab('all');
   }, [query]);
+
+  if (!result) return null;
+
+  const hasResult =
+    result && Object.values(result).some((entries) => entries.length > 0);
+  const showTab = hasResult && getDictQueryType(query) === 'all';
+  const filteredTabs = showTab
+    ? tabs.filter((tab) => tab.id === 'all' || result[tab.id].length > 0)
+    : [];
 
   return (
     <>
@@ -79,7 +81,7 @@ function SharedDictSearchList({
           query={query}
           entries={result.words}
           onSelect={(id, entry, word) => {
-            onSelect({ id, entry, word, type: 'words' });
+            onSelect?.({ id, entry, word, type: 'words' });
           }}
         />
       )}
@@ -87,14 +89,14 @@ function SharedDictSearchList({
         <CommandKanjiEntries
           query={query}
           entries={result.kanji}
-          onSelect={(id, entry) => onSelect({ id, entry, type: 'kanji' })}
+          onSelect={(id, entry) => onSelect?.({ id, entry, type: 'kanji' })}
         />
       )}
       {(activeTab === 'all' || activeTab === 'names') && (
         <CommandNameEntries
           query={query}
           entries={result.names}
-          onSelect={(id, entry) => onSelect({ id, entry, type: 'names' })}
+          onSelect={(id, entry) => onSelect?.({ id, entry, type: 'names' })}
         />
       )}
     </>

@@ -32,7 +32,7 @@ function Popup() {
       } else {
         await RuntimeMessage.sendMessageToTab({
           frameId: 0,
-          tabId: currentTab.id,
+          tabId: currentTab.id as number,
           name: 'content:open-search-command',
         });
       }

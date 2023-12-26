@@ -8,6 +8,8 @@ import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { Volume2Icon } from 'lucide-react';
 
+type WordPosTagKey = keyof typeof WORD_POS_TAG;
+
 function ViewWordSense({
   sense,
   className,
@@ -30,10 +32,15 @@ function ViewWordSense({
               (pos) => (
                 <span
                   key={pos}
-                  title={WORD_POS_TAG[pos]?.value || WORD_MISC_TAG[pos]?.value}
+                  title={
+                    WORD_POS_TAG[pos as WordPosTagKey]?.value ||
+                    WORD_MISC_TAG[pos]?.value
+                  }
                   className="text-xs px-1 py-0.5 bg-fuchsia-400/20 dark:text-fuchsia-400 text-fuchsia-700 rounded inline-block"
                 >
-                  {WORD_POS_TAG[pos]?.name || WORD_MISC_TAG[pos]?.name || pos}
+                  {WORD_POS_TAG[pos as WordPosTagKey]?.name ||
+                    WORD_MISC_TAG[pos]?.name ||
+                    pos}
                 </span>
               ),
             )}
@@ -47,7 +54,7 @@ function ViewWordSense({
                 <button
                   className="underline font-sans-jp ml-1"
                   onClick={() => {
-                    const xref = currSense.xref[0].replaceAll(
+                    const xref = currSense.xref![0].replaceAll(
                       new RegExp(NON_JP_CHARS_REGEX, 'g'),
                       '',
                     );
@@ -83,7 +90,7 @@ function ViewWordSense({
                   {isSpeechAvailable && (
                     <Volume2Icon
                       className="h-4 w-4 cursor-pointer  inline-block"
-                      onClick={() => speak(currSense.example.sent[0]?.text)}
+                      onClick={() => speak(currSense.example!.sent[0]?.text)}
                     />
                   )}
                 </p>

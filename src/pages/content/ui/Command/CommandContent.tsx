@@ -26,17 +26,16 @@ export interface CommandContentRef {
   setActiveItem: React.Dispatch<React.SetStateAction<ActiveItem>>;
 }
 
-const itemDetailsMap: Record<
-  ItemType,
-  React.FC<{
-    onClose?(): void;
-    onBookmark?(): void;
-    entry: DictAllEntry;
-  }>
-> = {
-  names: CommandNameDetail,
-  words: CommandWordDetail,
-  kanji: CommandKanjiDetail,
+type DetailComp = React.FC<{
+  onClose?(): void;
+  onBookmark?(): void;
+  entry: DictAllEntry;
+}>;
+
+const itemDetailsMap: Record<ItemType, DetailComp> = {
+  names: CommandNameDetail as DetailComp,
+  words: CommandWordDetail as DetailComp,
+  kanji: CommandKanjiDetail as DetailComp,
 };
 
 const CommandContent = forwardRef<
@@ -66,7 +65,7 @@ const CommandContent = forwardRef<
     () => ({
       activeItem,
       setActiveItem,
-      activeItemDetail,
+      activeItemDetail: activeItemDetail || null,
     }),
     [activeItem, activeItemDetail],
   );

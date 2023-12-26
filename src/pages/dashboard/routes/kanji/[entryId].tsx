@@ -27,11 +27,11 @@ function KanjiDetailPage() {
   const [kanjiDetail, setKanjiDetail] = useState<DictKanjiEntry | null>(null);
 
   useEffect(() => {
-    const kanjiId = +entryId;
+    const kanjiId = +entryId!;
     const fetchAdditionalInfo = () => {
       const kanjiChar = String.fromCodePoint(kanjiId);
 
-      dictDB.kanjivg.get(kanjiId).then(setStrokes);
+      dictDB.kanjivg.get(kanjiId).then((result) => setStrokes(result ?? null));
       dictDB.words
         .where('kToken')
         .equals(kanjiChar)
@@ -44,8 +44,12 @@ function KanjiDetailPage() {
             .slice(0, 10)
             .map((word) => {
               let kanji = word.kanji;
-              if (kanji)
-                kanji = [kanji.find((item) => item.includes(kanjiChar))];
+              if (kanji) {
+                const currKanji = kanji.find((item) =>
+                  item.includes(kanjiChar),
+                );
+                kanji = currKanji ? [currKanji] : kanji;
+              }
 
               return {
                 ...word,

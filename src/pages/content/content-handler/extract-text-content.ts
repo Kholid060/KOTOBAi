@@ -70,7 +70,7 @@ export function extractTextNodeContent({
   const treeWalker = document.createTreeWalker(
     inlineAncestor || cursorOffset.offsetNode,
     NodeFilter.SHOW_TEXT,
-    treeWalkerFilter,
+    treeWalkerFilter!,
   );
   while (
     treeWalker.currentNode !== cursorOffset.offsetNode &&
@@ -139,7 +139,7 @@ export function extractTextNodeContent({
     node &&
     inlineAncestor &&
     (node.parentElement === inlineAncestor ||
-      isInlineElement(node.parentElement))
+      isInlineElement(node.parentElement!))
   );
 
   if (!result.textRange.length) return null;

@@ -16,7 +16,8 @@ function wordEntriesSorter(entries: WordEntry[]): WordEntry[] {
         return;
       }
 
-      sum += WORD_PRIORITY_WEIGHT[str] || 0;
+      sum +=
+        WORD_PRIORITY_WEIGHT[str as keyof typeof WORD_PRIORITY_WEIGHT] || 0;
     });
 
     return sum;

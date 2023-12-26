@@ -29,7 +29,7 @@ export interface SearchDictWordResult {
 interface SearchWordOptions {
   input: string;
   maxResult?: number;
-  maxQueryLimit?: number;
+  maxQueryLimit: number;
   controller: AbortController;
   searchWord: (
     detail: DictSearchOptions,
@@ -46,8 +46,8 @@ const YOON = {
 
 const endsInYoon = (str: string) =>
   str.length > 1 &&
-  YOON.smallY.includes(str.at(-1)) &&
-  YOON.chars.includes(str.at(-2));
+  YOON.smallY.includes(str.at(-1)!) &&
+  YOON.chars.includes(str.at(-2)!);
 
 async function handleSearchForward({
   searchWord,
@@ -261,7 +261,7 @@ export default function dictWordSearcher(isIframe = false) {
 
       resultCache.add(input, result);
 
-      if (isIframe) {
+      if (isIframe && sender.tab && frameSource) {
         await RuntimeMessage.sendMessageToTab(
           {
             frameId: 0,

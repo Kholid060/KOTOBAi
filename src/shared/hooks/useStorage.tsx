@@ -1,3 +1,5 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { useSyncExternalStore } from 'react';
 import { BaseStorage } from '@src/shared/storages/base';
 

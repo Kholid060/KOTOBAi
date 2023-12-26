@@ -24,7 +24,9 @@ export default function App({
   const [isDisabled, setIsDisabled] = useState(() => disabled);
 
   useEffectOnce(() => {
-    contentEventEmitter.addListener('disable-state-change', setIsDisabled);
+    contentEventEmitter.addListener('disable-state-change', (value) =>
+      setIsDisabled(value ?? false),
+    );
   });
 
   if (isDisabled) return null;

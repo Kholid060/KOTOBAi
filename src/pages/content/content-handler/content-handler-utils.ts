@@ -34,7 +34,7 @@ export function mirrorElement(target: Element, text?: string) {
   mirrorEl.textContent = text || '';
 
   COPY_CSS_PROPS.forEach((key) => {
-    mirrorEl.style.setProperty(key, targetStyle[key]);
+    mirrorEl.style.setProperty(key, targetStyle.getPropertyValue(key));
   });
 
   mirrorEl.scrollTop = target.scrollTop;
