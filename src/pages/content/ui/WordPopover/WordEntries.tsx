@@ -1,8 +1,7 @@
-import { memo, useRef } from 'react';
+import { memo, useContext, useRef } from 'react';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { UiButton } from '@root/src/components/ui/button';
 import { Volume2Icon } from 'lucide-react';
-import { WORD_REASONS } from '@root/src/shared/constant/word.const';
 import {
   DictionaryWordEntryResult,
   SearchDictWordResult,
@@ -14,15 +13,20 @@ import RuntimeMessage, {
 } from '@root/src/utils/RuntimeMessage';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
-import ViewWordSense from '@root/src/components/view/ViewWordSense';
+import ViewWordEntry from '@root/src/components/view/ViewWordEntry';
+import { AppContentContext } from '../app';
+import { ExtensionSettingsPopup } from '@root/src/shared/storages/extSettingsStorage';
+import { EXT_POPUP_FONT_SIZE } from '@root/src/shared/constant/ext-settings.const';
 
 function WordEntry({
   entry,
   onSpeak,
+  settings,
   speechAvailable,
 }: {
   speechAvailable?: boolean;
   onSpeak?: (str: string) => void;
+  settings: ExtensionSettingsPopup;
   entry: DictionaryWordEntryResult;
 }) {
   return (
@@ -52,23 +56,15 @@ function WordEntry({
           </UiButton>
         )}
       </div>
-      {entry.reasons && (
-        <div className="mt-2 space-x-1">
-          {entry.reasons.map((reason) => (
-            <span
-              key={reason}
-              className="text-xs px-1 py-0.5 bg-cyan-400/20 dark:text-cyan-400 text-cyan-700 rounded inline-block"
-            >
-              {WORD_REASONS[reason]}
-            </span>
-          ))}
-        </div>
+      <ViewWordEntry.Meta entry={entry} className="mt-2" />
+      {settings.showDefinition && (
+        <ViewWordEntry.Sense
+          tooltipExample
+          sense={entry.sense}
+          showPOS={settings.showPOS}
+          className="mt-2 space-y-1"
+        />
       )}
-      <ViewWordSense
-        tooltipExample
-        sense={entry.sense}
-        className="mt-2 space-y-1"
-      />
       <div className="text-right mt-1">
         <button
           className="underline text-xs text-muted-foreground hover:text-foreground"
@@ -94,15 +90,23 @@ function WordEntries({
   result: SearchDictWordResult;
   onBookmark?: (payload: BookmarkDictionaryPayload) => void;
 } & React.DetailsHTMLAttributes<HTMLDivElement>) {
+  const appCtx = useContext(AppContentContext);
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { isSpeechAvailable, speak } = useSpeechSynthesis();
+
+  const settings = appCtx.extSettings.popup;
 
   return (
     <div
       ref={containerRef}
       id="words-section"
-      className={cn('divide-y space-y-4 px-4 pb-4', className)}
+      className={cn(
+        'divide-y space-y-4 px-4 pb-4',
+        className,
+        EXT_POPUP_FONT_SIZE[settings.fontSize].className,
+      )}
       {...props}
     >
       {result.entries.map((entry) => (
@@ -110,6 +114,7 @@ function WordEntries({
           key={entry.id}
           entry={entry}
           onSpeak={speak}
+          settings={settings}
           speechAvailable={isSpeechAvailable}
         />
       ))}

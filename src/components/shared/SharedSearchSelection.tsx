@@ -59,8 +59,6 @@ function SharedSearchSelection({
         y: rangeRect.top - CONTAINER_HEIGHT - 5,
       });
 
-      console.log(selection, range, rangeRect);
-
       setIsOpen(true);
     }, 250);
     document.addEventListener('selectionchange', onSelectionChange);

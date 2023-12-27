@@ -57,9 +57,11 @@ class TextHighlighter {
     textRange,
     matchLength,
     cursorOffset,
+    highlightTextBox = true,
   }: {
     matchLength: number;
     textRange: TextRange[];
+    highlightTextBox?: boolean;
     cursorOffset: CursorOffset;
   }) {
     CSS?.highlights?.delete(STYLE_ID);
@@ -78,6 +80,8 @@ class TextHighlighter {
     };
 
     if (NodeTypeChecker.isInput(cursorOffset.offsetNode)) {
+      if (!highlightTextBox) return;
+
       this.inputHighlighter(highlighterPayload);
     } else {
       this.nodeHighlighter(highlighterPayload);

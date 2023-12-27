@@ -49,7 +49,7 @@ export interface BookmarkDictionaryPayload {
 export interface RuntimeMsgEvents {
   'background:bookmark-get': <T extends boolean>(
     id: BookmarkIdPayload,
-    boolean?: T,
+    boolean: T,
   ) => T extends true ? boolean : BookmarkItem[];
   'background:dashboard-open': (path?: string) => void;
   'background:bookmark-toggle': (
@@ -62,7 +62,7 @@ export interface RuntimeMsgEvents {
   ) => DictionaryNameEntryResult[];
   'background:search-word': (
     detail: MessageSearchWordOpts,
-  ) => SearchDictWordResult;
+  ) => SearchDictWordResult | null;
   'background:search-kanji': (
     detail: DictSearchKanjiOptions,
   ) => DictKanjiEntry[];
@@ -71,7 +71,7 @@ export interface RuntimeMsgEvents {
   }) => DictKanjiVGEntry[];
   'background:search-word-iframe': (
     detail: SetRequired<MessageSearchWordOpts, 'frameSource'>,
-  ) => SearchDictWordResult;
+  ) => SearchDictWordResult | null;
   'background:disable-ext': (payload: DisableExtPayload) => void;
   'content:iframe-word-result': (
     result: SearchDictWordResult & { frameSource: WordFrameSource },

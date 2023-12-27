@@ -74,11 +74,6 @@ export interface DictKanjiEntry {
   reading: DictKanjiEntryReading;
 }
 
-export interface DictMetadata {
-  version: string;
-  dataCreatedAt: string;
-}
-
 export interface KanjiDictMetadata {
   version: string;
   fileVersion: string;
@@ -129,4 +124,13 @@ export interface DictKanjiVGEntryPathGroup {
 export interface DictKanjiVGEntry {
   id: number;
   paths: (DictKanjiVGEntryPath | DictKanjiVGEntryPathGroup)[];
+}
+
+export interface DictMetadata {
+  version: string;
+  dataCreatedAt: string;
+}
+export interface DictMetadataItem {
+  id: `${DICTIONARY_NAME}`;
+  metadata: DictMetadata;
 }

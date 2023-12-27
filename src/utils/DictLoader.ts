@@ -2,7 +2,11 @@ import JSZip from 'jszip';
 import { DICTIONARY_NAME } from '../shared/constant/constant';
 import dictDB from '../shared/db/dict.db';
 import { api } from './api';
-import { DictEntry, DictFileEntries } from '../interface/dict.interface';
+import {
+  DictEntry,
+  DictFileEntries,
+  DictMetadata,
+} from '../interface/dict.interface';
 import { getRandomArbitrary } from './helper';
 
 const DB_NAME_MAP = {
@@ -59,6 +63,21 @@ class DictLoader {
         progress: maxDownloadProgress + currProgress,
       });
     }
+  }
+
+  static async putMetadata(dicts: (DICTIONARY_NAME | `${DICTIONARY_NAME}`)[]) {
+    const metadata = await api.getDictMetadata();
+    const metadataArr = Object.entries(metadata).reduce<
+      { id: DICTIONARY_NAME; metadata: DictMetadata }[]
+    >((acc, [id, metadata]) => {
+      const dictId = id as DICTIONARY_NAME;
+      if (dicts.includes(dictId)) {
+        acc.push({ id: dictId, metadata });
+      }
+
+      return acc;
+    }, []);
+    await dictDB.metadata.bulkPut(metadataArr);
   }
 }
 

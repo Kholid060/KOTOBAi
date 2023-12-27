@@ -26,7 +26,7 @@ function CommandWordEntries({
           key={entry.id}
           className="block !py-2"
           value={entry.id.toString()}
-          onSelect={(id) => onSelect(id, entry, matchWord.current[entry.id])}
+          onSelect={(id) => onSelect?.(id, entry, matchWord.current[entry.id])}
         >
           <ViewReadingKanji
             entry={entry}

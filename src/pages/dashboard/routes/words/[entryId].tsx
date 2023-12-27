@@ -1,17 +1,14 @@
 import { UiButton } from '@root/src/components/ui/button';
 import ViewKanjiStrokes from '@root/src/components/view/ViewKanjiStrokes';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
-import ViewWordSense from '@root/src/components/view/ViewWordSense';
+import ViewWordEntry from '@root/src/components/view/ViewWordEntry';
 import {
   DictKanjiVGEntry,
   DictWordEntry,
 } from '@root/src/interface/dict.interface';
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
-import {
-  WORD_KANJI_INFO_TAG,
-  WORD_REASONS,
-} from '@root/src/shared/constant/word.const';
+import { WORD_KANJI_INFO_TAG } from '@root/src/shared/constant/word.const';
 import dictDB from '@root/src/shared/db/dict.db';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { Volume2Icon } from 'lucide-react';
@@ -168,24 +165,8 @@ function WordDetailPage() {
           </UiButton>
         )}
       </div>
-      {('reasons' in wordDetail || wordDetail.common) && (
-        <div className="mt-2 space-x-1">
-          {wordDetail.common && (
-            <span className="text-xs px-1 py-0.5 bg-emerald-400/20 dark:text-emerald-400 text-emerald-700 rounded inline-block">
-              common word
-            </span>
-          )}
-          {(wordDetail as DictionaryWordEntryResult).reasons?.map((reason) => (
-            <span
-              key={reason}
-              className="text-xs px-1 py-0.5 bg-cyan-400/20 dark:text-cyan-400 text-cyan-700 rounded inline-block"
-            >
-              {WORD_REASONS[reason]}
-            </span>
-          ))}
-        </div>
-      )}
-      <ViewWordSense
+      <ViewWordEntry.Meta entry={wordDetail} className="mt-2" />
+      <ViewWordEntry.Sense
         showReference
         sense={wordDetail.sense}
         className="mt-6 mb-10 space-y-3"

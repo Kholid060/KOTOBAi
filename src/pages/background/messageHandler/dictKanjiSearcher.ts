@@ -1,3 +1,4 @@
+import { DictKanjiVGEntry } from '@root/src/interface/dict.interface';
 import dictDB, {
   DictSearchKanjiOptions,
   DictSearchKanjiVgOptions,
@@ -10,5 +11,7 @@ export async function dictKanjiSearcher(detail: DictSearchKanjiOptions) {
 
 export async function dictKanjiVgSearcher(detail: DictSearchKanjiVgOptions) {
   const result = await dictDB.searchKanjiVG(detail);
-  return result;
+  const filteredResult = result.filter(Boolean) as DictKanjiVGEntry[];
+
+  return filteredResult;
 }

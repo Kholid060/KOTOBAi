@@ -1,14 +1,12 @@
 import { UiButton } from '@root/src/components/ui/button';
 import UiCard from '@root/src/components/ui/card';
-import { DictMetadata } from '@root/src/interface/dict.interface';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
-import dictDB from '@root/src/shared/db/dict.db';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import DictLoader from '@root/src/utils/DictLoader';
-import { api } from '@root/src/utils/api';
 import {
   BookA,
   BookUserIcon,
+  CheckIcon,
   ExternalLinkIcon,
   Loader2Icon,
 } from 'lucide-react';
@@ -61,9 +59,9 @@ const defDictProgress = {
 function WelcomePage() {
   const navigate = useNavigate();
 
-  const [selectedDicts, setSelectedDicts] = useState<`${DICTIONARY_NAME}`[]>(
-    [],
-  );
+  const [selectedDicts, setSelectedDicts] = useState<`${DICTIONARY_NAME}`[]>([
+    DICTIONARY_NAME.JMDICT,
+  ]);
   const [dictProgress, setDictProgress] = useState<
     Record<DICTIONARY_NAME, number>
   >(() => ({ ...defDictProgress }));
@@ -104,18 +102,7 @@ function WelcomePage() {
         ),
       );
 
-      const metadata = await api.getDictMetadata();
-      const metadataArr = Object.entries(metadata).reduce<
-        { id: DICTIONARY_NAME; metadata: DictMetadata }[]
-      >((acc, [id, metadata]) => {
-        const dictId = id as DICTIONARY_NAME;
-        if (selectedDicts.includes(dictId)) {
-          acc.push({ id: dictId, metadata });
-        }
-
-        return acc;
-      }, []);
-      await dictDB.metadata.bulkPut(metadataArr);
+      await DictLoader.putMetadata(selectedDicts);
 
       navigate('/', { replace: true });
     } catch (error) {
@@ -184,9 +171,9 @@ function WelcomePage() {
                       }}
                     ></div>
                   )}
-                  <div className="z-10 flex items-start text-left px-4 py-2 relative">
+                  <div className="z-10 flex items-start text-left px-4 py-2 gap-2 relative">
                     <span className="w-5 flex-shrink-0">{dictionary.icon}</span>
-                    <div className="ml-2">
+                    <div className="flex-grow">
                       <p>
                         {dictionary.name}{' '}
                         <a
@@ -202,6 +189,9 @@ function WelcomePage() {
                         {dictionary.description}
                       </p>
                     </div>
+                    {selectedDicts.includes(dictionary.id) && (
+                      <CheckIcon className="h-5 w-5 dark:text-emerald-400 text-emerald-700 flex-shrink-0 mt-1" />
+                    )}
                   </div>
                 </button>
               ))}

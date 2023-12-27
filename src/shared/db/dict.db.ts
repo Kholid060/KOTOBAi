@@ -2,10 +2,10 @@ import Dexie, { IndexableType } from 'dexie';
 import {
   DictKanjiEntry,
   DictKanjiVGEntry,
-  DictMetadata,
   DictNameEntry,
   DictSearchOptions,
   DictWordEntry,
+  DictMetadataItem,
 } from '@src/interface/dict.interface';
 import { DICTIONARY_NAME } from '../constant/constant';
 
@@ -31,10 +31,7 @@ class DictDB extends Dexie {
   names!: Dexie.Table<DictNameEntry, number>;
   kanji!: Dexie.Table<DictKanjiEntry, number>;
   kanjivg!: Dexie.Table<DictKanjiVGEntry, number>;
-  metadata!: Dexie.Table<
-    { id: `${DICTIONARY_NAME}`; metadata: DictMetadata },
-    `${DICTIONARY_NAME}`
-  >;
+  metadata!: Dexie.Table<DictMetadataItem, DictMetadataItem['id']>;
 
   constructor() {
     super('dictionaries');

@@ -15,9 +15,3 @@ if (window.self === window.top) {
 }
 
 import('@pages/content/injected');
-
-console.log(
-  'content loaded',
-  window.self === window.top ? 'TOP FRAME' : 'IFRAME',
-  window.location.hostname,
-);

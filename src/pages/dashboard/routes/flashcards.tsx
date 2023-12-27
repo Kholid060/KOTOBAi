@@ -288,7 +288,7 @@ function FlashcardsPage() {
       (reviewItem) => !items.some((item) => item.id === reviewItem.id),
     );
 
-    return [...items, ...reReview];
+    return [...items, ...reReview] as BookmarkItem[];
   }, []);
 
   function updateCardIndex(index: number, type?: ChangeIndexType) {

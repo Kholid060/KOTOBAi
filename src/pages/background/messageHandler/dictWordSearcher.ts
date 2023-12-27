@@ -227,7 +227,6 @@ export default function dictWordSearcher(isIframe = false) {
     }
 
     try {
-      console.log('SEARCH', input);
       searchController = new AbortController();
 
       const cacheResult = resultCache.get(input);
@@ -284,5 +283,7 @@ export default function dictWordSearcher(isIframe = false) {
     } finally {
       searchController = null;
     }
+
+    return null;
   };
 }

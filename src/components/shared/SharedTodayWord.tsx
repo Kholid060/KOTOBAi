@@ -20,7 +20,7 @@ const WORD_MAX_ID = 2859479;
 const getRandWordId = (max: number, remainder?: number) =>
   Math.ceil(getRandomArbitrary(WORD_MIN_ID, max, remainder));
 
-async function findRandomWord(retryCount = 0) {
+async function findRandomWord(retryCount = 0): Promise<DictWordEntry | null> {
   const length = await dictDB.words.count();
   if (length <= 0 || retryCount > 3) return null;
 

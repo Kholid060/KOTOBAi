@@ -9,6 +9,7 @@ import {
 import { dictNameSearcher } from './messageHandler/dictNameSearcher';
 import dictWordSearcher from './messageHandler/dictWordSearcher';
 import Browser from 'webextension-polyfill';
+import { BookmarkItem } from '@root/src/interface/bookmark.interface';
 
 RuntimeMessage.onMessage('background:search-name', dictNameSearcher());
 RuntimeMessage.onMessage('background:search-word', dictWordSearcher());
@@ -38,7 +39,7 @@ RuntimeMessage.onMessage('background:bookmark-get', async (id, boolean) => {
   const result = await bookmarkDB.getBookmarks(id);
   if (typeof boolean === 'boolean' && boolean) return Boolean(result[0]);
 
-  return result;
+  return result as BookmarkItem[];
 });
 RuntimeMessage.onMessage('background:dashboard-open', async (path) => {
   try {

@@ -39,7 +39,7 @@ const queriesMap = {
       type: 'search-forward',
     });
 
-    return result.entries;
+    return result?.entries ?? [];
   },
   kanji: async (input: string) => {
     const kanjiIds = input

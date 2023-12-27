@@ -2,7 +2,9 @@ import { useEffectOnce } from 'usehooks-ts';
 import { contentEventEmitter } from '../../content-handler/ContentHandler';
 import { useContext, useEffect, useRef, useState } from 'react';
 import WordPopoverBase, { WordPopoverRef } from './WordPopoverBase';
-import { WordFrameSource } from '@root/src/utils/RuntimeMessage';
+import RuntimeMessage, {
+  WordFrameSource,
+} from '@root/src/utils/RuntimeMessage';
 import { ClientRect } from '@root/src/interface/shared.interface';
 import { NodeTypeChecker } from '../../content-handler/content-handler-utils';
 import { SearchDictWordResult } from '../../../background/messageHandler/dictWordSearcher';
@@ -166,7 +168,17 @@ function WordPopover() {
               </button>
             ))}
             <div className="flex-grow" />
-            <UiButton variant="secondary" size="icon-xs" className="ml-1">
+            <UiButton
+              variant="secondary"
+              size="icon-xs"
+              className="ml-1"
+              onClick={() =>
+                RuntimeMessage.sendMessage(
+                  'background:dashboard-open',
+                  '/settings',
+                )
+              }
+            >
               <SettingsIcon className="h-4 w-4" />
             </UiButton>
             <button

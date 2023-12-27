@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from 'react';
 import themeStorage, { ThemeList } from '../storages/themeStorage';
 import useStorage from '../hooks/useStorage';
+import { useEffectOnce } from 'usehooks-ts';
 
 interface ThemeContext {
   theme: ThemeList;
@@ -23,13 +24,20 @@ export function ThemeProvider({
   container?: HTMLElement;
 }) {
   const currTheme = useStorage(themeStorage);
-  const [theme, setTheme] = useState<ThemeList>(currTheme);
+  const [theme, setTheme] = useState<ThemeList>(() => currTheme);
 
   function setCurrentTheme(theme: ThemeList) {
     setTheme(theme);
     themeStorage.set(theme);
   }
 
+  useEffectOnce(() => {
+    const themeListener = themeStorage.subscribe(() => {
+      themeStorage.get().then(setTheme);
+    });
+
+    return themeListener;
+  });
   useEffect(() => {
     const isDarkTheme =
       theme === 'system' ? isSystemDarkTheme() : theme === 'dark';

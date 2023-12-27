@@ -11,6 +11,7 @@ type ThemeStorage = BaseStorage<ThemeList> & {
 };
 
 const storage = createStorage<ThemeList>('app-theme', 'system', {
+  liveUpdate: true,
   storageType: StorageType.Local,
 });
 

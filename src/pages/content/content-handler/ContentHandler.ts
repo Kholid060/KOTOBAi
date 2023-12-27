@@ -13,6 +13,11 @@ import { NodeTypeChecker, isInMainFrame } from './content-handler-utils';
 import { ClientRect } from '@root/src/interface/shared.interface';
 import { CursorOffset } from './caretPositionFromPoint';
 import { CONTENT_ROOT_EL_ID } from '../ui';
+import extSettingsStorage, {
+  ExtensionSettings,
+  ExtensionSettingsScanning,
+} from '@root/src/shared/storages/extSettingsStorage';
+import Browser from 'webextension-polyfill';
 
 const MAX_CONTENT_LENGTH = 16;
 
@@ -39,21 +44,43 @@ interface ContentHandlerOptions {
   disabled?: boolean;
 }
 
+function isMatchScannerModifier(
+  event: PointerEvent,
+  mod: ExtensionSettingsScanning['modifier'],
+) {
+  switch (mod) {
+    case 'none':
+      return true;
+    case 'alt':
+      return event.altKey;
+    case 'ctrl':
+      return event.ctrlKey || event.metaKey;
+    case 'shift':
+      return event.shiftKey;
+    default:
+      return false;
+  }
+}
+
 class ContentHandler {
   private _disabled = false;
   private isPointerDown = false;
   private isMainFrame = isInMainFrame();
+  private extSettings: ExtensionSettings = extSettingsStorage.$defaultValue;
 
   private textSearcher = new TextSearcher();
   private textHighlighter = new TextHighlighter();
 
   constructor({ disabled }: ContentHandlerOptions = { disabled: false }) {
     this.onPointerUp = this.onPointerUp.bind(this);
+    this.onExtStorage = this.onExtStorage.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onClearResult = this.onClearResult.bind(this);
     this.onPointerMove = debounce(this.onPointerMove.bind(this), 100);
 
     if (!disabled) this.attachListeners();
+
+    this._init();
   }
 
   get disabled() {
@@ -67,10 +94,18 @@ class ContentHandler {
     this._disabled = value;
   }
 
+  private _init() {
+    extSettingsStorage.get().then((settings) => {
+      this.extSettings = settings;
+    });
+  }
+
   private attachListeners() {
     window.addEventListener('pointerup', this.onPointerUp);
     window.addEventListener('pointerdown', this.onPointerDown);
     window.addEventListener('pointermove', this.onPointerMove);
+
+    Browser.storage.local.onChanged.addListener(this.onExtStorage);
 
     contentEventEmitter.addListener('clear-result', this.onClearResult);
   }
@@ -80,7 +115,16 @@ class ContentHandler {
     window.removeEventListener('pointerdown', this.onPointerDown);
     window.removeEventListener('pointermove', this.onPointerMove);
 
+    Browser.storage.local.onChanged.addListener(this.onExtStorage);
+
     contentEventEmitter.removeListener('clear-result', this.onClearResult);
+  }
+
+  onExtStorage(changes: Browser.Storage.StorageAreaOnChangedChangesType) {
+    const updatedSettings = changes[extSettingsStorage.$key];
+    if (updatedSettings) {
+      this.extSettings = updatedSettings.newValue as ExtensionSettings;
+    }
   }
 
   private onClearResult() {
@@ -109,6 +153,12 @@ class ContentHandler {
       (event.target && isInContentPopup(event.target))
     )
       return;
+
+    if (!isMatchScannerModifier(event, this.extSettings.scanning.modifier)) {
+      contentEventEmitter.emit('search-word-result', null);
+      this.textHighlighter.clearHighlight();
+      return;
+    }
 
     const cursorPoint = { x: event.clientX, y: event.clientY };
     const result = this.textSearcher.getTextByPoint({
@@ -161,17 +211,18 @@ class ContentHandler {
           : 'search-backward',
       });
 
-      if (searchResult) {
+      if (searchResult && this.extSettings.scanning.highlightText) {
         this.textHighlighter.highlighText({
           textRange: textRange,
           cursorOffset: cursorOffset,
           matchLength: searchResult.maxLength,
+          highlightTextBox: this.extSettings.scanning.highlightTextBox,
         });
       } else {
         this.textHighlighter.clearHighlight();
       }
 
-      if (!this.isMainFrame) return;
+      if (!this.isMainFrame || !searchResult) return;
 
       contentEventEmitter.emit('search-word-result', {
         rect,

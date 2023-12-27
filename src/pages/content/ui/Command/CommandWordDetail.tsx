@@ -2,10 +2,9 @@ import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmark
 import { UiButton } from '@root/src/components/ui/button';
 import UiTooltip from '@root/src/components/ui/tooltip';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
-import ViewWordSense from '@root/src/components/view/ViewWordSense';
+import ViewWordEntry from '@root/src/components/view/ViewWordEntry';
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
-import { WORD_REASONS } from '@root/src/shared/constant/word.const';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import { ArrowLeftIcon, ExternalLink, Volume2Icon } from 'lucide-react';
@@ -72,19 +71,8 @@ function CommandWordDetail({
           </UiButton>
         )}
       </div>
-      {entry.reasons && (
-        <div className="mt-2 space-x-1">
-          {entry.reasons.map((reason) => (
-            <span
-              key={reason}
-              className="text-xs px-1 py-0.5 bg-cyan-400/20 dark:text-cyan-400 text-cyan-700 rounded inline-block"
-            >
-              {WORD_REASONS[reason]}
-            </span>
-          ))}
-        </div>
-      )}
-      <ViewWordSense sense={entry.sense} className="mt-2 space-y-1" />
+      <ViewWordEntry.Meta entry={entry} className="mt-2" />
+      <ViewWordEntry.Sense sense={entry.sense} className="mt-2 space-y-1" />
       {((entry.kanji && entry.kanji?.length > 1) ||
         entry.reading?.length > 1) && (
         <div className="mt-4">

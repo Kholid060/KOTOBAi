@@ -38,7 +38,6 @@ function WordKanji({
       type: 'search-backward',
     })
       .then((result) => {
-        console.log('names', cursorText, result);
         setNames(result);
       })
       .catch((error) => {

@@ -1,8 +1,13 @@
-import { DictWordEntrySense } from '@root/src/interface/dict.interface';
+import {
+  DictWordEntry,
+  DictWordEntrySense,
+} from '@root/src/interface/dict.interface';
+import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { NON_JP_CHARS_REGEX } from '@root/src/shared/constant/char.const';
 import {
   WORD_MISC_TAG,
   WORD_POS_TAG,
+  WORD_REASONS,
 } from '@root/src/shared/constant/word.const';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
@@ -15,8 +20,10 @@ function ViewWordSense({
   className,
   showReference,
   tooltipExample,
+  showPOS = true,
   ...props
 }: {
+  showPOS?: boolean;
   showReference?: boolean;
   tooltipExample?: boolean;
   sense: DictWordEntrySense[];
@@ -27,9 +34,12 @@ function ViewWordSense({
     <ul className={cn('list-decimal pl-4', className)} {...props}>
       {sense.map((currSense, idx) => (
         <li key={idx}>
-          <span className="inline space-x-0.5">
-            {[...currSense.pos, ...(currSense.misc ? currSense.misc : [])].map(
-              (pos) => (
+          {showPOS && (
+            <span className="inline space-x-0.5">
+              {[
+                ...currSense.pos,
+                ...(currSense.misc ? currSense.misc : []),
+              ].map((pos) => (
                 <span
                   key={pos}
                   title={
@@ -42,9 +52,9 @@ function ViewWordSense({
                     WORD_MISC_TAG[pos]?.name ||
                     pos}
                 </span>
-              ),
-            )}
-          </span>
+              ))}
+            </span>
+          )}
           <p className="leading-tight inline">
             {' '}
             {currSense.gloss.join('; ')}{' '}
@@ -105,4 +115,37 @@ function ViewWordSense({
   );
 }
 
-export default ViewWordSense;
+function ViewWordMeta({
+  entry,
+  className,
+  ...props
+}: {
+  entry: DictWordEntry | DictionaryWordEntryResult;
+} & React.HTMLAttributes<HTMLDivElement>) {
+  if (!('reasons' in entry || entry.common)) return null;
+
+  return (
+    <div className={cn('space-x-1', className)} {...props}>
+      {entry.common && (
+        <span className="text-xs px-1 py-0.5 bg-emerald-400/20 dark:text-emerald-400 text-emerald-700 rounded inline-block">
+          common word
+        </span>
+      )}
+      {(entry as DictionaryWordEntryResult).reasons?.map((reason) => (
+        <span
+          key={reason}
+          className="text-xs px-1 py-0.5 bg-cyan-400/20 dark:text-cyan-400 text-cyan-700 rounded inline-block"
+        >
+          {WORD_REASONS[reason]}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+const ViewWordEntry = {
+  Meta: ViewWordMeta,
+  Sense: ViewWordSense,
+};
+
+export default ViewWordEntry;
