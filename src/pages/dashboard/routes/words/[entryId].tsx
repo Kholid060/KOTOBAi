@@ -8,7 +8,6 @@ import {
 } from '@root/src/interface/dict.interface';
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
-import { WORD_KANJI_INFO_TAG } from '@root/src/shared/constant/word.const';
 import dictDB from '@root/src/shared/db/dict.db';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { Volume2Icon } from 'lucide-react';
@@ -171,50 +170,7 @@ function WordDetailPage() {
         sense={wordDetail.sense}
         className="mt-6 mb-10 space-y-3"
       />
-      {((wordDetail.kanji && wordDetail.kanji.length > 1) ||
-        wordDetail.kInfo ||
-        wordDetail.reading?.length > 1) && (
-        <>
-          <p className="font-semibold text-muted-foreground">Other Forms </p>
-          <ol className="opacity-90 list-disc font-sans-jp pl-4">
-            {wordDetail.kanji && wordDetail.kanji.length > 1 && (
-              <li>
-                <p className="dark:text-indigo-400 text-indigo-600">
-                  {wordDetail.kanji?.map((str, index) => {
-                    const info = wordDetail.kInfo?.[index]
-                      ?.filter((item) => item !== 'sK')
-                      .map(
-                        (item) =>
-                          WORD_KANJI_INFO_TAG[
-                            item as keyof typeof WORD_KANJI_INFO_TAG
-                          ]?.value,
-                      );
-
-                    return (
-                      <span key={index}>
-                        <span>{str}</span>
-                        {info && info.length > 0 && (
-                          <span className="font-sans text-muted-foreground">
-                            【{info.join(', ')}】
-                          </span>
-                        )}
-                        {index !== wordDetail.kanji!.length - 1 ? '、' : ''}
-                      </span>
-                    );
-                  })}
-                </p>
-              </li>
-            )}
-            {wordDetail.reading?.length > 1 && (
-              <li>
-                <p className="dark:text-emerald-400 text-emerald-600">
-                  {wordDetail.reading?.join('、')}
-                </p>
-              </li>
-            )}
-          </ol>
-        </>
-      )}
+      <ViewWordEntry.OtherForms entry={wordDetail} />
       <WordStrokeOrderDiagrams entry={wordDetail} />
     </>
   );

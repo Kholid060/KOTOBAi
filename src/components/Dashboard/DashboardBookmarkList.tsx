@@ -150,33 +150,36 @@ function DashboardBookmarkList(props: React.HTMLAttributes<HTMLDivElement>) {
 
   return (
     <UiCard {...props}>
-      <UiCard.Header>
+      <UiCard.Header className="flex items-center flex-row gap-4">
         <p className="font-semibold">Bookmarks</p>
+        <div className="flex-grow"></div>
+        <UiSelect
+          value={statusFilter}
+          className="w-auto"
+          onValueChange={(value) =>
+            setstatusFilter(value as BookmarkItemStatus)
+          }
+        >
+          <UiSelect.Option value="all">All status</UiSelect.Option>
+          {Object.values(BOOKMARK_ITEM_STATUS).map((item) => (
+            <UiSelect.Option key={item.id} value={item.id}>
+              {item.name}
+            </UiSelect.Option>
+          ))}
+        </UiSelect>
+        <UiInput
+          value={query}
+          className="w-56"
+          placeholder="Search..."
+          onChange={(event) => setQuery(event.target.value)}
+        />
       </UiCard.Header>
       <UiCard.Content>
-        <div className="flex items-center mb-4 gap-2">
-          <UiInput
-            value={query}
-            className="w-56"
-            placeholder="Search..."
-            onChange={(event) => setQuery(event.target.value)}
-          />
-          <UiSelect
-            value={statusFilter}
-            className="w-auto"
-            onValueChange={(value) =>
-              setstatusFilter(value as BookmarkItemStatus)
-            }
-          >
-            <UiSelect.Option value="all">All status</UiSelect.Option>
-            {Object.values(BOOKMARK_ITEM_STATUS).map((item) => (
-              <UiSelect.Option key={item.id} value={item.id}>
-                {item.name}
-              </UiSelect.Option>
-            ))}
-          </UiSelect>
-        </div>
-        {bookmarks && <BookmarksTable bookmarks={bookmarks} />}
+        {bookmarks ? (
+          <BookmarksTable bookmarks={bookmarks} />
+        ) : (
+          <p className="text-center">No data</p>
+        )}
       </UiCard.Content>
       <UiCard.Footer className="flex items-center justify-end">
         <p className="text-muted-foreground tabular-nums">

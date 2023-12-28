@@ -117,62 +117,59 @@ function SettingsPopup({
       </UiCard.Header>
       <UiCard.Content>
         <WordEntryViewSample popupSettings={settings.popup} />
-        <ul className="mt-6 space-y-6">
+        <ul className="mt-6 space-y-4 divide-y divide-border/50">
           <li className="flex items-center gap-4">
+            <div className="flex-grow">
+              <p>Show word definitions</p>
+            </div>
             <UiSwitch
               checked={settings.popup.showDefinition}
               onCheckedChange={(value) =>
                 updateSettings?.({ popup: { showDefinition: value } })
               }
             />
-            <div className="flex-grow">
-              <p className="font-medium">Show word definitions</p>
-            </div>
           </li>
           {settings.popup.showDefinition && (
-            <li className="flex items-center gap-4">
+            <li className="flex items-center gap-4 pt-4">
+              <div className="flex-grow">
+                <p>Show Part of Speech</p>
+              </div>
               <UiSwitch
                 checked={settings.popup.showPOS}
                 onCheckedChange={(value) =>
                   updateSettings?.({ popup: { showPOS: value } })
                 }
               />
-              <div className="flex-grow">
-                <p className="font-medium">Show Part of Speech</p>
-              </div>
             </li>
           )}
+          <li className="flex items-center gap-4 pt-4">
+            <div className="flex-grow">
+              <p>Font size</p>
+            </div>
+            <UiSelect
+              className="w-auto"
+              value={settings.popup.fontSize}
+              size="sm"
+              onValueChange={(value) =>
+                updateSettings?.({
+                  popup: {
+                    fontSize: value as ExtensionSettingsPopup['fontSize'],
+                  },
+                })
+              }
+            >
+              {Object.values(EXT_POPUP_FONT_SIZE).map((size) => (
+                <UiSelect.Option
+                  key={size.id}
+                  value={size.id}
+                  className="capitalize"
+                >
+                  {size.name}
+                </UiSelect.Option>
+              ))}
+            </UiSelect>
+          </li>
         </ul>
-        <table className="mt-6">
-          <tr>
-            <td className="min-w-[150px]">
-              <p className="font-medium">Font size</p>
-            </td>
-            <td>
-              <UiSelect
-                className="w-auto"
-                value={settings.popup.fontSize}
-                onValueChange={(value) =>
-                  updateSettings?.({
-                    popup: {
-                      fontSize: value as ExtensionSettingsPopup['fontSize'],
-                    },
-                  })
-                }
-              >
-                {Object.values(EXT_POPUP_FONT_SIZE).map((size) => (
-                  <UiSelect.Option
-                    key={size.id}
-                    value={size.id}
-                    className="capitalize"
-                  >
-                    {size.name}
-                  </UiSelect.Option>
-                ))}
-              </UiSelect>
-            </td>
-          </tr>
-        </table>
       </UiCard.Content>
     </UiCard>
   );

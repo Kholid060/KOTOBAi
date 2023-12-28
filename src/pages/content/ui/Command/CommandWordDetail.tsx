@@ -73,28 +73,9 @@ function CommandWordDetail({
       </div>
       <ViewWordEntry.Meta entry={entry} className="mt-2" />
       <ViewWordEntry.Sense sense={entry.sense} className="mt-2 space-y-1" />
-      {((entry.kanji && entry.kanji?.length > 1) ||
-        entry.reading?.length > 1) && (
-        <div className="mt-4">
-          <p className="text-muted-foreground">Other forms </p>
-          <ol className="opacity-90 list-disc font-sans-jp pl-4">
-            {entry.kanji && entry.kanji?.length > 1 && (
-              <li>
-                <p className="dark:text-indigo-400 text-indigo-600">
-                  {entry.kanji?.join('、')}
-                </p>
-              </li>
-            )}
-            {entry.reading?.length > 1 && (
-              <li>
-                <p className="dark:text-emerald-400 text-emerald-600">
-                  {entry.reading?.join('、')}
-                </p>
-              </li>
-            )}
-          </ol>
-        </div>
-      )}
+      <div className="mt-2">
+        <ViewWordEntry.OtherForms entry={entry} />
+      </div>
     </div>
   );
 }

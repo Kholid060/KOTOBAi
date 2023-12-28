@@ -17,6 +17,7 @@ import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import UiSkeleton from '@root/src/components/ui/skeleton';
 import emptySvg from '@assets/svg/empty.svg';
 import dayjs from 'dayjs';
+import statsDB from '@root/src/shared/db/stats.db';
 
 type ChangeIndexType = 'learned' | 'undo';
 
@@ -267,7 +268,8 @@ function FlashcardDecks({
 }
 
 function FlashcardsPage() {
-  const learnedStatus = useRef<Map<number, number>>(new Map());
+  const hasUpdateStat = useRef(false);
+  const learnedStatus = useRef<Set<number>>(new Set());
 
   const [isLoading, setIsLoading] = useState(true);
   const [activeCardIdx, setActiveCardIdx] = useState(0);
@@ -291,18 +293,24 @@ function FlashcardsPage() {
     return [...items, ...reReview] as BookmarkItem[];
   }, []);
 
-  function updateCardIndex(index: number, type?: ChangeIndexType) {
-    setActiveCardIdx(Math.max(index, 0));
+  function updateCardIndex(newIndex: number, type?: ChangeIndexType) {
+    setActiveCardIdx(Math.max(newIndex, 0));
+
+    if (!hasUpdateStat.current) {
+      statsDB.incrementStat(new Date());
+      hasUpdateStat.current = true;
+    }
+
     if (typeof type !== 'string') return;
 
-    const currIndex = type === 'learned' ? index - 1 : index + 1;
-    const bookmarkId = bookmarks[currIndex]?.id;
+    const index = type === 'learned' ? newIndex - 1 : newIndex;
+    const bookmarkId = bookmarks[index]?.id;
     if (!bookmarkId) return;
 
     if (type === 'learned') {
-      learnedStatus.current.set(bookmarkId, bookmarkId);
+      learnedStatus.current.add(bookmarkId);
     } else if (type === 'undo') {
-      learnedStatus.current.delete(currIndex);
+      learnedStatus.current.delete(bookmarkId);
     }
 
     bookmarkDB.items.update(bookmarkId, {
@@ -319,7 +327,7 @@ function FlashcardsPage() {
       .then((newBookmarks) => {
         setActiveCardIdx(0);
         setBookmarks(newBookmarks);
-        learnedStatus.current = new Map();
+        learnedStatus.current = new Set();
       })
       .finally(() => {
         setIsLoading(false);
@@ -328,13 +336,13 @@ function FlashcardsPage() {
   async function restartFlashcards() {
     try {
       await Promise.all(
-        [...learnedStatus.current].map(([_itemIdx, itemId]) =>
+        [...learnedStatus.current].map((itemId) =>
           bookmarkDB.items.update(itemId, {
             status: BOOKMARK_ITEM_STATUS.LEARN,
           }),
         ),
       );
-      learnedStatus.current = new Map();
+      learnedStatus.current = new Set();
       setActiveCardIdx(0);
     } catch (error) {
       console.error(error);
@@ -398,7 +406,7 @@ function FlashcardsPage() {
           </p>
         </div>
         {isFinished && (
-          <div className="mt-16">
+          <>
             <div className="flex items-center justify-center">
               <svg
                 width="200"
@@ -469,7 +477,7 @@ function FlashcardsPage() {
                 Restart Flashcards
               </UiButton>
             </div>
-          </div>
+          </>
         )}
         {bookmarks.length > 0 && !isFinished && (
           <FlashcardDecks

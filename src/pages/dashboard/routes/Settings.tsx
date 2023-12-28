@@ -1,3 +1,4 @@
+import DashboardFooter from '@root/src/components/Dashboard/DashboardFooter';
 import SettingsDictionaryData from '@root/src/components/Settings/SettingsDictionaryData';
 import SettingsGeneral from '@root/src/components/Settings/SettingsGeneral';
 import SettingsPopup from '@root/src/components/Settings/SettingsPopup';
@@ -122,18 +123,18 @@ function SettingsIndex() {
   if (!settings) return null;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 lg:px-0 pb-12 pt-24">
+    <div className="w-full max-w-5xl mx-auto px-4 lg:px-0 pt-24">
       <div className="absolute top-0 left-0 -z-10 h-4/6 w-8/12 bg-gradient-to-br from-transparent via-primary/30 dark:from-transparent dark:via-primary/10 to-40% to-transparent"></div>
       <Link
         to="/"
-        className="text-muted-foreground mb-1 inline-flex items-center gap-1"
+        className="text-sm text-muted-foreground mb-1 inline-flex items-center gap-1"
       >
         <ArrowLeft className="h-4 w-4" />
         Dashboard
       </Link>
       <h3 className="text-3xl font-bold mb-10">Settings</h3>
       <div className="flex items-start gap-8">
-        <div className="flex-grow space-y-12">
+        <div className="flex-grow space-y-14">
           {settingsSections.map((section) => (
             <section.Component
               key={section.id}
@@ -146,6 +147,7 @@ function SettingsIndex() {
         </div>
         <SettingsContentList />
       </div>
+      <DashboardFooter />
     </div>
   );
 }

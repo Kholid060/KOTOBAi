@@ -1,8 +1,9 @@
 import DashboardBookmarkList from '@root/src/components/Dashboard/DashboardBookmarkList';
+import DashboardFooter from '@root/src/components/Dashboard/DashboardFooter';
 import DashboardNavigation from '@root/src/components/Dashboard/DashboardNavigation';
 import DashboardSearchInput from '@root/src/components/Dashboard/DashboardSearchInput';
+import DashboardStats from '@root/src/components/Dashboard/DashboardStats';
 import SharedTodayWord from '@root/src/components/shared/SharedTodayWord';
-import UiCard from '@root/src/components/ui/card';
 import { FileStackIcon, PencilLineIcon } from 'lucide-react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 
@@ -11,7 +12,7 @@ export function DashboardBasePage() {
 
   return (
     <>
-      <div className="flex gap-4 h-40">
+      <div className="flex gap-4 h-44">
         <SharedTodayWord
           className="w-64"
           onOpen={(entryId) => navigate(`/words/${entryId}`)}
@@ -26,12 +27,13 @@ export function DashboardBasePage() {
           </Link>
           <button className="relative bg-emerald-400 dark:bg-emerald-500 flex items-center rounded-lg px-2 gap-2 flex-grow dark:highlight-white/10">
             <PencilLineIcon className="h-12 w-12 flex-shrink-0 dark:text-emerald-400 text-emerald-500" />
-            <p className="text-lg">Practice</p>
+            <div className="text-left">
+              <p className="text-lg leading-tight">Practice</p>
+              <p className="opacity-80 leading-tight text-sm">Coming soon</p>
+            </div>
           </button>
         </div>
-        <UiCard className="flex-grow h-full">
-          <UiCard.Content>Stats</UiCard.Content>
-        </UiCard>
+        <DashboardStats className="h-full flex-grow" />
       </div>
       <DashboardBookmarkList className="mt-8" />
     </>
@@ -40,7 +42,7 @@ export function DashboardBasePage() {
 
 function DashboardPage() {
   return (
-    <div className="pb-24">
+    <>
       <DashboardNavigation />
       <div className="h-[500px] bg-gradient-to-b from-muted/80 to-transparent flex items-center w-full border-border/70">
         <div className="w-full max-w-2xl mx-auto pt-10">
@@ -49,8 +51,9 @@ function DashboardPage() {
       </div>
       <div className="w-full max-w-5xl mx-auto px-4 lg:px-0">
         <Outlet />
+        <DashboardFooter />
       </div>
-    </div>
+    </>
   );
 }
 

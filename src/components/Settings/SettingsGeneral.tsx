@@ -23,7 +23,7 @@ function SettingsGeneral(
     <UiCard {...props}>
       <UiCard.Header className="text-lg font-semibold">General</UiCard.Header>
       <UiCard.Content>
-        <p className="font-medium">Theme</p>
+        <p>Theme</p>
         <div className="flex items-center gap-4 text-muted-foreground">
           {APP_THEME.map((theme) => (
             <button
