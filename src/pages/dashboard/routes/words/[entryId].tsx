@@ -171,7 +171,10 @@ function WordDetailPage() {
           window.dispatchEvent(new CustomEvent('search', { detail: word }));
         }}
       />
-      <ViewWordEntry.OtherForms entry={wordDetail} />
+      <div>
+        <p className="font-semibold">Other Forms </p>
+        <ViewWordEntry.OtherForms entry={wordDetail} />
+      </div>
       <WordStrokeOrderDiagrams entry={wordDetail} />
     </>
   );

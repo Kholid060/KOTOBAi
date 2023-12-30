@@ -74,8 +74,6 @@ function DashboardSearchInput() {
   useEffect(() => {
     (async () => {
       try {
-        if (!debouncedQuery) return;
-
         const trimmedQuery = debouncedQuery.trim();
 
         setSearchParams((prevState) => {
@@ -84,6 +82,8 @@ function DashboardSearchInput() {
 
           return prevState;
         });
+
+        if (!debouncedQuery) return;
 
         if (trimmedQuery) setIsLoading(true);
 

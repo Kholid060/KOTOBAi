@@ -81,7 +81,12 @@ function SharedDictSearchList({
           query={query}
           entries={result.words}
           onSelect={(id, entry, word) => {
-            onSelect?.({ id, entry, word, type: 'words' });
+            onSelect?.({
+              id,
+              entry,
+              type: 'words',
+              word: entry?.oriWord || word,
+            });
           }}
         />
       )}

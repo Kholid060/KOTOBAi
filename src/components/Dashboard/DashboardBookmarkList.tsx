@@ -5,7 +5,7 @@ import {
   BookmarkItem,
   BookmarkItemStatus,
 } from '@root/src/interface/bookmark.interface';
-import { TrashIcon } from 'lucide-react';
+import { FileDownIcon, TrashIcon } from 'lucide-react';
 import { useState } from 'react';
 import { UiButton } from '../ui/button';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
@@ -15,6 +15,10 @@ import Dexie from 'dexie';
 import { useDebounce } from 'usehooks-ts';
 import { Link } from 'react-router-dom';
 import { DICTIONARY_TABLE_NAME_MAP } from '@root/src/shared/db/dict.db';
+import UiPopover from '../ui/popover';
+import dayjs from 'dayjs';
+import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
+import { capitalize } from 'lodash-es';
 
 const BOOKMARK_ITEM_STATUS: Record<
   BookmarkItemStatus,
@@ -36,6 +40,12 @@ const BOOKMARK_ITEM_STATUS: Record<
     class: 'text-primary',
   },
 };
+const BOOKMARK_EXPORT_PERDIOD = [
+  { id: 'all', day: Infinity, name: 'All' },
+  { id: 'last-day', day: 1, name: 'Last day' },
+  { id: 'last-week', day: 7, name: 'Last week' },
+  { id: 'last-month', day: 30, name: 'Last month' },
+] as const;
 
 function BookmarksTable({ bookmarks }: { bookmarks: BookmarkItem[] }) {
   function updateBookmark(
@@ -112,6 +122,155 @@ function BookmarksTable({ bookmarks }: { bookmarks: BookmarkItem[] }) {
   );
 }
 
+interface ExportFilter {
+  period: string;
+  type: DICTIONARY_NAME | 'all';
+  status: BookmarkItemStatus | 'all';
+}
+
+function BookmarkExport() {
+  const [filter, setFilter] = useState<ExportFilter>({
+    type: 'all',
+    period: 'all',
+    status: 'all',
+  });
+
+  async function exportBookmark() {
+    try {
+      let bookmarksQuery: Dexie.Table | Dexie.Collection = bookmarkDB.items;
+      if (filter.status !== 'all') {
+        bookmarksQuery = bookmarksQuery.where('status').equals(filter.status);
+      }
+      if (filter.type !== 'all') {
+        if ('or' in bookmarksQuery) {
+          bookmarksQuery = bookmarksQuery.or('type').equals(filter.type);
+        } else {
+          bookmarksQuery = bookmarksQuery.where('type').equals(filter.type);
+        }
+      }
+      if (filter.period !== 'all') {
+        const period = BOOKMARK_EXPORT_PERDIOD.find(
+          (item) => item.id === filter.period,
+        );
+        const date = dayjs()
+          .subtract(period?.day ?? 30, 'day')
+          .toDate();
+        bookmarksQuery = bookmarksQuery.filter(
+          (bookmark) => new Date(bookmark.createdAt) >= date,
+        );
+      }
+
+      const bookmarks = (await bookmarksQuery.toArray()) as BookmarkItem[];
+      if (bookmarks.length === 0) {
+        alert('No bookmarks to export with the current filter.');
+        return;
+      }
+
+      const tabOrEmpty = (val: unknown) => (val ? `${val}\t` : ' \t');
+      const mappedBookmarks = bookmarks.map(
+        ({ entryId, type, kanji, reading, meaning }) =>
+          `${type}_${entryId}\t${tabOrEmpty(kanji?.join('、'))}${tabOrEmpty(
+            reading.join('、'),
+          )}"${meaning.join('\n')}"`,
+      );
+
+      const blob = new Blob([mappedBookmarks.join('\n')], {
+        type: 'text/tab-separated-values',
+      });
+
+      const anchorEl = document.createElement('a');
+      anchorEl.download = 'jp-bookmarks.tsv';
+      anchorEl.href = URL.createObjectURL(blob);
+
+      document.body.appendChild(anchorEl);
+
+      anchorEl.click();
+      anchorEl.remove();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  return (
+    <UiPopover>
+      <UiPopover.Trigger asChild>
+        <UiButton variant="secondary">
+          <FileDownIcon className="h-5 w-5 mr-2 -ml-1" />
+          <span>Export</span>
+        </UiButton>
+      </UiPopover.Trigger>
+      <UiPopover.Content>
+        <p className="font-semibold">Export bookmarks</p>
+        <div className="grid grid-cols-3 items-center mt-4 gap-4">
+          <span>Status</span>
+          <UiSelect
+            value={filter.status}
+            onValueChange={(value) =>
+              setFilter((prevState) => ({
+                ...prevState,
+                status: value as ExportFilter['status'],
+              }))
+            }
+            className="col-span-2"
+            size="sm"
+          >
+            <UiSelect.Option value="all">All</UiSelect.Option>
+            {Object.values(BOOKMARK_ITEM_STATUS).map((status) => (
+              <UiSelect.Option key={status.id} value={status.id}>
+                {status.name}
+              </UiSelect.Option>
+            ))}
+          </UiSelect>
+          <span>Type</span>
+          <UiSelect
+            size="sm"
+            className="col-span-2"
+            value={filter.type}
+            onValueChange={(value) =>
+              setFilter((prevState) => ({
+                ...prevState,
+                type: value as ExportFilter['type'],
+              }))
+            }
+          >
+            <UiSelect.Option value="all">All</UiSelect.Option>
+            {[
+              DICTIONARY_NAME.JMDICT,
+              DICTIONARY_NAME.KANJIDIC,
+              DICTIONARY_NAME.ENAMDICT,
+            ].map((type) => (
+              <UiSelect.Option key={type} value={type}>
+                {capitalize(DICTIONARY_TABLE_NAME_MAP[type])}
+              </UiSelect.Option>
+            ))}
+          </UiSelect>
+          <span>Period</span>
+          <UiSelect
+            size="sm"
+            className="col-span-2"
+            value={filter.period}
+            onValueChange={(value) =>
+              setFilter((prevState) => ({
+                ...prevState,
+                period: value,
+              }))
+            }
+          >
+            {BOOKMARK_EXPORT_PERDIOD.map((period) => (
+              <UiSelect.Option key={period.id} value={period.id}>
+                {period.name}
+              </UiSelect.Option>
+            ))}
+          </UiSelect>
+        </div>
+        <UiButton className="mt-6 w-full" onClick={exportBookmark}>
+          Export
+        </UiButton>
+      </UiPopover.Content>
+    </UiPopover>
+  );
+}
+
 const SHOW_BOOKMARK_LIMIT = 10;
 
 const arrayStringSearch = (items: string[], query: string) =>
@@ -173,7 +332,7 @@ function DashboardBookmarkList(props: React.HTMLAttributes<HTMLDivElement>) {
             </UiSelect.Option>
           ))}
         </UiSelect>
-        <UiButton variant="secondary">Export</UiButton>
+        <BookmarkExport />
       </UiCard.Header>
       <UiCard.Content>
         {bookmarks ? (
