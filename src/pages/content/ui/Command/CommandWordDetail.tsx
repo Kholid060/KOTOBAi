@@ -8,7 +8,8 @@ import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import { ArrowLeftIcon, ExternalLink, Volume2Icon } from 'lucide-react';
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
+import { AppContentContext } from '../app';
 
 function CommandWordDetail({
   entry,
@@ -17,6 +18,7 @@ function CommandWordDetail({
   onClose?(): void;
   entry: DictionaryWordEntryResult;
 }) {
+  const appCtx = useContext(AppContentContext);
   const { isSpeechAvailable, speak } = useSpeechSynthesis();
 
   const matchWord = useRef('');
@@ -72,7 +74,14 @@ function CommandWordDetail({
         )}
       </div>
       <ViewWordEntry.Meta entry={entry} className="mt-2" />
-      <ViewWordEntry.Sense sense={entry.sense} className="mt-2 space-y-1" />
+      <ViewWordEntry.Sense
+        showReference
+        sense={entry.sense}
+        className="mt-2 space-y-1"
+        onSearchXRef={({ word }) => {
+          appCtx.setSearch?.(word);
+        }}
+      />
       <div className="mt-2">
         <ViewWordEntry.OtherForms entry={entry} />
       </div>

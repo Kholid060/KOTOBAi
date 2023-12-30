@@ -4,7 +4,8 @@ import { LOCALSTORAGE_KEYS } from '@root/src/shared/constant/constant';
 import dictDB from '@root/src/shared/db/dict.db';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
-import { getRandomArbitrary, parseJSON } from '@root/src/utils/helper';
+import findRandomWords from '@root/src/utils/findRandomWords';
+import { parseJSON } from '@root/src/utils/helper';
 import dayjs from 'dayjs';
 import { Volume2Icon } from 'lucide-react';
 import { useState } from 'react';
@@ -13,31 +14,6 @@ import { useEffectOnce } from 'usehooks-ts';
 interface TodayWordStorage {
   id: number;
   date: string;
-}
-
-const WORD_MIN_ID = 1000000;
-const WORD_MAX_ID = 2859479;
-const getRandWordId = (max: number, remainder?: number) =>
-  Math.ceil(getRandomArbitrary(WORD_MIN_ID, max, remainder));
-
-async function findRandomWord(retryCount = 0): Promise<DictWordEntry | null> {
-  const length = await dictDB.words.count();
-  if (length <= 0 || retryCount > 3) return null;
-
-  const ids = Array.from({ length: 5 }, (_, idx) => {
-    const withoutRemainder = idx > 2;
-
-    return getRandWordId(
-      withoutRemainder ? WORD_MAX_ID : 2000000,
-      withoutRemainder ? undefined : 10,
-    );
-  });
-  const words = await dictDB.words.bulkGet(ids);
-  const word = words.find(Boolean);
-
-  if (word) return word;
-
-  return await findRandomWord(retryCount + 1);
 }
 
 function SharedTodayWord({
@@ -74,7 +50,7 @@ function SharedTodayWord({
           }
         }
 
-        const word = await findRandomWord();
+        const [word] = (await findRandomWords()) ?? [];
         if (!word) return;
 
         setTodayWord(word);

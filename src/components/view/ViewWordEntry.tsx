@@ -13,12 +13,48 @@ import {
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { Volume2Icon } from 'lucide-react';
+import { Fragment } from 'react';
 
 type WordPosTagKey = keyof typeof WORD_POS_TAG;
+
+function SenseXref({
+  sense,
+  onSearch,
+}: {
+  sense: DictWordEntrySense;
+  onSearch?: (detail: { word: string; fullText: string }) => void;
+}) {
+  if (!sense.xref) return null;
+
+  const refs = sense.xref.map((wordRef) => {
+    const xref = wordRef.replaceAll(new RegExp(NON_JP_CHARS_REGEX, 'g'), '');
+    const [word] = xref.split('・');
+
+    return { fullText: wordRef, word };
+  });
+
+  return (
+    <span className="text-muted-foreground text-sm ml-2">
+      See also
+      {refs.map((item, index) => (
+        <Fragment key={item.word}>
+          <button
+            className="underline font-sans-jp ml-1"
+            onClick={() => onSearch?.(item)}
+          >
+            {item.fullText}
+          </button>
+          {index === refs.length - 1 ? '' : '、'}
+        </Fragment>
+      ))}
+    </span>
+  );
+}
 
 function ViewWordSense({
   sense,
   className,
+  onSearchXRef,
   showReference,
   tooltipExample,
   showPOS = true,
@@ -28,6 +64,7 @@ function ViewWordSense({
   showReference?: boolean;
   tooltipExample?: boolean;
   sense: DictWordEntrySense[];
+  onSearchXRef?: (detail: { word: string; fullText: string }) => void;
 } & React.HTMLAttributes<HTMLUListElement>) {
   const { isSpeechAvailable, speak } = useSpeechSynthesis();
 
@@ -60,25 +97,7 @@ function ViewWordSense({
             {' '}
             {currSense.gloss.join('; ')}{' '}
             {showReference && currSense.xref && (
-              <span className="text-muted-foreground text-sm ml-2">
-                See also
-                <button
-                  className="underline font-sans-jp ml-1"
-                  onClick={() => {
-                    const xref = currSense.xref![0].replaceAll(
-                      new RegExp(NON_JP_CHARS_REGEX, 'g'),
-                      '',
-                    );
-                    const [kanji] = xref.split('・');
-
-                    window.dispatchEvent(
-                      new CustomEvent('search', { detail: kanji }),
-                    );
-                  }}
-                >
-                  {currSense.xref.join(`、`)}
-                </button>
-              </span>
+              <SenseXref sense={currSense} onSearch={onSearchXRef} />
             )}
           </p>
           {currSense.example &&
@@ -146,7 +165,7 @@ function ViewWordMeta({
 
 function ViewWordOtherForms({ entry }: { entry: DictWordEntry }) {
   const { kanji, kInfo, reading } = entry;
-  if (kanji && kanji.length <= 1 && reading.length <= 1 && !kInfo) return null;
+  if ((!kanji || kanji.length <= 1) && reading.length <= 1) return null;
 
   return (
     <>

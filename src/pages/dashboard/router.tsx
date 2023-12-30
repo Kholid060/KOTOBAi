@@ -6,7 +6,8 @@ import FlashcardsPage from './routes/flashcards';
 import WordDetailPage from './routes/words/[entryId]';
 import KanjiDetailPage from './routes/kanji/[entryId]';
 import NameDetailPage from './routes/names/[entryId]';
-import AboutPage from './routes/about';
+import AboutPage from './routes/About';
+import PracticePage from './routes/Practice';
 
 const router = createHashRouter([
   {
@@ -42,6 +43,10 @@ const router = createHashRouter([
   {
     path: '/settings',
     element: <SettingsIndex />,
+  },
+  {
+    path: '/practice',
+    element: <PracticePage />,
   },
   {
     path: '/about',

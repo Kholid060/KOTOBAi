@@ -118,6 +118,7 @@ function DashboardSearchInput() {
         <UiCommand.Input
           value={query}
           onValueChange={onInputChange}
+          id="dashboard-search"
           wrapperClass="border rounded-lg"
           placeholder="Search words, kanji, or names"
           prependSlot={

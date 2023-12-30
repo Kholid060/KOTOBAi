@@ -9,6 +9,7 @@ import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHan
 import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
 import { DictQueryResult } from '@root/src/utils/searchDictEntries';
 import SharedDictSearchList from '@root/src/components/shared/SharedDictSearchList';
+import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 
 type ItemType = 'words' | 'kanji' | 'names';
 type DictAllEntry =
@@ -103,7 +104,13 @@ const CommandContent = forwardRef<
         <SharedDictSearchList
           query={query}
           result={queryResult}
-          onSelect={setActiveItem}
+          onSelect={(item) => {
+            RuntimeMessage.sendMessage(
+              'background:dashboard-open',
+              `/${item.type}/${item.id}`,
+            );
+            // setActiveItem(item);
+          }}
         />
       </UiCommand.List>
       {activeItemDetail && (

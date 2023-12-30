@@ -153,6 +153,12 @@ function DashboardBookmarkList(props: React.HTMLAttributes<HTMLDivElement>) {
       <UiCard.Header className="flex items-center flex-row gap-4">
         <p className="font-semibold">Bookmarks</p>
         <div className="flex-grow"></div>
+        <UiInput
+          value={query}
+          className="w-56"
+          placeholder="Search..."
+          onChange={(event) => setQuery(event.target.value)}
+        />
         <UiSelect
           value={statusFilter}
           className="w-auto"
@@ -167,12 +173,7 @@ function DashboardBookmarkList(props: React.HTMLAttributes<HTMLDivElement>) {
             </UiSelect.Option>
           ))}
         </UiSelect>
-        <UiInput
-          value={query}
-          className="w-56"
-          placeholder="Search..."
-          onChange={(event) => setQuery(event.target.value)}
-        />
+        <UiButton variant="secondary">Export</UiButton>
       </UiCard.Header>
       <UiCard.Content>
         {bookmarks ? (

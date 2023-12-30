@@ -77,9 +77,7 @@ function WordStrokeOrderDiagrams({
 
   return (
     <div className="mt-6">
-      <p className="font-semibold text-muted-foreground">
-        Stroke Order Diagrams
-      </p>
+      <p className="font-semibold">Stroke Order Diagrams</p>
       <ul className="mt-2 space-y-2">
         {kanjiPaths?.map((kanjiEntry) => (
           <li key={kanjiEntry.paths.id} className="flex gap-2">
@@ -169,6 +167,9 @@ function WordDetailPage() {
         showReference
         sense={wordDetail.sense}
         className="mt-6 mb-10 space-y-3"
+        onSearchXRef={({ word }) => {
+          window.dispatchEvent(new CustomEvent('search', { detail: word }));
+        }}
       />
       <ViewWordEntry.OtherForms entry={wordDetail} />
       <WordStrokeOrderDiagrams entry={wordDetail} />

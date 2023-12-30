@@ -107,13 +107,14 @@ const UiDialogDescription = React.forwardRef<
 UiDialogDescription.displayName = DialogPrimitive.Description.displayName;
 
 const UiDialog = Object.assign(UiDialogRoot, {
+  Title: UiDialogTitle,
   Portal: UiDialogPortal,
+  Header: UiDialogHeader,
+  Footer: UiDialogFooter,
   Overlay: UiDialogOverlay,
   Trigger: UiDialogTrigger,
   Content: UiDialogContent,
-  Header: UiDialogHeader,
-  Footer: UiDialogFooter,
-  Title: UiDialogTitle,
+  Close: DialogPrimitive.Close,
   Description: UiDialogDescription,
 });
 

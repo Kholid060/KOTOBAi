@@ -115,6 +115,9 @@ function CommandContainer() {
     })();
   }, [query]);
   useEffectOnce(() => {
+    const ctx = appCtx;
+    ctx.setSearch = setQuery;
+
     return () => {
       setQueryResult({
         kanji: [],
@@ -122,6 +125,7 @@ function CommandContainer() {
         words: [],
       });
       setQuery('');
+      ctx.setSearch = undefined;
     };
   });
 

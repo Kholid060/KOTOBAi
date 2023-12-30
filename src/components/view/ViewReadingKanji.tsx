@@ -1,29 +1,24 @@
-import {
-  DictNameEntry,
-  DictWordEntry,
-} from '@root/src/interface/dict.interface';
-import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHandler/dictNameSearcher';
-import { DictionaryWordEntryResult } from '@root/src/pages/background/messageHandler/dictWordSearcher';
+import { DictWordEntry } from '@root/src/interface/dict.interface';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { useEffect } from 'react';
 
-type DictEntry =
-  | DictWordEntry
-  | DictNameEntry
-  | DictionaryNameEntryResult
-  | DictionaryWordEntryResult;
+type EntryType = Pick<DictWordEntry, 'kanji' | 'reading'> & {
+  oriWord?: string;
+  word?: string;
+};
 
-function findMatchWord(entry: DictEntry, prop: 'kanji' | 'reading') {
-  if (!('word' in entry))
+function findMatchWord(entry: EntryType, prop: 'kanji' | 'reading') {
+  if (!entry.word) {
     return {
       match: '',
       text: entry[prop]?.join('、') ?? '',
     };
+  }
 
   const match = entry[prop]?.find(
     (str) =>
       (entry.oriWord && str.startsWith(entry.oriWord)) ||
-      str.startsWith(entry.word),
+      (entry.word && str.startsWith(entry.word)),
   );
 
   return {
@@ -38,7 +33,7 @@ function ViewReadingKanji({
   onMatchWord,
   ...props
 }: {
-  entry: DictEntry;
+  entry: EntryType;
   onMatchWord?: (word: string) => void;
 } & React.DetailsHTMLAttributes<HTMLParagraphElement>) {
   const matchKanji = entry.kanji && findMatchWord(entry, 'kanji');

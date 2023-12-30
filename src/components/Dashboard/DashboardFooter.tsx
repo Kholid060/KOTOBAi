@@ -1,6 +1,7 @@
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { Link } from 'react-router-dom';
 import UiSeparator from '../ui/separator';
+import { GITHUB_URL } from '@root/src/shared/constant/constant';
 
 function DashboardFooter({
   className,
@@ -18,9 +19,14 @@ function DashboardFooter({
         About
       </Link>
       <UiSeparator orientation="vertical" className="h-4 mx-4" />
-      <Link to="/about" className="hover:underline hover:text-foreground">
+      <a
+        href={GITHUB_URL}
+        rel="noreferrer"
+        target="_blank"
+        className="hover:underline hover:text-foreground"
+      >
         GitHub
-      </Link>
+      </a>
     </footer>
   );
 }

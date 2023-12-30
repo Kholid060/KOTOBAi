@@ -14,6 +14,7 @@ export const AppContentContext = createContext<{
   isDisabled?: boolean;
   shadowRoot: ShadowRoot | null;
   extSettings: ExtensionSettings;
+  setSearch?: (query: string) => void;
 }>({
   shadowRoot: null,
   isDisabled: false,

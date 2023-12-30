@@ -1,7 +1,13 @@
 import { SettingsPageSectionProps } from '@root/src/pages/dashboard/routes/Settings';
 import UiCard from '../ui/card';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
-import { BookA, BookUserIcon, DownloadIcon, Loader2Icon } from 'lucide-react';
+import {
+  BookA,
+  BookUserIcon,
+  DownloadIcon,
+  InfoIcon,
+  Loader2Icon,
+} from 'lucide-react';
 import dictDB from '@root/src/shared/db/dict.db';
 import { useState } from 'react';
 import { useEffectOnce } from 'usehooks-ts';
@@ -27,13 +33,13 @@ const dictionaries: {
     name: 'JMDict',
     id: DICTIONARY_NAME.JMDICT,
     description: 'Japanese vocabularies',
-    icon: <BookA className="h-7 w-7 flex-shrink-0 mt-1" />,
+    icon: <BookA className="h-7 w-7 flex-shrink-0" />,
     link: 'https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project',
   },
   {
     name: 'KANJIDIC ',
     icon: (
-      <span className="font-semibold font-sans-jp text-2xl leading-tight inline-block">
+      <span className="font-semibold font-sans-jp text-2xl leading-7 inline-block">
         字
       </span>
     ),
@@ -46,7 +52,7 @@ const dictionaries: {
     id: DICTIONARY_NAME.ENAMDICT,
     description:
       'Japanese names, company names, names of artistic, product names, etc.',
-    icon: <BookUserIcon className="h-7 w-7 flex-shrink-0 mt-1" />,
+    icon: <BookUserIcon className="h-7 w-7 flex-shrink-0" />,
     link: 'https://www.edrdg.org/enamdict/enamdict_doc.html',
   },
 ];
@@ -159,7 +165,10 @@ function SettingsDictionaryData({
       <UiCard.Content>
         <div className="grid grid-cols-3 gap-4">
           {dictionaries.map((dict) => (
-            <div className="border rounded-lg p-4 flex flex-col" key={dict.id}>
+            <div
+              className="border rounded-lg p-4 flex flex-col group"
+              key={dict.id}
+            >
               <div className="flex items-center">
                 {dict.icon}
                 <div className="flex-grow"></div>
@@ -177,7 +186,15 @@ function SettingsDictionaryData({
                   )
                 )}
               </div>
-              <p className="mt-2 font-medium">{dict.name}</p>
+              <p className="mt-2 font-medium">
+                {dict.name}
+                <span
+                  title={dict.description}
+                  className="ml-1 invisible group-hover:visible"
+                >
+                  <InfoIcon className="h-4 w-4 inline" />
+                </span>
+              </p>
               <div className="text-muted-foreground leading-tight text-sm">
                 {loadingState[dict.id] ? (
                   <UiProgress className="h-2" value={loadingState[dict.id]} />
@@ -192,7 +209,7 @@ function SettingsDictionaryData({
         </div>
       </UiCard.Content>
       <UiCard.Footer>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Last check update:{' '}
           {lastCheckUpdate
             ? dayjs(lastCheckUpdate).format('DD MMM YYYY, HH:mm')
