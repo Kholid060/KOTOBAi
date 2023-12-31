@@ -17,6 +17,10 @@
     "lint:fix": "yarn lint --fix",
     "prettier": "prettier . --write",
     "prepare": "husky install",
+    "build:zip": "node ./utils/scripts/build-zip.js",
+    "build:prod": "yarn build:prod-chrome && yarn build:prod-firefox",
+    "build:prod-chrome": "yarn build && yarn build:zip",
+    "build:prod-firefox": "yarn build:firefox && cross-env __FIREFOX__=true yarn build:zip",
     "generate-data": "node ./utils/scripts/generate-data.js"
   },
   "type": "module",
