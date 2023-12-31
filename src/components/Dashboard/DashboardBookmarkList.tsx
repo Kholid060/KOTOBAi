@@ -79,6 +79,9 @@ function BookmarksTable({ bookmarks }: { bookmarks: BookmarkItem[] }) {
               <td className="max-w-[12rem] first-letter:capitalize text-muted-foreground p-3">
                 <p className="line-clamp-2">{bookmark.meaning.join('; ')}</p>
               </td>
+              <td className="first-letter:capitalize text-muted-foreground p-3">
+                {DICTIONARY_TABLE_NAME_MAP[bookmark.type]}
+              </td>
               <td className="max-w-[12rem] first-letter:capitalize text-center text-sm p-3">
                 <select
                   value={bookmark.status}
