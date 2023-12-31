@@ -2,10 +2,7 @@ import { memo, useContext, useRef } from 'react';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { UiButton } from '@root/src/components/ui/button';
 import { Volume2Icon } from 'lucide-react';
-import {
-  DictionaryWordEntryResult,
-  SearchDictWordResult,
-} from '../../../background/messageHandler/dictWordSearcher';
+import { DictionaryWordEntryResult } from '../../../background/messageHandler/dictWordSearcher';
 import ViewReadingKanji from '@root/src/components/view/ViewReadingKanji';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import RuntimeMessage, {
@@ -83,11 +80,11 @@ function WordEntry({
 }
 
 function WordEntries({
-  result,
+  entries,
   className,
   ...props
 }: {
-  result: SearchDictWordResult;
+  entries: DictionaryWordEntryResult[];
   onBookmark?: (payload: BookmarkDictionaryPayload) => void;
 } & React.DetailsHTMLAttributes<HTMLDivElement>) {
   const appCtx = useContext(AppContentContext);
@@ -109,7 +106,7 @@ function WordEntries({
       )}
       {...props}
     >
-      {result.entries.map((entry) => (
+      {entries.map((entry) => (
         <WordEntry
           key={entry.id}
           entry={entry}

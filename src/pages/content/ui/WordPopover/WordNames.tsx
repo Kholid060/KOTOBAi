@@ -1,5 +1,4 @@
-import RuntimeMessage from '@root/src/utils/RuntimeMessage';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { UiButton } from '@root/src/components/ui/button';
@@ -13,44 +12,15 @@ import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHan
 type NameTypeKey = keyof typeof NAME_TYPES;
 
 function WordKanji({
+  entries,
   className,
-  cursorText,
-  onToggleDisable,
   ...props
 }: {
-  cursorText: string;
-  onToggleDisable?: (disable: boolean) => void;
+  entries: DictionaryNameEntryResult[];
 } & React.DetailsHTMLAttributes<HTMLDivElement>) {
   const { isSpeechAvailable, speak } = useSpeechSynthesis();
 
-  const [names, setNames] = useState<DictionaryNameEntryResult[]>([]);
-
-  useEffect(() => {
-    if (!cursorText.trim()) {
-      setNames([]);
-      return;
-    }
-
-    RuntimeMessage.sendMessage('background:search-name', {
-      maxResult: 10,
-      maxQueryLimit: 2,
-      input: cursorText,
-      type: 'search-backward',
-    })
-      .then((result) => {
-        setNames(result);
-      })
-      .catch((error) => {
-        console.error(error);
-        setNames([]);
-      });
-  }, [cursorText]);
-  useEffect(() => {
-    onToggleDisable?.(names.length <= 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [names.length]);
-
-  if (names.length <= 0) return null;
+  if (entries.length <= 0) return null;
 
   return (
     <div
@@ -58,7 +28,7 @@ function WordKanji({
       id="names-section"
       {...props}
     >
-      {names.map((name) => (
+      {entries.map((name) => (
         <div key={name.id} className="pt-4">
           <div className="flex items-start">
             <ViewReadingKanji

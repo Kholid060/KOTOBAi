@@ -1,71 +1,26 @@
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo } from 'react';
 import { DictKanjiEntry } from '@root/src/interface/dict.interface';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
-import { isKanji } from 'wanakana';
 import SharedBookmarkBtnContent from '@root/src/components/shared/SharedBookmarkBtn/Content';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 
 function WordKanji({
+  entries,
   className,
-  cursorText,
-  onToggleDisable,
   ...props
 }: {
-  cursorText: string;
-  onToggleDisable?: (disable: boolean) => void;
+  entries: DictKanjiEntry[];
 } & React.DetailsHTMLAttributes<HTMLDivElement>) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const [kanjiList, setKanjiList] = useState<DictKanjiEntry[]>([]);
-
-  useEffect(() => {
-    if (!cursorText.trim()) {
-      setKanjiList([]);
-      return;
-    }
-
-    const kanji = cursorText.split('').reduce<Set<number>>((acc, char) => {
-      if (isKanji(char)) {
-        const kanjiCodePoint = char.codePointAt(0);
-        if (kanjiCodePoint) acc.add(kanjiCodePoint);
-      }
-
-      return acc;
-    }, new Set());
-    if (kanji.size === 0) {
-      setKanjiList([]);
-      return;
-    }
-
-    RuntimeMessage.sendMessage('background:search-kanji', {
-      by: 'id',
-      maxResult: 10,
-      input: [...kanji],
-    })
-      .then((kanjiResult) => {
-        setKanjiList(kanjiResult.filter(Boolean));
-      })
-      .catch((error) => {
-        console.error(error);
-        setKanjiList([]);
-      });
-  }, [cursorText]);
-  useEffect(() => {
-    onToggleDisable?.(kanjiList.length <= 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kanjiList.length]);
-
-  if (kanjiList.length <= 0) return null;
+  if (entries.length <= 0) return null;
 
   return (
     <div
       className={cn('pb-4 px-4 space-y-4 divide-y', className)}
-      ref={containerRef}
       id="kanji-section"
       {...props}
     >
-      {kanjiList.map((kanji) => (
+      {entries.map((kanji) => (
         <div key={kanji.id} className="pt-4">
           <div className="flex items-center gap-2">
             <p className="text-6xl dark:text-indigo-400 text-indigo-600 font-sans-jp">

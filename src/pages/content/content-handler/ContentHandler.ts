@@ -21,7 +21,7 @@ import Browser from 'webextension-polyfill';
 
 const MAX_CONTENT_LENGTH = 16;
 
-interface SearchWordResult {
+export interface ContentSearchWordResult {
   rect?: ClientRect;
   point: CursorPoint;
   entry: SearchDictWordResult;
@@ -32,7 +32,7 @@ interface SearchWordResult {
 interface Events {
   'clear-result': () => void;
   'disable-state-change': (disabled?: boolean) => void;
-  'search-word-result': (result: SearchWordResult | null) => void;
+  'search-word-result': (result: ContentSearchWordResult | null) => void;
 }
 
 const isInContentPopup = (el: EventTarget | Element) =>

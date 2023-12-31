@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useEffectOnce } from 'usehooks-ts';
-import { version } from '@root/package.json';
+import { version, description } from '@root/package.json';
 import Browser from 'webextension-polyfill';
 
 const PLATFORM_NAMES: Record<string, string> = {
@@ -74,10 +74,7 @@ function AboutPage() {
     <div className="mx-auto w-full max-w-xl py-24">
       <img src="/icon.png" className="h-20 w-20" />
       <p className="font-semibold text-lg mt-6">Extension name</p>
-      <p className="leading-tight mt-1">
-        Extension description Lorem ipsum dolor sit amet consectetur,
-        adipisicing elit. Beatae delectus et ad libero,
-      </p>
+      <p className="leading-tight mt-1">{description}</p>
       <table className="text-sm w-full mt-4">
         <tr>
           <td className="min-w-[150px] py-1">Extension version</td>
