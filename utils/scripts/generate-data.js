@@ -29,7 +29,7 @@ const DATA_URL = {
 };
 
 const ZIP_DICT_DIR = path.join(DATA_DIR, 'zip');
-const META_FILEPATH = path.join(DATA_DIR, 'dict-metadata.json');
+const META_FILEPATH = path.join(DATA_DIR, 'dict-metadata.jsonp');
 
 async function writeMetadata(meta) {
   let currentMeta = {};
@@ -275,6 +275,7 @@ async function generateJMDictData(version) {
 
       const filename = `jmdict-${fileIndex}.json`;
       await fs.writeJSON(path.join(SLICE_DIR, filename), {
+        version,
         isLastFile,
         type: 'jmdict',
         records: currEntries,
@@ -447,6 +448,7 @@ async function generateKANJIDicData(version) {
 
     const FILE_PATH = path.join(FILE_DIR, 'kanjidic.json');
     await fs.writeJSON(FILE_PATH, {
+      version,
       isLastFile: true,
       type: 'kanjidic',
       records: entries,
@@ -548,6 +550,7 @@ async function generateENAMDICTData(version) {
       );
 
       await fs.writeJSON(path.join(SLICE_DIR, `enamdict-${fileIndex}.json`), {
+        version,
         isLastFile,
         type: 'enamdict',
         records: currEntries,
@@ -691,8 +694,9 @@ async function generateKanjiVG(version) {
   await fs.emptyDir(kanjiVgDir);
   await fs.ensureDir(kanjiVgDir);
   await fs.writeJSON(path.join(kanjiVgDir, 'kanjivg.json'), {
-    isLastFile: true,
+    version,
     type: 'kanjivg',
+    isLastFile: true,
     records: currEntries,
     counts: currEntries.length,
   });

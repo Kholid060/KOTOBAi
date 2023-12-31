@@ -23,5 +23,6 @@ public/manifest.json
 !/dict-data/zip
 !/dict-data/zip/**
 !/dict-data/dict-metadata.json
+!/dict-data/dict-metadata.jsonp
 
 /dist-zip
