@@ -276,6 +276,7 @@ async function generateJMDictData(version) {
       const filename = `jmdict-${fileIndex}.json`;
       await fs.writeJSON(path.join(SLICE_DIR, filename), {
         isLastFile,
+        type: 'jmdict',
         records: currEntries,
         counts: currEntries.length,
       });
@@ -447,6 +448,7 @@ async function generateKANJIDicData(version) {
     const FILE_PATH = path.join(FILE_DIR, 'kanjidic.json');
     await fs.writeJSON(FILE_PATH, {
       isLastFile: true,
+      type: 'kanjidic',
       records: entries,
       counts: entries.length,
     });
@@ -547,6 +549,7 @@ async function generateENAMDICTData(version) {
 
       await fs.writeJSON(path.join(SLICE_DIR, `enamdict-${fileIndex}.json`), {
         isLastFile,
+        type: 'enamdict',
         records: currEntries,
         counts: currEntries.length,
       });
@@ -689,6 +692,7 @@ async function generateKanjiVG(version) {
   await fs.ensureDir(kanjiVgDir);
   await fs.writeJSON(path.join(kanjiVgDir, 'kanjivg.json'), {
     isLastFile: true,
+    type: 'kanjivg',
     records: currEntries,
     counts: currEntries.length,
   });
@@ -708,20 +712,20 @@ async function getVersion(name) {
 }
 
 const ACTIONS_FUNCS = {
-  jmdict: async () => {
-    const jmDictVersion = await getVersion('JMDict');
+  jmdict: async (version) => {
+    const jmDictVersion = version ?? (await getVersion('JMDict'));
     await generateJMDictData(jmDictVersion);
   },
-  kanjidic: async () => {
-    const kanjiDictVersion = await getVersion('KanjiDic');
+  kanjidic: async (version) => {
+    const kanjiDictVersion = version ?? (await getVersion('KanjiDic'));
     await generateKANJIDicData(kanjiDictVersion);
   },
-  enamdict: async () => {
-    const enamDictVersion = await getVersion('ENAMDICT');
+  enamdict: async (version) => {
+    const enamDictVersion = version ?? (await getVersion('ENAMDICT'));
     await generateENAMDICTData(enamDictVersion);
   },
-  kanjivg: async () => {
-    const kanjiVgVersion = await getVersion('KanjiVG');
+  kanjivg: async (version) => {
+    const kanjiVgVersion = version ?? (await getVersion('KanjiVG'));
     await generateKanjiVG(kanjiVgVersion);
   },
 };
@@ -756,6 +760,15 @@ const AVAILABLE_OPTIONS = [...Object.keys(ACTIONS_FUNCS), 'all'];
           .choices(['true', 'false'])
           .default(false)
           .argParser((val) => val === 'true'),
+      )
+      .option(
+        '-version <VERSION>',
+        'set version for all dictionaries',
+        (versionStr) => {
+          if (!semverValid(versionStr)) throw new Error('Invalid version');
+
+          return versionStr;
+        },
       );
     await program.parseAsync();
 
@@ -769,7 +782,7 @@ const AVAILABLE_OPTIONS = [...Object.keys(ACTIONS_FUNCS), 'all'];
     if (dictKeys === 'all') dictKeys = Object.keys(ACTIONS_FUNCS);
 
     for (const key of dictKeys) {
-      await ACTIONS_FUNCS[key]();
+      await ACTIONS_FUNCS[key](options.Version);
     }
   } catch (error) {
     console.error(error);

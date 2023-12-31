@@ -22,6 +22,30 @@ class DictLoader {
     );
   }
 
+  static async insertZipFiles(
+    name: `${DICTIONARY_NAME}`,
+    zipBuffer: ArrayBuffer,
+    onProgress?: (event: { index: number; filesLen: number }) => void,
+  ) {
+    const zip = await JSZip.loadAsync(zipBuffer);
+    const files = Object.values(zip.files);
+
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      const fileStr = await file.async('string');
+      const kanjiData = JSON.parse(fileStr) as DictFileEntries<DictEntry>;
+
+      while (kanjiData.records.length > 0) {
+        const currRecords = kanjiData.records.splice(0, 10_000);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        await dictDB[DB_NAME_MAP[name]].bulkPut(currRecords);
+      }
+
+      onProgress?.({ index, filesLen: files.length });
+    }
+  }
+
   static async loadDictionary(
     name: `${DICTIONARY_NAME}`,
     onProgress?: (event: {
@@ -41,28 +65,14 @@ class DictLoader {
       },
     });
 
-    const zip = await JSZip.loadAsync(zipBuffer);
-    const files = Object.values(zip.files);
-
-    for (let index = 0; index < files.length; index += 1) {
-      const file = files[index];
-      const fileStr = await file.async('string');
-      const kanjiData = JSON.parse(fileStr) as DictFileEntries<DictEntry>;
-
-      while (kanjiData.records.length > 0) {
-        const currRecords = kanjiData.records.splice(0, 10_000);
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        await dictDB[DB_NAME_MAP[name]].bulkPut(currRecords);
-      }
-
+    await this.insertZipFiles(name, zipBuffer, ({ index, filesLen }) => {
       const currProgress =
-        ((index + 1) / files.length) * (100 - maxDownloadProgress);
+        ((index + 1) / filesLen) * (100 - maxDownloadProgress);
       onProgress?.({
         type: 'parsing',
         progress: maxDownloadProgress + currProgress,
       });
-    }
+    });
   }
 
   static async putMetadata(dicts: (DICTIONARY_NAME | `${DICTIONARY_NAME}`)[]) {
