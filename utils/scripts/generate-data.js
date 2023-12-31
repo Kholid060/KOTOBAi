@@ -29,7 +29,7 @@ const DATA_URL = {
 };
 
 const ZIP_DICT_DIR = path.join(DATA_DIR, 'zip');
-const META_FILEPATH = path.join(DATA_DIR, 'dict-metadata.json');
+const META_FILEPATH = path.join(DATA_DIR, 'dict-metadata.jsonp');
 
 async function writeMetadata(meta) {
   let currentMeta = {};

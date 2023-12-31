@@ -8,7 +8,7 @@ import { DictMetadataRecord } from '../interface/dict.interface';
 const { VITE_DICT_BASE_URL } = import.meta.env;
 
 async function getDictMetadata() {
-  const response = await $fetch(`${VITE_DICT_BASE_URL}/dict-metadata.json`);
+  const response = await $fetch(`${VITE_DICT_BASE_URL}/dict-metadata.jsonp`);
   const result = (await response.json()) as DictMetadataRecord;
 
   return result;
