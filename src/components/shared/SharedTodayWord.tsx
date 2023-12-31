@@ -1,6 +1,9 @@
 import UiSkeleton from '@root/src/components/ui/skeleton';
 import { DictWordEntry } from '@root/src/interface/dict.interface';
-import { LOCALSTORAGE_KEYS } from '@root/src/shared/constant/constant';
+import {
+  DICTIONARY_NAME,
+  LOCALSTORAGE_KEYS,
+} from '@root/src/shared/constant/constant';
 import dictDB from '@root/src/shared/db/dict.db';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
@@ -33,6 +36,9 @@ function SharedTodayWord({
     (async () => {
       try {
         setIsLoading(true);
+
+        const hasWordDict = await dictDB.metadata.get(DICTIONARY_NAME.JMDICT);
+        if (!hasWordDict) return;
 
         const currentWord = parseJSON<TodayWordStorage, null>(
           localStorage.getItem(LOCALSTORAGE_KEYS.TODAY_WORD) ?? '',

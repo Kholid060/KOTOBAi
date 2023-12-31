@@ -31,7 +31,7 @@ function WordKanji({
                 <div
                   title={`${
                     kanji.misc.freq ?? '-'
-                  } of 2501 moust used kanji in newspaper`}
+                  } of 2501 most used kanji in newspaper`}
                 >
                   <p className="text-xs text-muted-foreground">Freq:</p>
                   {kanji.misc.freq ?? '-'}/2501

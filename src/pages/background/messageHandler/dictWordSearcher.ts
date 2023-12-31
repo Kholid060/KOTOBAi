@@ -275,7 +275,6 @@ export default function dictWordSearcher(isIframe = false) {
 
         result.entries = [];
       }
-      console.log('RESULT || ', input, ' || ', result);
 
       return result;
     } catch (error) {

@@ -37,5 +37,5 @@ class StatsDb extends Dexie {
 }
 
 const statsDB = new StatsDb();
-console.log(statsDB);
+
 export default statsDB;

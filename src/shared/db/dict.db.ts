@@ -103,7 +103,7 @@ class DictDB extends Dexie {
     maxResult,
     by: searchBy,
   }: DictSearchKanjiOptions) {
-    let result: DictKanjiEntry[];
+    let result: DictKanjiEntry[] = [];
     if (searchBy === 'reading') {
       result = await this.kanji
         .where('reading.ja_on')
@@ -125,7 +125,7 @@ class DictDB extends Dexie {
       }
     }
 
-    return result!;
+    return result;
   }
 
   async searchKanjiVG({ input }: DictSearchKanjiVgOptions) {

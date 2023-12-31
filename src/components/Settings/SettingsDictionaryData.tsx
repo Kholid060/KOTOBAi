@@ -197,7 +197,10 @@ function SettingsDictionaryData({
               </p>
               <div className="text-muted-foreground leading-tight text-sm">
                 {loadingState[dict.id] ? (
-                  <UiProgress className="h-2" value={loadingState[dict.id]} />
+                  <UiProgress
+                    className="h-2 mt-1"
+                    value={loadingState[dict.id]}
+                  />
                 ) : localMetadata[dict.id] ? (
                   <p>Data from {localMetadata[dict.id]?.dataFrom}</p>
                 ) : (

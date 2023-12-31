@@ -100,7 +100,7 @@ function KanjiDetailPage() {
             <div
               title={`${
                 kanjiDetail.misc.freq ?? '-'
-              } of 2501 moust used kanji in newspaper`}
+              } of 2501 most used kanji in newspaper`}
             >
               <p className="text-muted-foreground leading-tight">Freq:</p>
               {kanjiDetail.misc.freq ?? '-'}/2501

@@ -73,7 +73,7 @@ function CommandKanjiDetail({
             <div
               title={`${
                 entry.misc.freq ?? '-'
-              } of 2501 moust used kanji in newspaper`}
+              } of 2501 most used kanji in newspaper`}
             >
               <p className="text-xs text-muted-foreground">Freq:</p>
               {entry.misc.freq ?? '-'}/2501

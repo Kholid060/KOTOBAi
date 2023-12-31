@@ -61,17 +61,23 @@ function getFrameRect({
   };
 }
 
-async function fetchKanji(text: string): Promise<DictKanjiEntry[]> {
+async function fetchKanji(
+  text: string,
+  maxLength: number,
+): Promise<DictKanjiEntry[]> {
   if (!text.trim()) return [];
 
-  const kanji = text.split('').reduce<Set<number>>((acc, char) => {
-    if (isKanji(char)) {
-      const kanjiCodePoint = char.codePointAt(0);
-      if (kanjiCodePoint) acc.add(kanjiCodePoint);
-    }
+  const kanji = text
+    .slice(0, maxLength)
+    .split('')
+    .reduce<Set<number>>((acc, char) => {
+      if (isKanji(char)) {
+        const kanjiCodePoint = char.codePointAt(0);
+        if (kanjiCodePoint) acc.add(kanjiCodePoint);
+      }
 
-    return acc;
-  }, new Set());
+      return acc;
+    }, new Set());
   if (kanji.size === 0) return [];
 
   try {
@@ -145,14 +151,14 @@ function WordPopover() {
         const { rect, point, frameSource, cursorOffset, entry } = result;
 
         const [kanji, names] = await Promise.all([
-          fetchKanji(entry.input),
+          fetchKanji(entry.input, entry.maxLength),
           fetchWords(entry.input),
         ]);
 
         const dictEntriesResult: typeof dictEntries = {
           names,
           kanji,
-          words: entry.entries,
+          words: entry.entries ?? [],
         };
 
         const noResult = Object.values(dictEntriesResult).every(
@@ -223,8 +229,6 @@ function WordPopover() {
       contentEventEmitter.removeListener('search-word-result', onSearchResult);
     };
   });
-
-  console.log(activeTab);
 
   return (
     <WordPopoverBase

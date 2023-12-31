@@ -1,4 +1,4 @@
-import { createHashRouter } from 'react-router-dom';
+import { createHashRouter, useNavigate } from 'react-router-dom';
 import DashboardPage, { DashboardBasePage } from './routes';
 import SettingsIndex from './routes/Settings';
 import WelcomePage from './routes/welcome';
@@ -8,11 +8,33 @@ import KanjiDetailPage from './routes/kanji/[entryId]';
 import NameDetailPage from './routes/names/[entryId]';
 import AboutPage from './routes/About';
 import PracticePage from './routes/Practice';
+import { useEffectOnce } from 'usehooks-ts';
+import { useState } from 'react';
+import dictDB from '@root/src/shared/db/dict.db';
+
+const Guard = ({ component: Component }: { component: React.FC }) => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffectOnce(() => {
+    dictDB.metadata.count().then((dictLength) => {
+      if (dictLength === 0) {
+        navigate('/welcome', { replace: true });
+      } else {
+        setIsLoading(false);
+      }
+    });
+  });
+
+  if (isLoading) return null;
+
+  return <Component />;
+};
 
 const router = createHashRouter([
   {
     path: '/',
-    element: <DashboardPage />,
+    element: <Guard component={DashboardPage} />,
     children: [
       {
         path: '/',
@@ -38,7 +60,7 @@ const router = createHashRouter([
   },
   {
     path: '/flashcards',
-    element: <FlashcardsPage />,
+    element: <Guard component={FlashcardsPage} />,
   },
   {
     path: '/settings',
@@ -46,7 +68,7 @@ const router = createHashRouter([
   },
   {
     path: '/practice',
-    element: <PracticePage />,
+    element: <Guard component={PracticePage} />,
   },
   {
     path: '/about',

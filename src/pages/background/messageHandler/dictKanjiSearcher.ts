@@ -6,7 +6,9 @@ import dictDB, {
 
 export async function dictKanjiSearcher(detail: DictSearchKanjiOptions) {
   const result = await dictDB.searchKanji(detail);
-  return result;
+  const filteredResult = result.filter(Boolean);
+
+  return filteredResult;
 }
 
 export async function dictKanjiVgSearcher(detail: DictSearchKanjiVgOptions) {

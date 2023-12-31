@@ -335,7 +335,7 @@ function DashboardBookmarkList(props: React.HTMLAttributes<HTMLDivElement>) {
         <BookmarkExport />
       </UiCard.Header>
       <UiCard.Content>
-        {bookmarks ? (
+        {bookmarks?.length ? (
           <BookmarksTable bookmarks={bookmarks} />
         ) : (
           <p className="text-center">No data</p>
