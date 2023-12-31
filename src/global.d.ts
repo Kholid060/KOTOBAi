@@ -47,3 +47,5 @@ declare interface Window {
 declare namespace CSS {
   const highlights: Map<string, Highlight> | undefined;
 }
+
+declare const VITE_IS_FIREFOX: boolean;

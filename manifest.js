@@ -6,7 +6,7 @@ import packageJson from './package.json' assert { type: 'json' };
  */
 const manifest = {
   manifest_version: 3,
-  name: packageJson.name,
+  name: 'Kotobai',
   version: packageJson.version,
   description: packageJson.description,
   permissions: ['tabs', 'storage'],

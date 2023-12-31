@@ -15,6 +15,7 @@ import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import { Volume2Icon } from 'lucide-react';
 import { DictionaryNameEntryResult } from '@root/src/pages/background/messageHandler/dictNameSearcher';
 import { NAME_TYPES } from '@root/src/shared/constant/word.const';
+import { useTitle } from '@root/src/shared/hooks/useTitle';
 
 function NameDetailPage() {
   const navigate = useNavigate();
@@ -30,6 +31,11 @@ function NameDetailPage() {
   const [nameDetail, setWordDetail] = useState<
     DictNameEntry | DictionaryNameEntryResult | null
   >(null);
+
+  useTitle(
+    (matchWord.current || nameDetail?.kanji?.[0] || nameDetail?.reading[0]) ??
+      '',
+  );
 
   useEffect(() => {
     setWordDetail(dictEntry);

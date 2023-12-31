@@ -11,6 +11,7 @@ import { ThemeContext } from '@root/src/shared/context/theme.context';
 import UiDropdownMenu from '../ui/dropdown-menu';
 import { ThemeList } from '@root/src/shared/storages/themeStorage';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
+import { name } from '@root/package.json';
 
 const themeIcon = {
   light: SunIcon,
@@ -30,7 +31,7 @@ function DashboardNavigation() {
       <nav className="bg-background/80 backdrop-blur-sm w-full h-full mx-auto max-w-5xl rounded-lg px-4 py-2 flex items-center border">
         <Link to="/" className="flex items-center">
           <img src="/icon.png" height="28" width="28" />
-          <p className="font-semibold ml-2">App Name</p>
+          <p className="font-semibold ml-2 capitalize">{name}</p>
         </Link>
         <div className="flex-grow"></div>
         <UiButton

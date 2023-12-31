@@ -18,7 +18,6 @@ import { DICTIONARY_TABLE_NAME_MAP } from '@root/src/shared/db/dict.db';
 import UiPopover from '../ui/popover';
 import dayjs from 'dayjs';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
-import { capitalize } from 'lodash-es';
 
 const BOOKMARK_ITEM_STATUS: Record<
   BookmarkItemStatus,
@@ -243,7 +242,7 @@ function BookmarkExport() {
               DICTIONARY_NAME.ENAMDICT,
             ].map((type) => (
               <UiSelect.Option key={type} value={type}>
-                {capitalize(DICTIONARY_TABLE_NAME_MAP[type])}
+                {DICTIONARY_TABLE_NAME_MAP[type]}
               </UiSelect.Option>
             ))}
           </UiSelect>

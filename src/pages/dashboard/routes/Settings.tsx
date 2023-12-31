@@ -3,11 +3,12 @@ import SettingsDictionaryData from '@root/src/components/Settings/SettingsDictio
 import SettingsGeneral from '@root/src/components/Settings/SettingsGeneral';
 import SettingsPopup from '@root/src/components/Settings/SettingsPopup';
 import SettingsScanning from '@root/src/components/Settings/SettingsScanning';
+import { useTitle } from '@root/src/shared/hooks/useTitle';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import extSettingsStorage, {
   ExtensionSettings,
 } from '@root/src/shared/storages/extSettingsStorage';
-import { merge } from 'lodash-es';
+import deepmerge from 'deepmerge';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -93,11 +94,13 @@ function SettingsContentList() {
   );
 }
 
-function SettingsIndex() {
+function SettingsIndexPage() {
   const [settings, setSettings] = useState<ExtensionSettings | null>(null);
 
+  useTitle('Settings');
+
   function updateSettings(newSettings: PartialDeep<ExtensionSettings>) {
-    setSettings(merge(settings, newSettings));
+    setSettings(deepmerge(settings || {}, newSettings) as ExtensionSettings);
     extSettingsStorage.update(newSettings);
   }
 
@@ -152,4 +155,4 @@ function SettingsIndex() {
   );
 }
 
-export default SettingsIndex;
+export default SettingsIndexPage;

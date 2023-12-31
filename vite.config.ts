@@ -39,7 +39,7 @@ export default defineConfig({
   ],
   publicDir,
   define: {
-    IS_FIREFOX: Boolean(process.env.__FIREFOX__),
+    VITE_IS_FIREFOX: Boolean(process.env.__FIREFOX__),
   },
   build: {
     outDir,

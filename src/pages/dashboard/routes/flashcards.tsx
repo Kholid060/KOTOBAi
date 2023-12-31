@@ -19,6 +19,7 @@ import emptySvg from '@assets/svg/empty.svg';
 import dayjs from 'dayjs';
 import statsDB from '@root/src/shared/db/stats.db';
 import UiCircleProgress from '@root/src/components/ui/circle-progress';
+import { useTitle } from '@root/src/shared/hooks/useTitle';
 
 type ChangeIndexType = 'learned' | 'undo';
 
@@ -279,6 +280,8 @@ function FlashcardsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCardIdx, setActiveCardIdx] = useState(0);
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
+
+  useTitle('Flashcards');
 
   const queryBookmarks = useCallback(async () => {
     const lastMonthDate = dayjs().subtract(30, 'day');

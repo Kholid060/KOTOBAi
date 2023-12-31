@@ -13,6 +13,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import wordEntriesSorter from '@root/src/utils/wordEntriesSorter';
 import { useSpeechSynthesis } from '@root/src/shared/hooks/useSpeechSynthesis';
 import { Volume2Icon } from 'lucide-react';
+import { useTitle } from '@root/src/shared/hooks/useTitle';
 
 function KanjiDetailPage() {
   const navigate = useNavigate();
@@ -25,6 +26,8 @@ function KanjiDetailPage() {
   const [strokes, setStrokes] = useState<DictKanjiVGEntry | null>(null);
   const [exampleWords, setExampleWords] = useState<DictWordEntry[]>([]);
   const [kanjiDetail, setKanjiDetail] = useState<DictKanjiEntry | null>(null);
+
+  useTitle(kanjiDetail ? String.fromCodePoint(kanjiDetail.id) : 'Kanji');
 
   useEffect(() => {
     const kanjiId = +entryId!;
@@ -168,7 +171,11 @@ function KanjiDetailPage() {
           <ul className="space-y-1 list-disc pl-4">
             {exampleWords.map((wordEntry) => (
               <li key={wordEntry.id}>
-                <Link to={`/words/${wordEntry.id}`}>
+                <Link
+                  to={`/words/${wordEntry.id}?word=${
+                    wordEntry.kanji?.[0] || wordEntry.reading[0]
+                  }`}
+                >
                   {wordEntry.kanji && (
                     <span className="dark:text-indigo-400 text-indigo-600">
                       {wordEntry.kanji[0]}

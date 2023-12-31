@@ -21,6 +21,7 @@ import {
 } from 'react-router-dom';
 import SharedBookmarkBtnMain from '@root/src/components/shared/SharedBookmarkBtn/Main';
 import { isKanji } from 'wanakana';
+import { useTitle } from '@root/src/shared/hooks/useTitle';
 
 interface KanjiPath {
   paths: DictKanjiVGEntry;
@@ -111,6 +112,11 @@ function WordDetailPage() {
   const [wordDetail, setWordDetail] = useState<
     DictWordEntry | DictionaryWordEntryResult | null
   >(null);
+
+  useTitle(
+    (matchWord.current || wordDetail?.kanji?.[0] || wordDetail?.reading[0]) ??
+      '',
+  );
 
   useEffect(() => {
     setWordDetail(dictEntry);

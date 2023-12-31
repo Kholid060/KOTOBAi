@@ -6,6 +6,7 @@ import { useState } from 'react';
 import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import Browser from 'webextension-polyfill';
 import SharedTodayWord from '@root/src/components/shared/SharedTodayWord';
+import { name } from '@root/package.json';
 
 function Popup() {
   const [isExtDisabled, setExtDisabled] = useState(false);
@@ -47,7 +48,7 @@ function Popup() {
     <div className="p-4">
       <div className="flex items-center gap-2">
         <img src="/icon.png" width="26" alt="icon" />
-        <h1 className="font-semibold">App Name</h1>
+        <h1 className="font-semibold capitalize">{name}</h1>
       </div>
       <div className="flex items-center gap-2 mt-6 text-muted-foreground">
         <div className="flex items-center border rounded-lg flex-grow bg-muted/50">

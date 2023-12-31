@@ -6,10 +6,11 @@ import fontCss from '@assets/style/fonts.css?inline';
 import { isInMainFrame } from '../content-handler/content-handler-utils';
 import themeStorage from '@root/src/shared/storages/themeStorage';
 import disableExtStorage from '@root/src/shared/storages/disableExtStorage';
+import { name } from '@root/package.json';
 
 refreshOnUpdate('pages/content');
 
-export const CONTENT_ROOT_EL_ID = 'chrome-extension-root';
+export const CONTENT_ROOT_EL_ID = `${name}-extension-root`;
 
 async function applyTheme(rootEl: HTMLElement) {
   try {

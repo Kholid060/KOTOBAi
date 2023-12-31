@@ -4,7 +4,7 @@ import {
   StorageType,
 } from '@src/shared/storages/base';
 import { PartialDeep } from 'type-fest';
-import { merge } from 'lodash-es';
+import deepmerge from 'deepmerge';
 import { EXT_SCAN_KEY_MOD } from '../constant/ext-settings.const';
 
 export interface ExtensionSettingsPopup {
@@ -50,7 +50,9 @@ const storage = createStorage<ExtensionSettings>(
 const extSettingsStorage: ExtSettingsStorage = {
   ...storage,
   update(newSettings) {
-    return storage.set((settings) => merge(settings, newSettings));
+    return storage.set(
+      (settings) => deepmerge(settings, newSettings) as ExtensionSettings,
+    );
   },
 };
 

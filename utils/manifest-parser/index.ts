@@ -29,7 +29,7 @@ class ManifestParser {
     }
 
     manifestCopy.content_security_policy = {
-      extension_pages: "script-src 'self'; object-src 'self'",
+      extension_pages: "script-src 'self' blob:; object-src 'self'",
     };
     delete manifestCopy.options_page;
     return manifestCopy as Manifest;

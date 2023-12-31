@@ -18,6 +18,7 @@ import PracticeQuestion from '@root/src/components/Pratice/PracticeQuestion';
 import UiCircleProgress from '@root/src/components/ui/circle-progress';
 import { UiButton } from '@root/src/components/ui/button';
 import statsDB from '@root/src/shared/db/stats.db';
+import { useTitle } from '@root/src/shared/hooks/useTitle';
 
 function PracticePage() {
   const location = useLocation();
@@ -29,6 +30,8 @@ function PracticePage() {
 
   const [questionIdx, setQuestionIdx] = useState(0);
   const [questions, setQuestions] = useState<PracticeQuestions[]>([]);
+
+  useTitle('Practice');
 
   function onAnswer(isCorrect: boolean) {
     if (isCorrect) correctCount.current += 1;
