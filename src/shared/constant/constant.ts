@@ -11,6 +11,7 @@ export const IS_FIREFOX = Boolean(VITE_IS_FIREFOX);
 
 export const LOCALSTORAGE_KEYS = {
   TODAY_WORD: 'today-word',
+  LAST_ANKI_SYNC: 'last-anki-sync',
 };
 
 export const GITHUB_URL = 'https://github.com';

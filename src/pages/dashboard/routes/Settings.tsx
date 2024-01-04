@@ -1,4 +1,5 @@
 import DashboardFooter from '@root/src/components/Dashboard/DashboardFooter';
+import SettingsAnki from '@root/src/components/Settings/SettingsAnki';
 import SettingsDictionaryData from '@root/src/components/Settings/SettingsDictionaryData';
 import SettingsGeneral from '@root/src/components/Settings/SettingsGeneral';
 import SettingsPopup from '@root/src/components/Settings/SettingsPopup';
@@ -25,6 +26,7 @@ const settingsSections = [
   { id: 'general', name: 'General', Component: SettingsGeneral },
   { id: 'popup-apperance', name: 'Popup Apperance', Component: SettingsPopup },
   { id: 'scanning', name: 'Text Scanning', Component: SettingsScanning },
+  { id: 'anki', name: 'Anki Integration', Component: SettingsAnki },
   {
     id: 'dictionary-data',
     name: 'Dictionary Data',
@@ -114,7 +116,9 @@ function SettingsIndexPage() {
       setSettings(updatedSettings.newValue as ExtensionSettings);
     };
 
-    extSettingsStorage.get().then(setSettings);
+    extSettingsStorage.get().then((savedSettings) => {
+      setSettings(deepmerge(extSettingsStorage.$defaultValue, savedSettings));
+    });
     Browser.storage.local.onChanged.addListener(storageListener);
 
     return () => {

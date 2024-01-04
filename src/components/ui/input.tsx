@@ -3,10 +3,12 @@ import * as React from 'react';
 import { cn } from '@src/shared/lib/shadcn-utils';
 
 export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+  extends React.InputHTMLAttributes<HTMLInputElement> {
+  onValueChange?: (value: string) => void;
+}
 
 const UiInput = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, onChange, onValueChange, ...props }, ref) => {
     return (
       <input
         type={type}
@@ -15,6 +17,10 @@ const UiInput = React.forwardRef<HTMLInputElement, InputProps>(
           className,
         )}
         ref={ref}
+        onChange={(event) => {
+          onChange?.(event);
+          onValueChange?.(event.target.value);
+        }}
         {...props}
       />
     );
