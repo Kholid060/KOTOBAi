@@ -67,3 +67,6 @@ RuntimeMessage.onMessage('background:dashboard-open', async (path) => {
     console.error(error);
   }
 });
+RuntimeMessage.onMessage('background:get-frame-id', (source) =>
+  Promise.resolve(source.frameId ?? null),
+);

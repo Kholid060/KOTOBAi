@@ -38,6 +38,7 @@ function findJPText(str: string, maxLength: number) {
 class TextSearcher {
   private previousResult: GetTextByPointResult | null = null;
 
+  // to-do: move pointer events to here
   constructor() {}
 
   getTextByPoint({

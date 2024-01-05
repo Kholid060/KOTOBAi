@@ -206,7 +206,7 @@ async function handleSearchBackward({
   return searchResult;
 }
 
-export default function dictWordSearcher(isIframe = false) {
+export default function dictWordSearcher() {
   let searchController: AbortController | null = null;
 
   const resultCache = new MemoryCache<string, SearchDictWordResult>();
@@ -214,8 +214,8 @@ export default function dictWordSearcher(isIframe = false) {
   return async (
     {
       input,
+      frameId,
       maxResult,
-      frameSource,
       type = 'search-backward',
       maxQueryLimit = QUERY_LIMIT_DEF,
     }: MessageSearchWordOpts,
@@ -230,7 +230,23 @@ export default function dictWordSearcher(isIframe = false) {
       searchController = new AbortController();
 
       const cacheResult = resultCache.get(input);
-      if (cacheResult) return cacheResult.value;
+      if (cacheResult) {
+        if (sender.tab?.id && typeof frameId === 'number') {
+          await RuntimeMessage.sendMessageToTab(
+            {
+              frameId,
+              tabId: sender.tab.id,
+              name: 'content:iframe-highlight-text',
+            },
+            {
+              text: input,
+              matchLength: cacheResult.value.maxLength,
+            },
+          );
+        }
+
+        return cacheResult.value;
+      }
 
       const searchPayload = {
         input,
@@ -260,20 +276,18 @@ export default function dictWordSearcher(isIframe = false) {
 
       resultCache.add(input, result);
 
-      if (isIframe && sender.tab && frameSource) {
+      if (sender.tab?.id && typeof frameId === 'number') {
         await RuntimeMessage.sendMessageToTab(
           {
-            frameId: 0,
-            tabId: sender.tab.id!,
-            name: 'content:iframe-word-result',
+            frameId,
+            tabId: sender.tab.id,
+            name: 'content:iframe-highlight-text',
           },
           {
-            ...result,
-            frameSource,
+            text: input,
+            matchLength: result.maxLength,
           },
         );
-
-        result.entries = [];
       }
 
       return result;
