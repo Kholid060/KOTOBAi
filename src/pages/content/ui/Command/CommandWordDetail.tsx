@@ -83,7 +83,9 @@ function CommandWordDetail({
         }}
       />
       <div className="mt-2">
-        <ViewWordEntry.OtherForms entry={entry} />
+        <ViewWordEntry.OtherForms entry={entry}>
+          <p className="font-semibold">Other Forms </p>
+        </ViewWordEntry.OtherForms>
       </div>
     </div>
   );

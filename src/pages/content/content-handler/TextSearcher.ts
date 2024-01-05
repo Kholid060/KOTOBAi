@@ -5,7 +5,7 @@ import {
 } from './content-handler-utils';
 import { NON_JP_CHARS_REGEX } from '@root/src/shared/constant/char.const';
 import { TextRange, extractTextNodeContent } from './extract-text-content';
-import { caretPositionFromPoint } from './caretPositionFromPoint';
+import { getCursorPosByPoint } from './caretPositionFromPoint';
 import { SetOptional } from 'type-fest';
 
 export interface CursorPoint {
@@ -78,7 +78,7 @@ class TextSearcher {
       });
     }
 
-    const cursorOffset = caretPositionFromPoint({ point, element });
+    const cursorOffset = getCursorPosByPoint({ point, element });
     if (!cursorOffset) return this.cacheTextResult(null);
 
     let isFake = false;

@@ -165,6 +165,7 @@ function ViewWordMeta({
 
 function ViewWordOtherForms({
   entry,
+  children,
   className,
   ...props
 }: { entry: DictWordEntry } & React.HTMLAttributes<HTMLOListElement>) {
@@ -172,46 +173,48 @@ function ViewWordOtherForms({
   if ((!kanji || kanji.length <= 1) && reading.length <= 1) return null;
 
   return (
-    <ol
-      className={cn('opacity-90 list-disc font-sans-jp pl-4', className)}
-      {...props}
-    >
-      {kanji && kanji.length > 1 && (
-        <li>
-          <p className="dark:text-indigo-400 text-indigo-600">
-            {kanji?.map((str, index) => {
-              const info = kInfo?.[index]
-                ?.filter((item) => item !== 'sK')
-                .map(
-                  (item) =>
-                    WORD_KANJI_INFO_TAG[
-                      item as keyof typeof WORD_KANJI_INFO_TAG
-                    ]?.value,
+    <>
+      {children}
+      <ol
+        className={cn('opacity-90 list-disc font-sans-jp pl-4', className)}
+        {...props}
+      >
+        {kanji && kanji.length > 1 && (
+          <li>
+            <p className="dark:text-indigo-400 text-indigo-600">
+              {kanji?.map((str, index) => {
+                const info = kInfo?.[index]
+                  ?.filter((item) => item !== 'sK')
+                  .map(
+                    (item) =>
+                      WORD_KANJI_INFO_TAG[
+                        item as keyof typeof WORD_KANJI_INFO_TAG
+                      ]?.value,
+                  );
+                return (
+                  <span key={index}>
+                    <span>{str}</span>
+                    {info && info.length > 0 && (
+                      <span className="font-sans text-muted-foreground">
+                        【{info.join(', ')}】
+                      </span>
+                    )}
+                    {index !== kanji!.length - 1 ? '、' : ''}
+                  </span>
                 );
-
-              return (
-                <span key={index}>
-                  <span>{str}</span>
-                  {info && info.length > 0 && (
-                    <span className="font-sans text-muted-foreground">
-                      【{info.join(', ')}】
-                    </span>
-                  )}
-                  {index !== kanji!.length - 1 ? '、' : ''}
-                </span>
-              );
-            })}
-          </p>
-        </li>
-      )}
-      {reading?.length > 1 && (
-        <li>
-          <p className="dark:text-emerald-400 text-emerald-600">
-            {reading?.join('、')}
-          </p>
-        </li>
-      )}
-    </ol>
+              })}
+            </p>
+          </li>
+        )}
+        {reading?.length > 1 && (
+          <li>
+            <p className="dark:text-emerald-400 text-emerald-600">
+              {reading?.join('、')}
+            </p>
+          </li>
+        )}
+      </ol>
+    </>
   );
 }
 

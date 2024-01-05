@@ -11,6 +11,7 @@ let contentHandler: ContentHandler | null = null;
 function contentMessageListener() {
   if (IS_MAIN_FRAME) {
     RuntimeMessage.onMessage('content:iframe-word-result', (searchResult) => {
+      console.log(searchResult);
       contentEventEmitter.emit('search-word-result', {
         entry: searchResult,
         point: searchResult.frameSource.point,
