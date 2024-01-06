@@ -4,7 +4,7 @@ const defaultTitle = document.title;
 
 export function useTitle(title = defaultTitle) {
   useEffect(() => {
-    const suffix = title === defaultTitle ? '' : ' | Kotobai';
+    const suffix = title === defaultTitle ? '' : ' | KOTOBAi';
     document.title = title.trim() + suffix;
 
     return () => {

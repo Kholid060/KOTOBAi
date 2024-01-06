@@ -5,7 +5,7 @@ const ANKI_CONNECT_VERSION = 6;
 
 export const ANKI_CONNECT_DEFAULT_BASE_URL = 'http://127.0.0.1:8765';
 
-export const ANKI_DECK_NAME = 'Kotobai:bookmarks';
+export const ANKI_DECK_NAME = 'KOTOBAi:bookmarks';
 
 export interface AnkiAddNoteParam {
   tags?: string;

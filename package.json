@@ -1,6 +1,6 @@
 {
   "name": "kotobai",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Shows Japanese word definitions and reading by hovering over words.",
   "license": "GPL-3.0-or-later",
   "scripts": {

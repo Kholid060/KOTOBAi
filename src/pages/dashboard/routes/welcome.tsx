@@ -153,7 +153,7 @@ function WelcomePage() {
     <div className="w-full h-screen flex justify-center items-center">
       <div className="absolute top-0 left-0 -z-10 h-4/6 w-8/12 bg-gradient-to-br from-cyan-700/30 via-blue-700/30 dark:from-cyan-500/10 dark:via-blue-500/10 to-50% to-transparent"></div>
       <div className="max-w-md w-full">
-        <h1 className="text-3xl font-bold">Welcome to Kotobai! 👋</h1>
+        <h1 className="text-3xl font-bold">Welcome to KOTOBAi! 👋</h1>
         <p className="text-muted-foreground mt-1">
           Download the dictionary data to start using the app
         </p>

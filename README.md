@@ -1,7 +1,7 @@
 <div align="center">
 <img src="public/icon.png" alt="logo" height="120px" />
 
-# Kotobai
+# KOTOBAi
 
 A browser extension for showing Japanese word definitions and reading by hovering over words.
 
