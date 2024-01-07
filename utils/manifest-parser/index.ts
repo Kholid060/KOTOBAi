@@ -31,7 +31,15 @@ class ManifestParser {
     manifestCopy.content_security_policy = {
       extension_pages: "script-src 'self'; object-src 'self'",
     };
+    manifestCopy.browser_specific_settings = {
+      gecko: {
+        id: 'kholid060.kotobai@gmail.com',
+        strict_min_version: '109.0',
+      },
+    };
+
     delete manifestCopy.options_page;
+
     return manifestCopy as Manifest;
   }
 }

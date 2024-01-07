@@ -1,5 +1,7 @@
 import { UiButton } from '@root/src/components/ui/button';
 import UiCard from '@root/src/components/ui/card';
+import UiToast from '@root/src/components/ui/toast';
+import { useToast } from '@root/src/components/ui/use-toast';
 import { DICTIONARY_NAME } from '@root/src/shared/constant/constant';
 import { cn } from '@root/src/shared/lib/shadcn-utils';
 import DictLoader from '@root/src/utils/DictLoader';
@@ -57,6 +59,7 @@ const defDictProgress = {
 };
 
 function WelcomePage() {
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   const [selectedDicts, setSelectedDicts] = useState<`${DICTIONARY_NAME}`[]>([
@@ -90,7 +93,7 @@ function WelcomePage() {
         dicts.push(DICTIONARY_NAME.KANJIVG);
       }
 
-      await Promise.allSettled(
+      const promises = await Promise.allSettled(
         dicts.map((dictName) =>
           DictLoader.loadDictionary(dictName, ({ progress, type }) => {
             console.log(dictName, `(${type}): ${Math.floor(progress)}%`);
@@ -101,12 +104,25 @@ function WelcomePage() {
           }),
         ),
       );
+      const someSuccess = promises.some(
+        (promise) => promise.status === 'fulfilled',
+      );
+      if (!someSuccess) throw new Error('Failed to download dictionaries');
 
       await DictLoader.putMetadata(selectedDicts);
 
       navigate('/', { replace: true });
     } catch (error) {
       console.error(error);
+      toast({
+        title: 'Uh oh! Something went wrong.',
+        variant: 'destructive',
+        action: (
+          <UiToast.Action altText="Try again" onClick={startDownload}>
+            Try again
+          </UiToast.Action>
+        ),
+      });
     } finally {
       setIsDownloading(false);
       setDictProgress({ ...defDictProgress });
@@ -137,7 +153,7 @@ function WelcomePage() {
     <div className="w-full h-screen flex justify-center items-center">
       <div className="absolute top-0 left-0 -z-10 h-4/6 w-8/12 bg-gradient-to-br from-cyan-700/30 via-blue-700/30 dark:from-cyan-500/10 dark:via-blue-500/10 to-50% to-transparent"></div>
       <div className="max-w-md w-full">
-        <h1 className="text-3xl font-bold">Welcome to Kotobai! 👋</h1>
+        <h1 className="text-3xl font-bold">Welcome to KOTOBAi! 👋</h1>
         <p className="text-muted-foreground mt-1">
           Download the dictionary data to start using the app
         </p>

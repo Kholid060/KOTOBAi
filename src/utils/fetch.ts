@@ -1,4 +1,4 @@
-import fetchRetry, { RequestInitRetryParams } from 'fetch-retry';
+import fetchRetry, { RequestInitWithRetry } from 'fetch-retry';
 
 export class FetchError extends Error {
   status: number;
@@ -27,7 +27,7 @@ export class FetchError extends Error {
 
 export async function $fetch(
   info: Parameters<typeof fetch>[0],
-  init?: RequestInitRetryParams,
+  init?: RequestInitWithRetry,
 ) {
   const fetchWithRetry = fetchRetry(fetch);
 

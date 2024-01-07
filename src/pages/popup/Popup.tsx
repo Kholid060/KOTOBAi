@@ -45,12 +45,12 @@ function Popup() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 w-full h-full">
       <div className="flex items-center gap-2">
         <img src="/icon.png" width="26" alt="icon" />
         <h1 className="font-semibold capitalize">{name}</h1>
       </div>
-      <div className="flex items-center gap-2 mt-6 text-muted-foreground">
+      <div className="flex items-center gap-2 mt-6 text-muted-foreground w-full">
         <div className="flex items-center border rounded-lg flex-grow bg-muted/50">
           <UiButton
             variant="ghost"

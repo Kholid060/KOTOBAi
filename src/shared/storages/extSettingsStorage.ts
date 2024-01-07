@@ -13,6 +13,12 @@ export interface ExtensionSettingsPopup {
   fontSize: 'small' | 'normal' | 'large';
 }
 
+export interface ExtensionSettingsAnki {
+  apiURL: string;
+  apiKey: string;
+  enabled: boolean;
+}
+
 export interface ExtensionSettingsScanning {
   highlightText: boolean;
   highlightTextBox: boolean;
@@ -20,6 +26,7 @@ export interface ExtensionSettingsScanning {
 }
 
 export interface ExtensionSettings {
+  anki: ExtensionSettingsAnki;
   popup: ExtensionSettingsPopup;
   scanning: ExtensionSettingsScanning;
 }
@@ -31,6 +38,11 @@ type ExtSettingsStorage = BaseStorage<ExtensionSettings> & {
 const storage = createStorage<ExtensionSettings>(
   'ext-settings',
   {
+    anki: {
+      apiKey: '',
+      apiURL: '',
+      enabled: false,
+    },
     scanning: {
       modifier: 'none',
       highlightText: true,

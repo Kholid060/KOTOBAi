@@ -156,9 +156,6 @@ function caretRangeFromPointExtended({
   const position = document.caretRangeFromPoint(point.x, point.y);
   if (!position) return null;
 
-  const rect = getNodeBoundingClientRect(position.startContainer);
-  if (!isRectOverlap({ point, rect })) return null;
-
   if (NodeTypeChecker.isInput(position.startContainer)) {
     return getCursorOffsetFromTextField({
       point,
@@ -178,13 +175,57 @@ export function caretPositionFromPoint({
 }: {
   element: Element;
   point: CursorPoint;
-}): CursorOffset | null {
+}) {
+  let result: CursorOffset | null = null;
+
   if (document.caretPositionFromPoint) {
     const position = document.caretPositionFromPoint(point.x, point.y);
-    if (!position?.offsetNode) return null;
-
-    return { offset: position.offset, offsetNode: position.offsetNode };
+    if (position?.offsetNode) {
+      result = { offset: position.offset, offsetNode: position.offsetNode };
+    }
+  } else {
+    result = caretRangeFromPointExtended({ element, point });
   }
 
-  return caretRangeFromPointExtended({ element, point });
+  if (result) {
+    const rect = getNodeBoundingClientRect(result?.offsetNode);
+    if (!isRectOverlap({ point, rect })) return null;
+  }
+
+  return result;
+}
+
+export function getCursorPosByPoint({
+  point,
+  element: eventTarget,
+}: {
+  element: Element;
+  point: CursorPoint;
+}): CursorOffset | null {
+  let position = caretPositionFromPoint({ point, element: eventTarget });
+  if (position) return position;
+
+  const tempInvisibleEl = new Map<Element, string | null>();
+  const elementsInPoint = document
+    .elementsFromPoint(point.x, point.y)
+    .slice(0, -2);
+  for (const el of elementsInPoint) {
+    if (!(el instanceof HTMLElement || el instanceof SVGAElement)) continue;
+
+    tempInvisibleEl.set(el, el.getAttribute('style'));
+    el.style.setProperty('pointer-events', 'none', 'important');
+
+    position = caretPositionFromPoint({ point, element: eventTarget });
+    if (position) break;
+  }
+
+  tempInvisibleEl.forEach((style, element) => {
+    if (!style) {
+      element.removeAttribute('style');
+    } else {
+      element.setAttribute('style', style);
+    }
+  });
+
+  return position;
 }

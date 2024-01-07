@@ -9,14 +9,14 @@ const IS_MAIN_FRAME = isInMainFrame();
 let contentHandler: ContentHandler | null = null;
 
 function contentMessageListener() {
-  if (IS_MAIN_FRAME) {
-    RuntimeMessage.onMessage('content:iframe-word-result', (searchResult) => {
-      contentEventEmitter.emit('search-word-result', {
-        entry: searchResult,
-        point: searchResult.frameSource.point,
-        frameSource: searchResult.frameSource,
-      });
-    });
+  if (!IS_MAIN_FRAME) {
+    RuntimeMessage.onMessage(
+      'content:iframe-highlight-text',
+      ({ matchLength, text }) => {
+        if (!contentHandler) return;
+        contentHandler.highlightLastScan(text, matchLength);
+      },
+    );
   }
 
   RuntimeMessage.onMessage('content:disable-ext-state', (isDisabled) => {

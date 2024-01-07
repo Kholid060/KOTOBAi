@@ -178,8 +178,9 @@ function WordDetailPage() {
         }}
       />
       <div>
-        <p className="font-semibold">Other Forms </p>
-        <ViewWordEntry.OtherForms entry={wordDetail} />
+        <ViewWordEntry.OtherForms entry={wordDetail}>
+          <p className="font-semibold">Other Forms </p>
+        </ViewWordEntry.OtherForms>
       </div>
       <WordStrokeOrderDiagrams entry={wordDetail} />
     </>

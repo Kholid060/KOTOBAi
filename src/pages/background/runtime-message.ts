@@ -15,10 +15,6 @@ RuntimeMessage.onMessage('background:search-name', dictNameSearcher());
 RuntimeMessage.onMessage('background:search-word', dictWordSearcher());
 RuntimeMessage.onMessage('background:search-kanji', dictKanjiSearcher);
 RuntimeMessage.onMessage('background:search-kanjivg', dictKanjiVgSearcher);
-RuntimeMessage.onMessage(
-  'background:search-word-iframe',
-  dictWordSearcher(true),
-);
 RuntimeMessage.onMessage('background:set-disabled-badge', ({ tab }) => {
   if (!tab?.id) return;
 
@@ -67,3 +63,6 @@ RuntimeMessage.onMessage('background:dashboard-open', async (path) => {
     console.error(error);
   }
 });
+RuntimeMessage.onMessage('background:get-frame-id', (source) =>
+  Promise.resolve(source.frameId ?? null),
+);

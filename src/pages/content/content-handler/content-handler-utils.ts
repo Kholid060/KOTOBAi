@@ -85,3 +85,25 @@ export function isRectOverlap({
 export function isInMainFrame() {
   return window.self === window.top;
 }
+
+export function getMessageIframeSource(event: MessageEvent) {
+  const sourceWindow = event.source as Window;
+  const isSameOrigin = () => {
+    try {
+      return sourceWindow.frameElement instanceof HTMLIFrameElement;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  if (isSameOrigin()) {
+    return sourceWindow.frameElement as HTMLIFrameElement;
+  }
+
+  const iframes = document.getElementsByTagName('iframe');
+  for (const iframe of iframes) {
+    if (iframe.contentWindow === sourceWindow) return iframe;
+  }
+
+  return null;
+}

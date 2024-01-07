@@ -39,9 +39,12 @@ async function applyTheme(rootEl: HTMLElement) {
     shadowRoot.appendChild(rootIntoShadow);
 
     // Main Style
+    const mainStyleURL = browser.runtime.getURL(
+      '/assets/css/Contentstyle.chunk.css',
+    );
     const style = document.createElement('link');
     style.setAttribute('rel', 'stylesheet');
-    style.href = browser.runtime.getURL('/assets/css/contentStyle.chunk.css');
+    style.href = mainStyleURL;
     shadowRoot.appendChild(style);
 
     // Font styyle
@@ -51,8 +54,6 @@ async function applyTheme(rootEl: HTMLElement) {
     document.head.appendChild(fontStyle);
 
     applyTheme(rootIntoShadow);
-
-    // attachTwindStyle(rootIntoShadow, shadowRoot);
 
     /**
      * https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite/pull/174

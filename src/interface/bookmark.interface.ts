@@ -13,6 +13,7 @@ export interface BookmarkItem<T extends DICTIONARY_NAME = DICTIONARY_NAME> {
   type: T;
   id: number;
   note?: string;
+  ankiId?: number;
   entryId: number;
   kanji?: string[];
   reading: string[];

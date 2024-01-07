@@ -5,10 +5,7 @@ import {
 } from '../../content-handler/ContentHandler';
 import { useContext, useEffect, useRef, useState } from 'react';
 import WordPopoverBase, { WordPopoverRef } from './WordPopoverBase';
-import RuntimeMessage, {
-  WordFrameSource,
-} from '@root/src/utils/RuntimeMessage';
-import { ClientRect } from '@root/src/interface/shared.interface';
+import RuntimeMessage from '@root/src/utils/RuntimeMessage';
 import { NodeTypeChecker } from '../../content-handler/content-handler-utils';
 import { DictionaryWordEntryResult } from '../../../background/messageHandler/dictWordSearcher';
 import WordEntries from './WordEntries';
@@ -28,38 +25,6 @@ const TAB_ITEMS: { name: string; id: TabItems }[] = [
   { name: 'Kanji', id: 'kanji' },
   { name: 'Names', id: 'names' },
 ];
-
-function getFrameRect({
-  frameURL,
-  point,
-  rect,
-}: WordFrameSource): ClientRect | null {
-  let frameRect = rect;
-  if (!frameRect) {
-    const frameEl = document.querySelector<HTMLIFrameElement>(
-      `frame[src="${frameURL}"]`,
-    );
-    if (!frameEl) return null;
-
-    frameRect = frameEl.getBoundingClientRect();
-  }
-
-  const top = point.y;
-  const left = point.x;
-  const right = frameRect.left + point.x;
-  const bottom = frameRect.top + point.y;
-
-  return {
-    top,
-    left,
-    right,
-    bottom,
-    y: top,
-    x: left,
-    width: right - left,
-    height: bottom - top,
-  };
-}
 
 async function fetchKanji(
   text: string,
@@ -148,7 +113,7 @@ function WordPopover() {
           return;
         }
 
-        const { rect, point, frameSource, cursorOffset, entry } = result;
+        const { rect, point, cursorOffset, entry } = result;
 
         const [kanji, names] = await Promise.all([
           fetchKanji(entry.input, entry.maxLength),
@@ -193,11 +158,6 @@ function WordPopover() {
 
         popover.refs.setPositionReference({
           getBoundingClientRect() {
-            if (frameSource) {
-              const frameRect = getFrameRect(frameSource);
-              if (frameRect) return frameRect;
-            }
-
             if (
               !rect ||
               (cursorOffset &&

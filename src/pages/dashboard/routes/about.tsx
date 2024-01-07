@@ -105,7 +105,7 @@ function AboutPage() {
             The dictionary data includes data from{' '}
             <a
               href="https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project"
-              className="text-primary hover:underline"
+              className="link"
               target="_blank"
               rel="noreferrer"
             >
@@ -114,7 +114,7 @@ function AboutPage() {
             ,{' '}
             <a
               href="https://www.edrdg.org/wiki/index.php/KANJIDIC_Project"
-              className="text-primary hover:underline"
+              className="link"
               target="_blank"
               rel="noreferrer"
             >
@@ -123,7 +123,7 @@ function AboutPage() {
             , and{' '}
             <a
               href="https://www.edrdg.org/enamdict/enamdict_doc.html"
-              className="text-primary hover:underline"
+              className="link"
               target="_blank"
               rel="noreferrer"
             >
@@ -132,7 +132,7 @@ function AboutPage() {
             , which are the property of the{' '}
             <a
               href="http://www.edrdg.org/"
-              className="text-primary hover:underline"
+              className="link"
               target="_blank"
               rel="noreferrer"
             >
@@ -141,7 +141,7 @@ function AboutPage() {
             and are used in conformance with the{' '}
             <a
               href="https://www.edrdg.org/edrdg/licence.html"
-              className="text-primary hover:underline"
+              className="link"
               target="_blank"
               rel="noreferrer"
             >
@@ -154,7 +154,7 @@ function AboutPage() {
             The kanji stroke order data is from the{' '}
             <a
               href="http://kanjivg.tagaini.net/"
-              className="text-primary hover:underline"
+              className="link"
               target="_blank"
               rel="noreferrer"
             >

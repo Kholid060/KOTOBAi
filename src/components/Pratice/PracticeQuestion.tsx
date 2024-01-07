@@ -60,7 +60,7 @@ const QuestionBoolean: QuestionComponentType<PRACTICE_TYPE.BOOLEAN> = ({
         </p>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        {['false', 'true'].map((val) => (
+        {['true', 'false'].map((val) => (
           <UiButton
             key={val}
             size="lg"

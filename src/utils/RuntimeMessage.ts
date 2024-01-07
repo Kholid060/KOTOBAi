@@ -1,9 +1,7 @@
 import Browser, { Runtime } from 'webextension-polyfill';
 import { isObject } from './helper';
 import { SearchDictWordResult } from '../pages/background/messageHandler/dictWordSearcher';
-import { CursorPoint } from '../pages/content/content-handler/TextSearcher';
-import { SetOptional, SetRequired } from 'type-fest';
-import { ClientRect } from '../interface/shared.interface';
+import { SetOptional } from 'type-fest';
 import { DictSearchKanjiOptions } from '../shared/db/dict.db';
 import {
   DictKanjiEntry,
@@ -18,16 +16,11 @@ import {
   BookmarkIdPayload,
 } from '../shared/db/bookmark.db';
 
-export interface WordFrameSource {
-  frameURL: string;
-  rect?: ClientRect;
-  point: CursorPoint;
-}
 export interface MessageSearchWordOpts
   extends SetOptional<Omit<DictSearchOptions, 'matchWhole'>, 'maxResult'> {
   input: string;
+  frameId?: number;
   maxQueryLimit?: number;
-  frameSource?: WordFrameSource;
   type?: 'search-backward' | 'search-forward' | 'whole';
 }
 
@@ -52,6 +45,7 @@ export interface RuntimeMsgEvents {
     boolean: T,
   ) => T extends true ? boolean : BookmarkItem[];
   'background:dashboard-open': (path?: string) => void;
+  'background:get-frame-id': () => number | null;
   'background:bookmark-toggle': (
     payload: BookmarkAddPayload & { id?: string },
     value: boolean,
@@ -69,13 +63,11 @@ export interface RuntimeMsgEvents {
   'background:search-kanjivg': (detail: {
     input: number | number[];
   }) => DictKanjiVGEntry[];
-  'background:search-word-iframe': (
-    detail: SetRequired<MessageSearchWordOpts, 'frameSource'>,
-  ) => SearchDictWordResult | null;
   'background:disable-ext': (payload: DisableExtPayload) => void;
-  'content:iframe-word-result': (
-    result: SearchDictWordResult & { frameSource: WordFrameSource },
-  ) => void;
+  'content:iframe-highlight-text': (detail: {
+    text: string;
+    matchLength: number;
+  }) => void;
   'content:open-search-command': () => void;
   'content:disable-ext-state': (disabled: boolean) => void;
 }
@@ -98,7 +90,6 @@ class RuntimeMessage {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private runtimeMessageListener(message: any, sender: Runtime.MessageSender) {
     if (!isObject(message) || !Object.hasOwn(message, 'name')) return;
-
     const callback = this.eventListeners.get(message.name);
     if (!callback) return;
 

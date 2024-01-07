@@ -1,6 +1,6 @@
 {
   "name": "kotobai",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Shows Japanese word definitions and reading by hovering over words.",
   "license": "GPL-3.0-or-later",
   "scripts": {
@@ -37,6 +37,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-toggle": "^1.0.3",
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",

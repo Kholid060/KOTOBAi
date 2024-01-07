@@ -1,20 +1,26 @@
 <div align="center">
 <img src="public/icon.png" alt="logo" height="120px" />
 
-# Kotobai
+# KOTOBAi
 
 A browser extension for showing Japanese word definitions and reading by hovering over words.
 
-<div>
-	<a href="" style="display: inline-block">
-    <img src="https://user-images.githubusercontent.com/22908993/166417152-f870bfbd-1770-4c28-b69d-a7303aebc9a6.png" alt="Chrome web store" />
-    <p>Chrome Web Store</p>
-  </a>
-  <a href="" style="display: inline-block">
-    <img src="https://user-images.githubusercontent.com/22908993/166417727-3481fef4-00e5-4cf0-bb03-27fb880d993c.png" alt="Firefox add-ons" />
-    <p>Firefox Add-ons</p>
-  </a>
-</div>
+<table>
+ <tr>
+	 <td align="center">
+		 <a href="https://chromewebstore.google.com/detail/kotobai/ggimgmdngdcdamnjdcjimaajbofcolia" style="display: inline-block">
+	    <img src="https://user-images.githubusercontent.com/22908993/166417152-f870bfbd-1770-4c28-b69d-a7303aebc9a6.png" alt="Chrome web store" />
+	    <p>Chrome Web Store</p>
+	  </a>
+	 </td>
+	 <td align="center">
+		 <a href="https://addons.mozilla.org/en-US/firefox/addon/kotobai/" style="display: inline-block">
+	    <img src="https://user-images.githubusercontent.com/22908993/166417727-3481fef4-00e5-4cf0-bb03-27fb880d993c.png" alt="Firefox add-ons" />
+	    <p>Firefox Add-ons</p>
+	  </a>
+	 </td>
+ </tr>
+</table>
 </div>
 
 ## Project setup
