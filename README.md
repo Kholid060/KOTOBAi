@@ -23,6 +23,12 @@ A browser extension for showing Japanese word definitions and reading by hoverin
 </table>
 </div>
 
+### Features:
+- Word bookmarks and practice using flashcards or tests.
+- Anki Integration
+- Command menu for searching words, kanji, or names. Press the Ctrl+Alt+A keys on any page to open the command menu.
+- Dashboard page to see more details about a word, kanji, or name with its stroke order.
+
 ## Project setup
 
 ```bash
